@@ -35,7 +35,7 @@ let debug = false
 
 
 let MAX_SCORE = 5
-let MAX_SPEED = 30
+let MAX_SPEED = 40
 let SPEED_PERCENT = 5 / 100   // 5 per cent
 
 
@@ -286,7 +286,7 @@ function ball_racket_union(ball, racket)
     //   ball.speed *= 1 + SPEED_PERCENT;
     // else
     //   ball.speed = MAX_SPEED
-    ball.speed = (ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
+    ball.speed = !(ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
   }
 }
 
@@ -397,7 +397,7 @@ function game_update()
   score_update(ball, racket1, racket2)
   // racket1.bot(ball)
   // racket2.bot(ball)
-  racket1.botv2 (ball)
+  // racket1.botv2 (ball)
   racket2.botv2 (ball)
   ball_racket_union(ball, racket1)
   ball_racket_union(ball, racket2)
