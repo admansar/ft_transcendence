@@ -10,7 +10,7 @@ canvas.height = window.innerHeight
 
 let ball_pos = {x : canvas.width / 2, y : canvas.height / 2}
 let ratio = {x : 1, y : 1}
-let direction  = {x : 1, y : 1}
+let direction  = {x : 1, y : 0}
 let ball_ray = 15
 let ball_speed = 10
 
@@ -28,7 +28,7 @@ let racket2_pos = {x: canvas.width - racket_width - racket1_pos.x, y: canvas.hei
 
 
 let animation = false
-let debug = true
+let debug = false
 
 
 /* define    */
@@ -66,6 +66,7 @@ class Ball
   {
     this.pos = {...pos}
     this.ratio = {...ratio}
+    this.old_pos = {...pos}
     this.ray = ray
     this.direction = {...direction}
     this.speed = speed
@@ -79,12 +80,6 @@ class Ball
 
   check_edges()
   {
-    if (this.pos.x - this.ray < 0)
-      this.direction.x *= -1;
-    else if (this.pos.x + this.ray >= canvas.width)
-      this.direction.x *= -1;
-
-
     if (this.pos.y - this.ray < 0)
     {
       this.pos.y = this.ray;
@@ -99,6 +94,7 @@ class Ball
 
   update()
   {
+    this.old_pos = {...this.pos}
     this.pos.x += this.ratio.x * this.direction.x * this.speed
     this.pos.y += this.ratio.y * this.direction.y * this.speed
     this.check_edges()
@@ -114,6 +110,7 @@ class Ball
 }
 
 /*********************************************************************/
+
 
 
 /*******************************RACKET*********************************/
@@ -173,10 +170,14 @@ class Racket
     let racket_right = this.pos.x + this.width;
     let racket_top = this.pos.y;
     let racket_bottom = this.pos.y + this.height;
-  
+    
     if (ball.pos.x + ball.ray > racket_left && ball.pos.x - ball.ray < racket_right &&
-        ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
+      ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
     {
+      if (this.pos.x < canvas.width / 2 && ball.pos.x - ball.speed <= this.pos.x + this.width) // left
+        ball.pos.x = this.pos.x + ball.ray + this.width
+      else if (this.pos.x >= canvas.width / 2 && ball.pos.x + ball.speed >= this.pos.x)
+        ball.pos.x = this.pos.x - ball.ray
       ball.direction.x *= -1;
       let delta_y = ball.pos.y - (this.pos.y + this.height / 2);
       ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
@@ -184,7 +185,16 @@ class Racket
         ball.direction.y -= Math.floor(ball.direction.y)
       if (ball.direction.y  == 0)
         ball.direction.y = 0.1
-      ball.speed = !(ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
+      ball.speed = Math.min(ball.speed * (1 + SPEED_PERCENT), MAX_SPEED)
+    }
+  }
+
+  score_update(ball)
+  {
+    if (ball.pos.x - ball.ray < 0 || ball.pos.x + ball.ray >= canvas.width)
+    {
+      this.incrementScore()
+      reset_ball(ball)
     }
   }
 
@@ -248,7 +258,7 @@ class Racket
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
 const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=true)
 
 
@@ -294,6 +304,13 @@ window.addEventListener('keyup', function(e){
 
 /*     helper functions     */
 
+function dist_two_point(a, b)
+{
+  return Math.sqrt (Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+}
+
+
+
 function drawMenu()
 {
   ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
@@ -303,8 +320,18 @@ function drawMenu()
   draw_string(30, "#ffffff", "Press ESC to Resume", canvas.width / 2, canvas.height / 2 + 50);
 }
 
-function is_inside (to_cmp, min, max)
+function is_inside (to_cmp, a, b)
 {
+  if (a > b)
+  {
+    max = a
+    min = b
+  }
+  else
+  {
+    max = b
+    min = a
+  }
   return (to_cmp >= min && to_cmp <= max)
 }
 
@@ -335,26 +362,6 @@ function draw_traject(trajectory)
   ctx.stroke();
 }
 
-function ball_racket_union(ball, racket)
-{
-  let racket_left = racket.pos.x;
-  let racket_right = racket.pos.x + racket.width;
-  let racket_top = racket.pos.y;
-  let racket_bottom = racket.pos.y + racket.height;
-
-  if (ball.pos.x + ball.ray > racket_left && ball.pos.x - ball.ray < racket_right &&
-      ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
-  {
-    ball.direction.x *= -1;
-    let delta_y = ball.pos.y - (racket.pos.y + racket.height / 2);
-    ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
-    if (!is_aprox_inside(ball.direction.y, 0, 1))
-      ball.direction.y -= Math.floor(ball.direction.y)
-    if (ball.direction.y  == 0)
-      ball.direction.y = 0.1
-    ball.speed = !(ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
-  }
-}
 
 /*   smart bot calcultors    */
 
@@ -415,41 +422,8 @@ function reset_ball(ball)
 {
   ball.pos = {...ball_pos}
   ball.speed = ball_speed
+  ball.ray = ball_ray
  // ball_pos, ratio, ball_ray, direction,  ball_speed
-}
-
-function score_update(ball, racket, other_racket)
-{
-  if (ball.pos.x - ball.ray < 0)
-  {
-    other_racket.incrementScore()
-    reset_ball(ball)
-  }
-  if (ball.pos.x + ball.ray >= canvas.width)
-  {
-    racket.incrementScore()
-    reset_ball(ball)
-  }
-}
-
-function check_edges(ball)
-{
-  if (ball.pos.x - ball.ray < 0)
-    ball.direction.x *= -1;
-  else if (ball.pos.x + ball.ray >= canvas.width)
-    ball.direction.x *= -1;
-
-
-  if (ball.pos.y - ball.ray < 0)
-  {
-    ball.pos.y = ball.ray;
-    ball.direction.y *= -1;
-  }
-  else if (ball.pos.y + ball.ray >= canvas.height)
-  {
-    ball.pos.y = canvas.height - ball.ray;
-    ball.direction.y *= -1;
-  }
 }
 
 function game_update()
@@ -457,13 +431,12 @@ function game_update()
   ball.update()
   racket1.update()
   racket2.update()
-  score_update(ball, racket1, racket2)
-  // racket1.bot(ball)
-  // racket2.bot(ball)
+  racket1.inter_ball(ball)
+  racket1.score_update(ball)
+  racket2.inter_ball(ball)
+  racket2.score_update(ball)
   racket1.botv2 (ball)  // always check racket.bot_mode
   racket2.botv2 (ball)
-  racket1.inter_ball(ball)
-  racket2.inter_ball(ball)
 }
 
 
