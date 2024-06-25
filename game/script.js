@@ -10,7 +10,7 @@ canvas.height = window.innerHeight
 
 let ball_pos = {x : canvas.width / 2, y : canvas.height / 2}
 let ratio = {x : 1, y : 1}
-let direction  = {x : 1, y : -1}
+let direction  = {x : 1, y : 1}
 let ball_ray = 15
 let ball_speed = 10
 
@@ -28,15 +28,34 @@ let racket2_pos = {x: canvas.width - racket_width - racket1_pos.x, y: canvas.hei
 
 
 let animation = false
-let debug = false
+let debug = true
 
 
 /* define    */
 
 
 let MAX_SCORE = 5
-let MAX_SPEED = 40
+let MAX_SPEED = 35
 let SPEED_PERCENT = 5 / 100   // 5 per cent
+
+
+/*  keys  */
+
+const keyPressed = []
+const KEY_UP = 38
+const KEY_DOWN = 40
+const KEY_SPACE = 32 // Spacebar for pause/resume
+const KEY_ESC = 27; // esc
+const KEY_R = 82;
+const KEY_W = 87;
+const KEY_S = 83;
+
+
+/* mini menu */
+
+let paused = false // Initial game state is not paused
+let showMenu = false;
+
 
 
 /********************************BALL*********************************/
@@ -53,10 +72,36 @@ class Ball
     this.color = color
   }
 
+  clone ()
+  {
+    return new Ball(this.pos, this.ratio, this.ray, this.direction, this.speed, this.color)
+  }
+
+  check_edges()
+  {
+    if (this.pos.x - this.ray < 0)
+      this.direction.x *= -1;
+    else if (this.pos.x + this.ray >= canvas.width)
+      this.direction.x *= -1;
+
+
+    if (this.pos.y - this.ray < 0)
+    {
+      this.pos.y = this.ray;
+      this.direction.y *= -1;
+    }
+    else if (this.pos.y + this.ray >= canvas.height)
+    {
+      this.pos.y = canvas.height - this.ray;
+      this.direction.y *= -1;
+    }
+  }
+
   update()
   {
     this.pos.x += this.ratio.x * this.direction.x * this.speed
     this.pos.y += this.ratio.y * this.direction.y * this.speed
+    this.check_edges()
   }
   draw()
   {
@@ -103,13 +148,43 @@ class Racket
 
   update()
   {
-    if (keyPressed[KEY_UP])
+    if (!this.bot_mode)
     {
-      this.pos.y -= this.speed
+      if (this.pos.x > canvas.width / 2)
+      {
+        if (keyPressed[KEY_UP])
+          this.down()
+        else if (keyPressed[KEY_DOWN])
+          this.up()
+      }
+      else
+      {
+        if (keyPressed[KEY_W])
+          this.down()
+        else if (keyPressed[KEY_S])
+          this.up()
+      }
     }
-    else if (keyPressed[KEY_DOWN])
+  }
+
+  inter_ball(ball)
+  {
+    let racket_left = this.pos.x;
+    let racket_right = this.pos.x + this.width;
+    let racket_top = this.pos.y;
+    let racket_bottom = this.pos.y + this.height;
+  
+    if (ball.pos.x + ball.ray > racket_left && ball.pos.x - ball.ray < racket_right &&
+        ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
     {
-      this.pos.y += this.speed
+      ball.direction.x *= -1;
+      let delta_y = ball.pos.y - (this.pos.y + this.height / 2);
+      ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
+      if (!is_aprox_inside(ball.direction.y, 0, 1))
+        ball.direction.y -= Math.floor(ball.direction.y)
+      if (ball.direction.y  == 0)
+        ball.direction.y = 0.1
+      ball.speed = !(ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
     }
   }
 
@@ -173,34 +248,27 @@ class Racket
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
 const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=true)
 
 
-const keyPressed = []
-const KEY_UP = 38
-const KEY_DOWN = 40
-const KEY_SPACE = 32 // Spacebar for pause/resume
-const KEY_ESC = 27; // esc
-const KEY_R = 82;
 
 
-let paused = false // Initial game state is not paused
-let showMenu = false;
+
+
 
 /*     key hooks    */
 
-
-window.addEventListener('keydown', function(e){
+function hooks(e)
+{
   keyPressed[e.keyCode] = true 
 
-  // Toggle pause on spacebar press
-  if (e.keyCode === KEY_SPACE) {
+  if (e.keyCode === KEY_SPACE)
+  {
     paused = !paused
     draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2)
-    if (!paused) {
-      game_loop() // Resume game loop if unpaused
-    }
+    if (!paused)
+      game_loop()
   }
   else if (e.keyCode === KEY_ESC)
   {
@@ -216,7 +284,9 @@ window.addEventListener('keydown', function(e){
     showMenu = false;
     game_loop();
   }
-})
+}
+
+window.addEventListener('keydown', hooks)
 
 window.addEventListener('keyup', function(e){
  keyPressed[e.keyCode] = false
@@ -282,10 +352,6 @@ function ball_racket_union(ball, racket)
       ball.direction.y -= Math.floor(ball.direction.y)
     if (ball.direction.y  == 0)
       ball.direction.y = 0.1
-    // if (ball.speed <= MAX_SPEED)
-    //   ball.speed *= 1 + SPEED_PERCENT;
-    // else
-    //   ball.speed = MAX_SPEED
     ball.speed = !(ball.speed <= MAX_SCORE) ? ball.speed * (1 + SPEED_PERCENT) : MAX_SPEED
   }
 }
@@ -294,18 +360,18 @@ function ball_racket_union(ball, racket)
 
 function predict_ball_trajectory(ball, future_frames) //segment ball estimations
 {
-  let future_ball = {pos: { ...ball.pos }, ratio: { ...ball.ratio }, direction: { ...ball.direction }, speed: ball.speed, ray: ball.ray}
+  let future_ball = ball.clone()
   let trajectory = []
-
 
   for (let i = 0; i < future_frames; i++)
   {
     future_ball.pos.x += future_ball.ratio.x * future_ball.direction.x * future_ball.speed;
     future_ball.pos.y += future_ball.ratio.y * future_ball.direction.y * future_ball.speed;
-
+    
     if (future_ball.pos.y - future_ball.ray < 0 || future_ball.pos.y + future_ball.ray > canvas.height)
       future_ball.direction.y *= -1;
-
+  
+    // console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
     trajectory.push({ x: future_ball.pos.x, y: future_ball.pos.y});
   }
 
@@ -316,7 +382,7 @@ let TRAJECTORY = {x: 0, y: 0}  // no static, so ill use global as a static
 
 function predict_ball_racket_inter(ball, future_frames, racket)
 {
-  let future_ball = {pos: {...ball.pos}, ratio: {...ball.ratio}, direction: {...ball.direction}, speed: ball.speed, ray: ball.ray}
+  let future_ball = ball.clone()
 
   for (let i = 0; i < future_frames; i++)
   {
@@ -366,12 +432,13 @@ function score_update(ball, racket, other_racket)
   }
 }
 
-function check_edges(ball, racket)
+function check_edges(ball)
 {
   if (ball.pos.x - ball.ray < 0)
     ball.direction.x *= -1;
   else if (ball.pos.x + ball.ray >= canvas.width)
     ball.direction.x *= -1;
+
 
   if (ball.pos.y - ball.ray < 0)
   {
@@ -383,24 +450,20 @@ function check_edges(ball, racket)
     ball.pos.y = canvas.height - ball.ray;
     ball.direction.y *= -1;
   }
-  if (racket.pos.y < 0)
-    racket.pos.y = 0;
-  else if (racket.pos.y + racket.height >= canvas.height)
-    racket.pos.y = canvas.height - racket.height;
 }
 
 function game_update()
 {
   ball.update()
   racket1.update()
-  check_edges(ball, racket1)
+  racket2.update()
   score_update(ball, racket1, racket2)
   // racket1.bot(ball)
   // racket2.bot(ball)
-  // racket1.botv2 (ball)
+  racket1.botv2 (ball)  // always check racket.bot_mode
   racket2.botv2 (ball)
-  ball_racket_union(ball, racket1)
-  ball_racket_union(ball, racket2)
+  racket1.inter_ball(ball)
+  racket2.inter_ball(ball)
 }
 
 
