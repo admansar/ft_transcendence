@@ -66,7 +66,6 @@ class Ball
   {
     this.pos = {...pos}
     this.ratio = {...ratio}
-    this.old_pos = {...pos}
     this.ray = ray
     this.direction = {...direction}
     this.speed = speed
@@ -94,7 +93,6 @@ class Ball
 
   update()
   {
-    this.old_pos = {...this.pos}
     this.pos.x += this.ratio.x * this.direction.x * this.speed
     this.pos.y += this.ratio.y * this.direction.y * this.speed
     this.check_edges()
@@ -106,6 +104,13 @@ class Ball
     ctx.arc(ball.pos.x, ball.pos.y, ball.ray, 0, 2 * Math.PI)
     ctx.fill()
     ctx.stroke()
+  }
+
+  reset()
+  {
+    this.pos = {...ball_pos}
+    this.speed = ball_speed
+    this.ray = ball_ray
   }
 }
 
@@ -127,6 +132,16 @@ class Racket
     this.bot_mode = bot_mode
     this.color = color
     this.score = 0
+    if (this.pos.x <= canvas.width / 2)
+    {
+      this.is_left = true
+      this.is_right = false
+    }
+    else
+    {
+      this.is_left = false
+      this.is_right = true
+    }
   }
 
   up () // racket goes up
@@ -147,7 +162,7 @@ class Racket
   {
     if (!this.bot_mode)
     {
-      if (this.pos.x > canvas.width / 2)
+      if (this.is_right)
       {
         if (keyPressed[KEY_UP])
           this.down()
@@ -174,9 +189,9 @@ class Racket
     if (ball.pos.x + ball.ray > racket_left && ball.pos.x - ball.ray < racket_right &&
       ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
     {
-      if (this.pos.x < canvas.width / 2 && ball.pos.x - ball.speed <= this.pos.x + this.width) // left
+      if (this.is_left && ball.pos.x - ball.speed <= this.pos.x + this.width) // left
         ball.pos.x = this.pos.x + ball.ray + this.width
-      else if (this.pos.x >= canvas.width / 2 && ball.pos.x + ball.speed >= this.pos.x)
+      else if (this.is_right && ball.pos.x + ball.speed >= this.pos.x)
         ball.pos.x = this.pos.x - ball.ray
       ball.direction.x *= -1;
       let delta_y = ball.pos.y - (this.pos.y + this.height / 2);
@@ -191,10 +206,10 @@ class Racket
 
   score_update(ball)
   {
-    if (ball.pos.x - ball.ray < 0 || ball.pos.x + ball.ray >= canvas.width)
+    if ((ball.pos.x - ball.ray < 0 && this.is_left) || (ball.pos.x + ball.ray >= canvas.width && this.is_right))
     {
       this.incrementScore()
-      reset_ball(ball)
+      ball.reset()
     }
   }
 
@@ -218,14 +233,14 @@ class Racket
   {
     if (this.bot_mode)
     {
-      if (this.pos.x > canvas.height / 2 && ball.direction.x > 0) // right racket (PLAYER 2)
+      if (this.is_right && ball.direction.x > 0) // right racket (PLAYER 2)
       {
         if (ball.pos.y > this.pos.y + this.width / 2)
           this.up()
         else if (ball.pos.y < this.pos.y - this.width / 2)
           this.down()
       }
-      else if (this.pos.x <= canvas.height / 2 && ball.direction.x < 0) // left (PLAYER 1)
+      else if (this.is_left && ball.direction.x < 0) // left (PLAYER 1)
       {
         if (ball.pos.y > this.pos.y + this.width / 2)
           this.up()
@@ -322,16 +337,8 @@ function drawMenu()
 
 function is_inside (to_cmp, a, b)
 {
-  if (a > b)
-  {
-    max = a
-    min = b
-  }
-  else
-  {
-    max = b
-    min = a
-  }
+  let max = a > b ? a : b;
+  let min = a > b ? b : a;
   return (to_cmp >= min && to_cmp <= max)
 }
 
@@ -414,16 +421,8 @@ function reset_game()
 {
   racket1.score = 0;
   racket2.score = 0;
-  reset_ball(ball);
+  ball.reset()
   paused = false;
-}
-
-function reset_ball(ball)
-{
-  ball.pos = {...ball_pos}
-  ball.speed = ball_speed
-  ball.ray = ball_ray
- // ball_pos, ratio, ball_ray, direction,  ball_speed
 }
 
 function game_update()
