@@ -206,7 +206,7 @@ class Racket
 
   score_update(ball)
   {
-    if ((ball.pos.x - ball.ray < 0 && this.is_left) || (ball.pos.x + ball.ray >= canvas.width && this.is_right))
+    if ((ball.pos.x - ball.ray < 0 && this.is_right) || (ball.pos.x + ball.ray >= canvas.width && this.is_left))
     {
       this.incrementScore()
       ball.reset()
