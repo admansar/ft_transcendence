@@ -5,8 +5,8 @@ const height = window.innerHeight
 
 
 // paddle hand details
-const paddle_hand_dimensions = { radiusTop: 0.05, radiusBottom: 0.05, height: 0.5, radialSegments: 32 }
-const paddle_hand_position = { x: 0, y: -1.5, z: 0 }
+const paddle_hand_dimensions = { radiusTop: 0.05, radiusBottom: 0.05, height: 0.4, radialSegments: 32 }
+const paddle_hand_position = { x: 0, y: -1.45, z: 0 }
 const paddle_hand_color = 0xD5A35E
 const paddle_hand_rotation = { x: 0, y: 0, z: 0 }
 
@@ -14,7 +14,7 @@ const paddle_hand_rotation = { x: 0, y: 0, z: 0 }
 const paddle_head_dimensions = { radiusTop: 0.3, radiusBottom: 0.3, height: 0.04, radialSegments: 32 }
 const paddle_head_position = { x: 0, y: -1, z: 0 }
 const paddle_head_color = 0xff0000
-const paddle_head_rotation = { x: 1.5, y: 0, z: 0 }
+const paddle_head_rotation = { x: 1.55, y: 0, z: 0 }
 
 
 // Cube details
