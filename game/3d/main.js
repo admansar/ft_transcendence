@@ -222,6 +222,7 @@ function create_paddle_head (paddle_head_dimensions, paddle_head_position, paddl
 
 
 
+
 // init Scene
 const scene = init_scene(scene_color)
 const camera = camera_init(camera_position, camera_fov, camera_aspect, camera_near, camera_far)
