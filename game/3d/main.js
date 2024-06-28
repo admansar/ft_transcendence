@@ -4,6 +4,19 @@ const width = window.innerWidth
 const height = window.innerHeight
 
 
+// paddle hand details
+const paddle_hand_dimensions = { radiusTop: 0.05, radiusBottom: 0.05, height: 0.5, radialSegments: 32 }
+const paddle_hand_position = { x: 0, y: -1.5, z: 0.02 }
+const paddle_hand_color = 0xD5A35E
+const paddle_hand_rotation = { x: 0, y: 0, z: 0 }
+
+// paddle head details
+const paddle_head_dimensions = { radiusTop: 0.3, radiusBottom: 0.3, height: 0.04, radialSegments: 32 }
+const paddle_head_position = { x: 0, y: -1, z: 0 }
+const paddle_head_color = 0xff0000
+const paddle_head_rotation = { x: 1.5, y: 0, z: 0 }
+
+
 // Cube details
 const table_dimensions = { x: 0.06, y: 4.29, z: 6.76 }
 const table_position = { x: 0, y: 0, z: 2 }
@@ -178,7 +191,36 @@ function create_table_cadre (cube_dimensions, cube_position, cube_rotation, cube
     const back_line  = create_cube(back_line_dimensions, back_line_position, cube_rotation, cube_color)
     scene.add(back_line)
 
+    return {middle_line: middle_line, front_line: front_line, left_side_line: left_side_line, right_side_line: right_side_line, back_line: back_line}
+
 }
+
+function create_cylinder (cylinder_dimensions, cylinder_position, cylinder_color, cylinder_rotation)
+{
+    const cylinder = new THREE.CylinderGeometry(cylinder_dimensions.radiusTop, cylinder_dimensions.radiusBottom, cylinder_dimensions.height, cylinder_dimensions.radialSegments)
+    const material = new THREE.MeshStandardMaterial({ color: cylinder_color })
+    const cylinder_mesh = new THREE.Mesh(cylinder, material)
+    cylinder_mesh.position.set(cylinder_position.x, cylinder_position.y, cylinder_position.z)
+    cylinder_mesh.rotation.set(cylinder_rotation.x, cylinder_rotation.y, cylinder_rotation.z)
+    scene.add(cylinder_mesh)
+    cylinder_mesh.castShadow = true
+    cylinder_mesh.receiveShadow = true
+    return cylinder_mesh
+}
+
+function create_paddle_hand (paddle_hand_dimensions, paddle_hand_position, paddle_hand_color, paddle_hand_rotation)
+{
+    const paddle_hand = create_cylinder(paddle_hand_dimensions, paddle_hand_position, paddle_hand_color, paddle_hand_rotation)
+    return paddle_hand
+}
+
+function create_paddle_head (paddle_head_dimensions, paddle_head_position, paddle_head_color, paddle_head_rotation)
+{
+    const paddle_head = create_cylinder(paddle_head_dimensions, paddle_head_position, paddle_head_color, paddle_head_rotation)
+    return paddle_head
+}
+
+
 
 // init Scene
 const scene = init_scene(scene_color)
@@ -191,6 +233,33 @@ const table = create_cube(table_dimensions, table_position, table_rotation,  0x5
 const table_cadre = create_table_cadre(table_dimensions, table_position, table_rotation,  0xffffff)
 const net = create_net(net_dimensions, net_position, net_rotation,  0xffffff) // dak l3iba li bkhit f lwest d table
 // const sphere = create_sphere(sphere_dimensions, sphere_position, '#00ffff')
+
+let ping_pong_table = new THREE.Object3D()
+
+ping_pong_table.add (table)
+ping_pong_table.add (table_cadre.middle_line)
+ping_pong_table.add (table_cadre.front_line)
+ping_pong_table.add (table_cadre.left_side_line)
+ping_pong_table.add (table_cadre.right_side_line)
+ping_pong_table.add (table_cadre.back_line)
+ping_pong_table.add (net)
+
+scene.add (ping_pong_table)
+
+const paddle_hand = create_paddle_hand(paddle_hand_dimensions, paddle_hand_position, paddle_hand_color, paddle_hand_rotation)
+const paddle_head = create_paddle_head(paddle_head_dimensions, paddle_head_position, paddle_head_color, paddle_head_rotation)
+
+let paddle = new THREE.Object3D()
+paddle.add(paddle_hand)
+paddle.add(paddle_head)
+
+scene.add(paddle)
+
+paddle.position.set(0, 0.8, 5.7)
+
+
+
+
 
 // Rendering the scene
 function animate()
@@ -206,6 +275,19 @@ function animate()
     //     sphere.position.y = 0
     // }
     // light.point_light_position.z = Math.sin(Date.now() * 0.01) * 5
+	// ping_pong_table.position.y += Math.sin(Date.now() * 0.01) * 0.01
+    // paddle_head.rotation.z += 0.01
+    // paddle_hand.position.y -= 0.01
+    // paddle_head.rotation.y += 0.01
+    // paddle.rotation.x += 0.01
+    // paddle.position.z += 0.01
+    // paddle.position.y -= 0.004
+    paddle.rotation.y += 0.01
+    // paddle.rotation.z += 0.01
+    // console.log (`${paddle.position.x}, ${paddle.position.y}, ${paddle.position.z}`)
+
+    // console.log (`${paddle_head.rotation.x}, ${paddle_head.rotation.y}, ${paddle_head.rotation.z}`)
+
     renderer.render(scene, camera)
 }
 
