@@ -6,7 +6,7 @@ const height = window.innerHeight
 
 // paddle hand details
 const paddle_hand_dimensions = { radiusTop: 0.05, radiusBottom: 0.05, height: 0.5, radialSegments: 32 }
-const paddle_hand_position = { x: 0, y: -1.5, z: 0.02 }
+const paddle_hand_position = { x: 0, y: -1.5, z: 0 }
 const paddle_hand_color = 0xD5A35E
 const paddle_hand_rotation = { x: 0, y: 0, z: 0 }
 
