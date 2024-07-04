@@ -1,38 +1,40 @@
-// import * as THREE from 'three';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const width = window.innerWidth
 const height = window.innerHeight
 
 
 // paddle hand details
-const paddle_hand_dimensions = { radiusTop: 0.05, radiusBottom: 0.05, height: 0.4, radialSegments: 32 }
-const paddle_hand_position = { x: 0, y: -1.45, z: 0 }
+const paddle_hand_dimensions = { radiusTop: 0.02, radiusBottom: 0.02, height: 0.13, radialSegments: 32 }
+const paddle_hand_position = { x: 0, y: 0.05, z: 0 }
 const paddle_hand_color = 0xD5A35E
 const paddle_hand_rotation = { x: 0, y: 0, z: 0 }
 
 // paddle head details
-const paddle_head_dimensions = { radiusTop: 0.3, radiusBottom: 0.3, height: 0.04, radialSegments: 32 }
-const paddle_head_position = { x: 0, y: -1, z: 0 }
+const paddle_head_dimensions = { radiusTop: 0.1, radiusBottom: 0.1, height: 0.02, radialSegments: 32 }
+const paddle_head_position = { x: 0, y: 0.17, z: 0 }
 const paddle_head_color = 0xff0000
 const paddle_head_rotation = { x: 1.55, y: 0, z: 0 }
 
 
 // Cube details
-const table_dimensions = { x: 0.06, y: 4.29, z: 6.76 }
-const table_position = { x: 0, y: 0, z: 2 }
-const table_rotation = { x: 0.3, y: 0, z: 1.57 }
+const table_dimensions = { x: 1.52, y: 0.03, z: 2.74 }
+const table_position = { x: 0, y: 0, z: 0 }
+const table_rotation = { x: 0, y: 0, z: 0 }
 
-const net_dimensions = { x: 0.26, y: 4.29, z: 0.06 }
-const net_position = { x: 0, y: 0.18, z: 2 }
-const net_rotation = { x: 0.3, y: 0, z: 1.57 }
+const net_dimensions = { x: table_dimensions.x, y: 0.152, z: 0.03 }
+const net_position = { x: 0, y: 0.06, z: 0 }
+const net_rotation = { x: 0, y: 0, z: 0 }
 
 // light details
-const light_position = { x: 2.5, y: 2, z: -0.3 }
+const light_position = { x: 10, y: 10, z: -10 }
 const light_color = 0xffffff
 const light_intensity = 0.3
 
 // Camera details
-const camera_position = { x: 0, y: 0, z: 10 }
+const camera_position = { x: 0, y: 1, z: 3 }
 const camera_fov = 45
 const camera_aspect = width / height
 const camera_near = 0.1
@@ -150,7 +152,7 @@ function create_plane(plane_position, plane_color, plane_dimensions)
 
 function create_renderer(width, height)
 {
-    const renderer = new THREE.WebGL1Renderer()
+    const renderer = new THREE.WebGLRenderer()
     renderer.setSize(width, height)
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -160,39 +162,35 @@ function create_renderer(width, height)
 
 function create_table_cadre (cube_dimensions, cube_position, cube_rotation, cube_color)
 {
-    const middle_line_dimensions = { x: cube_dimensions.x, y: cube_dimensions.y  / 100, z: cube_dimensions.z }
-    const middle_line_position = { x: cube_position.x, y: cube_position.y + 1e-5, z: cube_position.z }
-
+    const middle_line_dimensions = { x: cube_dimensions.x / 100, y: cube_dimensions.y, z: cube_dimensions.z }
+    const middle_line_position = { x: cube_position.x, y: cube_position.y, z: cube_position.z }
     const middle_line  = create_cube(middle_line_dimensions, middle_line_position, cube_rotation, cube_color)
     scene.add(middle_line)
 
-    const front_line_dimensions = { x: cube_dimensions.x, y: cube_dimensions.y + 0.03, z: cube_dimensions.z / 100 }
-    const front_line_position = { x: cube_position.x , y: cube_position.y - 1.0, z: cube_position.z + table_dimensions.z / 2 - 0.11}
+	const front_line_dimensions = { x: cube_dimensions.x + 0.015, y: cube_dimensions.y, z: cube_dimensions.z / 100 }
+	const front_line_position = { x: cube_position.x , y: cube_position.y, z: cube_position.z + table_dimensions.z / 2}
+	const front_line  = create_cube(front_line_dimensions, front_line_position, cube_rotation, cube_color)
+	scene.add(front_line)
 
-    const front_line  = create_cube(front_line_dimensions, front_line_position, cube_rotation, cube_color)
-    scene.add(front_line)
 
+	const left_side_line_dimensions = {...middle_line_dimensions}
+	const left_side_line_position = { x: cube_position.x - table_dimensions.x / 2, y: cube_position.y, z: cube_position.z }
 
-    const left_side_line_dimensions = { x: cube_dimensions.x , y: cube_dimensions.y  / 100, z: cube_dimensions.z }
-    const left_side_line_position = { x: cube_position.x - table_dimensions.y / 2 - 0.007, y: cube_position.y + 1e-5, z: cube_position.z + 0.001 }
+	const left_side_line  = create_cube(left_side_line_dimensions, left_side_line_position, cube_rotation, cube_color)
+	scene.add(left_side_line)
 
-    const left_side_line  = create_cube(left_side_line_dimensions, left_side_line_position, cube_rotation, cube_color)
-    scene.add(left_side_line)
+	const right_side_line_dimensions = {...middle_line_dimensions}
+	const right_side_line_position = { x: cube_position.x + table_dimensions.x / 2, y: cube_position.y, z: cube_position.z }
 
-    const right_side_line_dimensions = { x: cube_dimensions.x , y: cube_dimensions.y  / 100, z: cube_dimensions.z }
-    const right_side_line_position = { x: cube_position.x + table_dimensions.y / 2, y: cube_position.y + 1e-5, z: cube_position.z + 0.001 }
+	const right_side_line  = create_cube(right_side_line_dimensions, right_side_line_position, cube_rotation, cube_color)
+	scene.add(right_side_line)
 
-    const right_side_line  = create_cube(right_side_line_dimensions, right_side_line_position, cube_rotation, cube_color)
-    scene.add(right_side_line)
+	const back_line_dimensions = {...front_line_dimensions}
+	const back_line_position = { x: cube_position.x , y: cube_position.y , z: cube_position.z - table_dimensions.z / 2 }
+	const back_line  = create_cube(back_line_dimensions, back_line_position, cube_rotation, cube_color)
+	scene.add(back_line)
 
-    const back_line_dimensions = { x: cube_dimensions.x, y: cube_dimensions.y + 0.03, z: cube_dimensions.z / 100 }
-    const back_line_position = { x: cube_position.x , y: cube_position.y + 1.01, z: cube_position.z - table_dimensions.z / 2 + 0.11}
-
-    const back_line  = create_cube(back_line_dimensions, back_line_position, cube_rotation, cube_color)
-    scene.add(back_line)
-
-    return {middle_line: middle_line, front_line: front_line, left_side_line: left_side_line, right_side_line: right_side_line, back_line: back_line}
-
+	 return {middle_line: middle_line, front_line: front_line, left_side_line: left_side_line, right_side_line: right_side_line, back_line: back_line}
 }
 
 function create_cylinder (cylinder_dimensions, cylinder_position, cylinder_color, cylinder_rotation)
@@ -221,19 +219,25 @@ function create_paddle_head (paddle_head_dimensions, paddle_head_position, paddl
 }
 
 
-
-
 // init Scene
 const scene = init_scene(scene_color)
+
 const camera = camera_init(camera_position, camera_fov, camera_aspect, camera_near, camera_far)
 const renderer = create_renderer(width, height)
 const light = create_light(light_position, light_color, light_intensity, point_light_position)
-// const helper = light_helper(light)
-// const plane = create_plane(plane_position, plane_color, plane_dimensions)
+//const helper = light_helper(light)
+
+const axisHelper = new THREE.AxesHelper(100, 100, 100);
+scene.add(axisHelper);
+
+const orbit = new OrbitControls(camera, renderer.domElement);
+orbit.update();
+
+//const plane = create_plane(plane_position, plane_color, plane_dimensions)
 const table = create_cube(table_dimensions, table_position, table_rotation,  0x51E338)
 const table_cadre = create_table_cadre(table_dimensions, table_position, table_rotation,  0xffffff)
 const net = create_net(net_dimensions, net_position, net_rotation,  0xffffff) // dak l3iba li bkhit f lwest d table
-// const sphere = create_sphere(sphere_dimensions, sphere_position, '#00ffff')
+//const sphere = create_sphere(sphere_dimensions, sphere_position, '#00ffff')
 
 let ping_pong_table = new THREE.Object3D()
 
@@ -253,41 +257,33 @@ const paddle_head = create_paddle_head(paddle_head_dimensions, paddle_head_posit
 let paddle = new THREE.Object3D()
 paddle.add(paddle_hand)
 paddle.add(paddle_head)
-
 scene.add(paddle)
 
-paddle.position.set(0, 0.8, 5.7)
+paddle.position.set(0, 0.1, 1)
 
 
 
+let opp_paddle = paddle.clone()
+scene.add (opp_paddle)
+
+
+opp_paddle.position.set(0, 0.1, -1)
+
+
+// x is the red 
+// y is the green
+// z is the blue
 
 
 // Rendering the scene
 function animate()
 {
     requestAnimationFrame(animate)
-    // cube.rotation.x += 0.005
-    // cube.rotation.y += 0.01
-    // cube.rotation.z += 0.01
-    // console.log (`${cube.rotation.x}, ${cube.rotation.y}, ${cube.rotation.z}`)
-    // sphere.position.y += Math.sin(Date.now() * 0.002) * 0.02
-    // if (sphere.position.y + sphere_dimensions.radius < 0)
-    // {
-    //     sphere.position.y = 0
-    // }
-    // light.point_light_position.z = Math.sin(Date.now() * 0.01) * 5
-	// ping_pong_table.position.y += Math.sin(Date.now() * 0.01) * 0.01
-    // paddle_head.rotation.z += 0.01
-    // paddle_hand.position.y -= 0.01
-    // paddle_head.rotation.y += 0.01
-    // paddle.rotation.x += 0.01
-    // paddle.position.z += 0.01
-    // paddle.position.y -= 0.004
-    paddle.rotation.y += 0.01
-    // paddle.rotation.z += 0.01
-    // console.log (`${paddle.position.x}, ${paddle.position.y}, ${paddle.position.z}`)
 
-    // console.log (`${paddle_head.rotation.x}, ${paddle_head.rotation.y}, ${paddle_head.rotation.z}`)
+    paddle.position.y = Math.sin(Date.now() * 0.001) * 0.05 + 0.1
+    opp_paddle.position.y = Math.cos((Date.now()) * 0.001) * 0.05 + 0.1
+    paddle.rotation.y += 0.01
+    opp_paddle.rotation.y -= 0.01
 
     renderer.render(scene, camera)
 }
