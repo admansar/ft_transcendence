@@ -6,6 +6,11 @@ const width = window.innerWidth
 const height = window.innerHeight
 
 
+//Ball
+
+const ball_init_pos = {x: 0, y: 0.2, z: 2}
+
+
 // paddle hand details
 const paddle_hand_dimensions = { radiusTop: 0.02, radiusBottom: 0.02, height: 0.13, radialSegments: 32 }
 const paddle_hand_position = { x: 0, y: 0.05, z: 0 }
@@ -96,7 +101,7 @@ function create_net(net_dimensions, net_position, net_rotation, net_color)
 function create_sphere(sphere_dimensions, sphere_position, sphere_color)
 {
     const geometry = new THREE.SphereGeometry(sphere_dimensions.radius, sphere_dimensions.widthSegments, sphere_dimensions.heightSegments)
-    const material = new THREE.MeshStandardMaterial({ color: sphere_color })
+    const material = new THREE.MeshStandardMaterial({ color: sphere_color, transparent : true})
     const sphere = new THREE.Mesh(geometry, material)
     sphere.position.set(sphere_position.x, sphere_position.y, sphere_position.z)
     sphere.castShadow = true
@@ -260,9 +265,9 @@ const paddle_head = create_paddle_head(paddle_head_dimensions, paddle_head_posit
 let paddle = new THREE.Object3D()
 paddle.add(paddle_hand)
 paddle.add(paddle_head)
-scene.add(paddle)
+//scene.add(paddle)
 
-paddle.position.set(0, 0.1, 1)
+//paddle.position.set(0, 0.1, 1)
 
 
 
@@ -280,10 +285,10 @@ world.broadphase = new CANNON.NaiveBroadphase();
 world.solver.iterations = 10;
 
 // Ball
-const radius = 0.1;// m
+const radius = 0.02;// m
 const ballBody = new CANNON.Body({
     mass: 1, // kg
-    position: new CANNON.Vec3(0, 0.2, 10), //m
+    position: new CANNON.Vec3(ball_init_pos.x, ball_init_pos.y, ball_init_pos.z), //m
     shape: new CANNON.Sphere(radius)
 });
 world.addBody(ballBody);
@@ -314,7 +319,7 @@ function animate()
 {
     requestAnimationFrame(animate)
 
-    paddle.position.y = Math.sin(Date.now() * 0.001) * 0.05 + 0.1
+  //  paddle.position.y = Math.sin(Date.now() * 0.001) * 0.05 + 0.1
     opp_paddle.position.y = Math.cos((Date.now()) * 0.001) * 0.05 + 0.1
     paddle.rotation.y += 0.01
     opp_paddle.rotation.y -= 0.01
@@ -324,8 +329,9 @@ function animate()
     world.step(1 / 60);
 
     // Sync Three.js and Cannon.js
-    ballMesh.position.copy(ballBody.position);
-    ballMesh.quaternion.copy(ballBody.quaternion);
+	if (ballMesh.position.z >= 0)
+		ballMesh.position.copy(ballBody.position);
+    //ballMesh.quaternion.copy(ballBody.quaternion);
 
 //////
     renderer.render(scene, camera)
