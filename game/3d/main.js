@@ -41,14 +41,14 @@ const camera_near = 0.1
 const camera_far = 100
 
 // plane details
-const plane_position = { x: 0, y: -1.75, z: 0 }
-const plane_color = 0xffffff
-const plane_dimensions = { x: 100, y: 20 }
+// const plane_position = { x: 0, y: -1.75, z: 0 }
+// const plane_color = 0xffffff
+// const plane_dimensions = { x: 100, y: 20 }
 
 // sphere details
-const sphere_dimensions = { radius: 1, widthSegments: 32, heightSegments: 32 }
-const sphere_position = { x: 0, y: 0, z: 0 }
-const sphere_color = 0xff0000
+// const sphere_dimensions = { radius: 1, widthSegments: 32, heightSegments: 32 }
+// const sphere_position = { x: 0, y: 0, z: 0 }
+// const sphere_color = 0xff0000
 
 const point_light_position = { x: 10, y: 5, z: 5 }
 
@@ -239,6 +239,9 @@ const table_cadre = create_table_cadre(table_dimensions, table_position, table_r
 const net = create_net(net_dimensions, net_position, net_rotation,  0xffffff) // dak l3iba li bkhit f lwest d table
 //const sphere = create_sphere(sphere_dimensions, sphere_position, '#00ffff')
 
+
+
+
 let ping_pong_table = new THREE.Object3D()
 
 ping_pong_table.add (table)
@@ -270,6 +273,37 @@ scene.add (opp_paddle)
 opp_paddle.position.set(0, 0.1, -1)
 
 
+///////
+const world = new CANNON.World();
+world.gravity.set(0, 0,-9.82);
+world.broadphase = new CANNON.NaiveBroadphase();
+world.solver.iterations = 10;
+
+// Ball
+const radius = 0.1;// m
+const ballBody = new CANNON.Body({
+    mass: 1, // kg
+    position: new CANNON.Vec3(0, 0.2, 10), //m
+    shape: new CANNON.Sphere(radius)
+});
+world.addBody(ballBody);
+
+const ballGeometry = new THREE.SphereGeometry(radius, 32, 32);
+const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
+const ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
+ballMesh.castShadow = true;
+ballMesh.receiveShadow = true;
+scene.add(ballMesh);
+
+// Table
+const tableGeometry = new THREE.BoxGeometry(1.52, 0.03, 2.74);
+const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x51E338 });
+const tableMesh = new THREE.Mesh(tableGeometry, tableMaterial);
+tableMesh.position.set(0, 0, 0);
+tableMesh.receiveShadow = true;
+scene.add(tableMesh);
+///////
+
 // x is the red 
 // y is the green
 // z is the blue
@@ -285,6 +319,15 @@ function animate()
     paddle.rotation.y += 0.01
     opp_paddle.rotation.y -= 0.01
 
+
+///////
+    world.step(1 / 60);
+
+    // Sync Three.js and Cannon.js
+    ballMesh.position.copy(ballBody.position);
+    ballMesh.quaternion.copy(ballBody.quaternion);
+
+//////
     renderer.render(scene, camera)
 }
 
