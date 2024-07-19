@@ -12,7 +12,7 @@ const GRAVITY = 9.8
 const BOUNCE = 0.9
 const vector_directeur = {x: 0, y: 1, z: -3}
 
-const ball_init_pos = {x: 0, y: 0.3, z: 1.5}
+const ball_init_pos = {x: 0, y: 0.6, z: 2.5}
 
 
 // paddle hand details
@@ -300,8 +300,9 @@ const ballBody = new CANNON.Body({
     mass: 1e-6, // kg
     position: new CANNON.Vec3(ball_init_pos.x, ball_init_pos.y, ball_init_pos.z), //m
     shape: new CANNON.Sphere(radius),
-	material : ballMaterial
+	material : ballMaterial,
 });
+ballBody.radius = radius;
 ballBody.material.restitution = BOUNCE; // bounce
 world.addBody(ballBody);
 
@@ -351,25 +352,51 @@ world.addContactMaterial(ball_net_inter);
 
 
 // Rendering the scene
+let paused = false;
+const KEY_SPACE = 32
 function animate()
 {
+    if (paused)
+        return;
     requestAnimationFrame(animate)
-
-  //  paddle.position.y = Math.sin(Date.now() * 0.001) * 0.05 + 0.1
-    //opp_paddle.position.y = Math.cos((Date.now()) * 0.001) * 0.05 + 0.1
-    //paddle.rotation.y += 0.01
-    //opp_paddle.rotation.y -= 0.01
 
 
 ///////
     world.step(1 / 60);
+    console.log ('ball position vs paddle position')
+    // console.log (`${ballBody.position.x} vs ${opp_paddle.position.x}`)
+    // console.log (`${ballBody.position.y} vs ${opp_paddle.position.y}`)
+    // console.log (`${ballBody.position.z} vs ${opp_paddle.position.z}`)
+
+
+
+    if (ballBody.position.z - (ballBody.radius * 2) < opp_paddle.position.z)
+    {
+        ballBody.velocity.z *= -1
+    }
+
+
 
 	ballMesh.position.copy(ballBody.position);
-    //ballMesh.quaternion.copy(ballBody.quaternion);
+    ballMesh.quaternion.copy(ballBody.quaternion);
 
 //////
     renderer.render(scene, camera)
 }
+
+function hooks(e)
+{
+
+    if (e.keyCode === KEY_SPACE)
+      {
+        paused = !paused;
+        if (!paused)
+            animate();
+      }
+}
+
+document.addEventListener('keydown', hooks)
+document.addEventListener('keyup', function(e) {})
 
 function onWindowResize()
 {
