@@ -8,7 +8,11 @@ const height = window.innerHeight
 
 //Ball
 
-const ball_init_pos = {x: 0, y: 0.2, z: 2}
+const GRAVITY = 9.8
+const BOUNCE = 0.9
+const vector_directeur = {x: 0, y: 1, z: -3}
+
+const ball_init_pos = {x: 0, y: 0.3, z: 1.5}
 
 
 // paddle hand details
@@ -46,7 +50,6 @@ const camera_near = 0.1
 const camera_far = 100
 
 // plane details
-// const plane_position = { x: 0, y: -1.75, z: 0 }
 // const plane_color = 0xffffff
 // const plane_dimensions = { x: 100, y: 20 }
 
@@ -87,7 +90,7 @@ function create_cube (cube_dimensions, cube_position, cube_rotation, cube_color)
 function create_net(net_dimensions, net_position, net_rotation, net_color)
 {
     const geometry = new THREE.BoxGeometry(net_dimensions.x, net_dimensions.y, net_dimensions.z)
-    const material = new THREE.MeshStandardMaterial({ color: net_color/*, opacity: 0.5, side: THREE.DoubleSide*/})
+    const material = new THREE.MeshStandardMaterial({ color: net_color, opacity: 0.7, transparent : true})
     const net = new THREE.Mesh(geometry, material)
     net.position.set(net_position.x, net_position.y, net_position.z)
     net.rotation.set(net_rotation.x, net_rotation.y, net_rotation.z)
@@ -278,21 +281,14 @@ scene.add (opp_paddle)
 opp_paddle.position.set(0, 0.1, -1)
 
 
-///////
+// WORLD
 const world = new CANNON.World();
-world.gravity.set(0, 0,-9.82);
+world.gravity.set(0, -GRAVITY,0);
 world.broadphase = new CANNON.NaiveBroadphase();
 world.solver.iterations = 10;
 
 // Ball
 const radius = 0.02;// m
-const ballBody = new CANNON.Body({
-    mass: 1, // kg
-    position: new CANNON.Vec3(ball_init_pos.x, ball_init_pos.y, ball_init_pos.z), //m
-    shape: new CANNON.Sphere(radius)
-});
-world.addBody(ballBody);
-
 const ballGeometry = new THREE.SphereGeometry(radius, 32, 32);
 const ballMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
 const ballMesh = new THREE.Mesh(ballGeometry, ballMaterial);
@@ -300,13 +296,53 @@ ballMesh.castShadow = true;
 ballMesh.receiveShadow = true;
 scene.add(ballMesh);
 
+const ballBody = new CANNON.Body({
+    mass: 1e-6, // kg
+    position: new CANNON.Vec3(ball_init_pos.x, ball_init_pos.y, ball_init_pos.z), //m
+    shape: new CANNON.Sphere(radius),
+	material : ballMaterial
+});
+ballBody.material.restitution = BOUNCE; // bounce
+world.addBody(ballBody);
+
+const initialVelocity = new CANNON.Vec3(vector_directeur.x, vector_directeur.y, vector_directeur.z); 
+ballBody.velocity.copy(initialVelocity);
+
 // Table
-const tableGeometry = new THREE.BoxGeometry(1.52, 0.03, 2.74);
-const tableMaterial = new THREE.MeshStandardMaterial({ color: 0x51E338 });
-const tableMesh = new THREE.Mesh(tableGeometry, tableMaterial);
-tableMesh.position.set(0, 0, 0);
-tableMesh.receiveShadow = true;
-scene.add(tableMesh);
+
+
+const tableShape = new CANNON.Box(new CANNON.Vec3(table_dimensions.x / 2, table_dimensions.y / 2, table_dimensions.z / 2));
+const tableMaterial = new CANNON.Material();
+const tableBody = new CANNON.Body({
+    mass: 0, // Static object
+    position: new CANNON.Vec3(table_position.x, table_position.y, table_position.z),
+    shape: tableShape,
+    material: tableMaterial
+});
+tableBody.material.restitution = BOUNCE; // Adjust bounciness
+world.addBody(tableBody);
+
+// net 
+const netShape = new CANNON.Box (new CANNON.Vec3(net_dimensions.x / 2, net_dimensions.y / 2, net_dimensions.z / 2))
+const netMaterial = new CANNON.Material();
+const netBody = new CANNON.Body({
+	mass : 0,
+	position : new CANNON.Vec3(net_position.x, net_position.y, net_position.z),
+	shape : netShape,
+	material :  netMaterial
+});
+net.material.restitution = BOUNCE / 2
+world.addBody(netBody)
+
+
+//paddle
+
+
+const ball_table_inter = new CANNON.ContactMaterial(ballMaterial, tableMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+world.addContactMaterial(ball_table_inter);
+
+const ball_net_inter = new CANNON.ContactMaterial(ballMaterial, netMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+world.addContactMaterial(ball_net_inter);
 ///////
 
 // x is the red 
@@ -320,22 +356,29 @@ function animate()
     requestAnimationFrame(animate)
 
   //  paddle.position.y = Math.sin(Date.now() * 0.001) * 0.05 + 0.1
-    opp_paddle.position.y = Math.cos((Date.now()) * 0.001) * 0.05 + 0.1
-    paddle.rotation.y += 0.01
-    opp_paddle.rotation.y -= 0.01
+    //opp_paddle.position.y = Math.cos((Date.now()) * 0.001) * 0.05 + 0.1
+    //paddle.rotation.y += 0.01
+    //opp_paddle.rotation.y -= 0.01
 
 
 ///////
     world.step(1 / 60);
 
-    // Sync Three.js and Cannon.js
-	if (ballMesh.position.z >= 0)
-		ballMesh.position.copy(ballBody.position);
+	ballMesh.position.copy(ballBody.position);
     //ballMesh.quaternion.copy(ballBody.quaternion);
 
 //////
     renderer.render(scene, camera)
 }
+
+function onWindowResize()
+{
+    camera.aspect = window.innerWidth / window.innerHeight
+    camera.updateProjectionMatrix()
+
+    renderer.setSize(window.innerWidth, window.innerHeight)
+}
+window.addEventListener('resize', onWindowResize, false)
 
 const container = document.querySelector('#threejs-container')
 container.append(renderer.domElement)
