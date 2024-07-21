@@ -10,9 +10,26 @@ const height = window.innerHeight
 
 const GRAVITY = 9.8
 const BOUNCE = 0.9
-const vector_directeur = {x: 0, y: 1, z: -3}
+const vector_directeur = {x: 0, y: 4, z: -1}
 
-const ball_init_pos = {x: 0, y: 0.6, z: 2.5}
+const ball_init_pos = {x: 0, y: 0.3, z: 1}
+
+const paddle_speed = 0.05;
+
+
+const key_W = 87;
+const key_S = 83;
+const key_A = 65;
+const key_D = 68;
+const key_UP = 38;
+const key_DOWN = 40;
+const key_LEFT = 37;
+const key_RIGHT = 39;
+
+
+
+const paddle_position = { x: 0, y: 0.1, z: 1 }
+const opp_paddle_position = { x: 0, y: 0.1, z: -1 }
 
 
 // paddle hand details
@@ -26,6 +43,7 @@ const paddle_head_dimensions = { radiusTop: 0.1, radiusBottom: 0.1, height: 0.02
 const paddle_head_position = { x: 0, y: 0.17, z: 0 }
 const paddle_head_color = 0xff0000
 const paddle_head_rotation = { x: 1.55, y: 0, z: 0 }
+
 
 
 // Cube details
@@ -268,9 +286,9 @@ const paddle_head = create_paddle_head(paddle_head_dimensions, paddle_head_posit
 let paddle = new THREE.Object3D()
 paddle.add(paddle_hand)
 paddle.add(paddle_head)
-//scene.add(paddle)
+scene.add(paddle)
 
-//paddle.position.set(0, 0.1, 1)
+paddle.position.set(paddle_position.x, paddle_position.y, paddle_position.z)
 
 
 
@@ -278,7 +296,7 @@ let opp_paddle = paddle.clone()
 scene.add (opp_paddle)
 
 
-opp_paddle.position.set(0, 0.1, -1)
+opp_paddle.position.set(opp_paddle_position.x, opp_paddle_position.y, opp_paddle_position.z)
 
 
 // WORLD
@@ -302,7 +320,7 @@ const ballBody = new CANNON.Body({
     shape: new CANNON.Sphere(radius),
 	material : ballMaterial,
 });
-ballBody.radius = radius;
+// ballBody.radius = radius;
 ballBody.material.restitution = BOUNCE; // bounce
 world.addBody(ballBody);
 
@@ -337,6 +355,25 @@ world.addBody(netBody)
 
 
 //paddle
+const padleMaterial = new CANNON.Material();
+const paddleBody = new CANNON.Body({
+    mass: 0,
+    position: new CANNON.Vec3(paddle_position.x, paddle_position.y, paddle_position.z),
+    shape: new CANNON.Box(new CANNON.Vec3(paddle_head_dimensions.radiusTop, paddle_head_dimensions.height / 2, paddle_head_dimensions.radiusTop)),
+    material: padleMaterial
+});
+world.addBody(paddleBody);
+
+const oppPadleMaterial = new CANNON.Material();
+const oppPaddleBody = new CANNON.Body({
+    mass: 0,
+    position: new CANNON.Vec3(opp_paddle_position.x, opp_paddle_position.y, opp_paddle_position.z),
+    shape: new CANNON.Box(new CANNON.Vec3(paddle_head_dimensions.radiusTop, paddle_head_dimensions.height / 2, paddle_head_dimensions.radiusTop)),
+    material: oppPadleMaterial
+});
+world.addBody(oppPaddleBody);
+
+
 
 
 const ball_table_inter = new CANNON.ContactMaterial(ballMaterial, tableMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
@@ -344,6 +381,13 @@ world.addContactMaterial(ball_table_inter);
 
 const ball_net_inter = new CANNON.ContactMaterial(ballMaterial, netMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
 world.addContactMaterial(ball_net_inter);
+
+const paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, padleMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+world.addContactMaterial(paddle_ball_inter);
+
+const opp_paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, oppPadleMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+world.addContactMaterial(opp_paddle_ball_inter);
+
 ///////
 
 // x is the red 
@@ -351,9 +395,48 @@ world.addContactMaterial(ball_net_inter);
 // z is the blue
 
 
+function intersect_effect(position) {
+    const particleCount = 100;
+    const particles = new THREE.Geometry();
+    const pMaterial = new THREE.PointsMaterial({
+        color: 0xFFFFFF,
+        size: 0.02,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+    });
+
+    for (let i = 0; i < particleCount; i++) {
+        const pX = position.x + (Math.random() * 0.1 - 0.05);
+        const pY = position.y + (Math.random() * 0.1 - 0.05);
+        const pZ = position.z + (Math.random() * 0.1 - 0.05);
+        const particle = new THREE.Vector3(pX, pY, pZ);
+        particles.vertices.push(particle);
+    }
+
+    const particleSystem = new THREE.Points(particles, pMaterial);
+    scene.add(particleSystem);
+
+    setTimeout(() => {
+        scenle.remove(particeSystem);
+    }, 500);
+}
+
+
+function inter_paddle_ball (paddle, ball)
+{
+    if (ball.position.z - (ball.radius * 2) <= paddle.position.z &&
+        ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
+        ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
+    {
+        // ball.velocity.z *= -1.1
+
+        intersect_effect(ball.position);
+    }
+}
+
 // Rendering the scene
 let paused = false;
-const KEY_SPACE = 32
+const KEY_SPACE = 32;
 function animate()
 {
     if (paused)
@@ -363,36 +446,51 @@ function animate()
 
 ///////
     world.step(1 / 60);
-    console.log ('ball position vs paddle position')
-    // console.log (`${ballBody.position.x} vs ${opp_paddle.position.x}`)
-    // console.log (`${ballBody.position.y} vs ${opp_paddle.position.y}`)
-    // console.log (`${ballBody.position.z} vs ${opp_paddle.position.z}`)
 
 
+    inter_paddle_ball(opp_paddle, ballBody)
+    inter_paddle_ball(paddle, ballBody)
 
-    if (ballBody.position.z - (ballBody.radius * 2) < opp_paddle.position.z)
-    {
-        ballBody.velocity.z *= -1
-    }
+    paddle.position.copy(paddleBody.position);
+    paddle.quaternion.copy(paddleBody.quaternion);
 
+    opp_paddle.position.copy(oppPaddleBody.position);
+    opp_paddle.quaternion.copy(oppPaddleBody.quaternion);
 
-
-	ballMesh.position.copy(ballBody.position);
+    ballMesh.position.copy(ballBody.position);
     ballMesh.quaternion.copy(ballBody.quaternion);
+
 
 //////
     renderer.render(scene, camera)
 }
 
+
 function hooks(e)
 {
 
     if (e.keyCode === KEY_SPACE)
-      {
-        paused = !paused;
-        if (!paused)
-            animate();
-      }
+    {
+      paused = !paused;
+      if (!paused)
+          animate();
+    }
+    if (e.keyCode === key_W)
+        paddleBody.position.z -= paddle_speed;
+    if (e.keyCode === key_S)
+        paddleBody.position.z += paddle_speed;
+    if (e.keyCode === key_A)
+        paddleBody.position.x -= paddle_speed;
+    if (e.keyCode === key_D)
+        paddleBody.position.x += paddle_speed;
+    if (e.keyCode === key_UP)
+        oppPaddleBody.position.z -= paddle_speed;
+    if (e.keyCode === key_DOWN)
+        oppPaddleBody.position.z += paddle_speed;
+    if (e.keyCode === key_LEFT)
+        oppPaddleBody.position.x -= paddle_speed;
+    if (e.keyCode === key_RIGHT)
+        oppPaddleBody.position.x += paddle_speed;
 }
 
 document.addEventListener('keydown', hooks)

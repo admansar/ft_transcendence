@@ -274,7 +274,7 @@ const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="
 
 
 const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=true)
+const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
 
 
 
