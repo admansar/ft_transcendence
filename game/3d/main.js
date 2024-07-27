@@ -10,7 +10,8 @@ const height = window.innerHeight
 
 const GRAVITY = 9.8
 const BOUNCE = 0.9
-const vector_directeur = {x: 0, y: 4, z: -1}
+const init_vector_dir = {x: 0, y: 4, z: -1}
+const vector_directeur = {x: 0, y: 2.5, z: -2.5}
 
 const ball_init_pos = {x: 0, y: 0.3, z: 1}
 
@@ -324,13 +325,13 @@ const ballBody = new CANNON.Body({
 ballBody.material.restitution = BOUNCE; // bounce
 world.addBody(ballBody);
 
-const initialVelocity = new CANNON.Vec3(vector_directeur.x, vector_directeur.y, vector_directeur.z); 
+const initialVelocity = new CANNON.Vec3(init_vector_dir.x, init_vector_dir.y, init_vector_dir.z);
 ballBody.velocity.copy(initialVelocity);
 
 // Table
 
 
-const tableShape = new CANNON.Box(new CANNON.Vec3(table_dimensions.x / 2, table_dimensions.y / 2, table_dimensions.z / 2));
+const tableShape = new CANNON.Box(new CANNON.Vec3(2 * table_dimensions.x, 2 * table_dimensions.y, 2 * table_dimensions.z));
 const tableMaterial = new CANNON.Material();
 const tableBody = new CANNON.Body({
     mass: 0, // Static object
@@ -420,28 +421,27 @@ function intersect_effect(position) {
     }, 500);
 }
 
-function inter_paddle_ball (paddle, ball)
+function inter_opp_paddle (paddle, ball)
 {
-    console.log (ball.velocity.z < 0 ? "mowjab" : "salib")
-    if (ball.velocity.z < 0 && ball.position.z - (2 * radius) <= paddle.position.z &&
-        ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
-        ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
-    {
-        ball.velocity.z *= -1
-        ball.velocity.z += 2
-        ball.velocity.y *= -2
-        // intersect_effect(ball.position);
-    }
-    else if (ball.velocity.z > 0 && ball.position.z + (ball.radius * 2) >= paddle.position.z &&
-        ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
-        ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
-    {
-        ball.velocity.z *= -1
-        ball.velocity.y *= -2.5
-    ball.velocity.y *= -2
-        // intersect_effect(ball.position);
-    }
+  if (ball.position.z - (2 * radius) <= paddle.position.z &&
+    ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
+    ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
+{
+    ball.velocity.z = -vector_directeur.z
+    ball.velocity.x = vector_directeur.x
+    ball.velocity.y = vector_directeur.y
+  }
 
+}
+
+function inter_paddle (paddle, ball)
+{
+  if (ball.position.z + (radius * 2) >= paddle.position.z)
+{
+    ball.velocity.z = vector_directeur.z
+    ball.velocity.x = vector_directeur.x
+    ball.velocity.y = vector_directeur.y
+  }
 }
 
 
@@ -458,7 +458,8 @@ function animate()
 ///////
     world.step(1 / 60);
 
-    inter_paddle_ball(opp_paddle, ballBody);
+    inter_opp_paddle(opp_paddle, ballBody);
+    inter_paddle(paddle, ballBody);
     // inter_paddle_ball(paddle, ballBody);
 
     paddle.position.copy(paddleBody.position);
