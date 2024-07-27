@@ -28,7 +28,7 @@ const key_RIGHT = 39;
 
 
 
-const paddle_position = { x: 0, y: 0.1, z: 1 }
+const paddle_position = { x: 0, y: 0.1, z: 1.3 }
 const opp_paddle_position = { x: 0, y: 0.1, z: -1 }
 
 
@@ -379,21 +379,20 @@ world.addBody(oppPaddleBody);
 const ball_table_inter = new CANNON.ContactMaterial(ballMaterial, tableMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
 world.addContactMaterial(ball_table_inter);
 
-const ball_net_inter = new CANNON.ContactMaterial(ballMaterial, netMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+const ball_net_inter = new CANNON.ContactMaterial(ballMaterial, netMaterial, {friction: 0.0, restitution: BOUNCE});
 world.addContactMaterial(ball_net_inter);
 
-const paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, padleMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
+const paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, padleMaterial, {friction: 0.0, restitution: BOUNCE});
 world.addContactMaterial(paddle_ball_inter);
 
-const opp_paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, oppPadleMaterial, {friction: 0.0, restitution: BOUNCE}); // intersect
-world.addContactMaterial(opp_paddle_ball_inter);
+// const opp_paddle_ball_inter = new CANNON.ContactMaterial(ballMaterial, oppPadleMaterial, {friction: 0.0, restitution: BOUNCE});
+// world.addContactMaterial(opp_paddle_ball_inter);
 
 ///////
 
-// x is the red 
+// x is the red
 // y is the green
 // z is the blue
-
 
 function intersect_effect(position) {
     const particleCount = 100;
@@ -421,18 +420,30 @@ function intersect_effect(position) {
     }, 500);
 }
 
-
 function inter_paddle_ball (paddle, ball)
 {
-    if (ball.position.z - (ball.radius * 2) <= paddle.position.z &&
+    console.log (ball.velocity.z < 0 ? "mowjab" : "salib")
+    if (ball.velocity.z < 0 && ball.position.z - (2 * radius) <= paddle.position.z &&
         ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
         ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
     {
-        // ball.velocity.z *= -1.1
-
-        intersect_effect(ball.position);
+        ball.velocity.z *= -1
+        ball.velocity.z += 2
+        ball.velocity.y *= -2
+        // intersect_effect(ball.position);
     }
+    else if (ball.velocity.z > 0 && ball.position.z + (ball.radius * 2) >= paddle.position.z &&
+        ball.position.x <= paddle.position.x + paddle_head_dimensions.radiusTop && 
+        ball.position.x >= paddle.position.x - paddle_head_dimensions.radiusTop)
+    {
+        ball.velocity.z *= -1
+        ball.velocity.y *= -2.5
+    ball.velocity.y *= -2
+        // intersect_effect(ball.position);
+    }
+
 }
+
 
 // Rendering the scene
 let paused = false;
@@ -447,9 +458,8 @@ function animate()
 ///////
     world.step(1 / 60);
 
-
-    inter_paddle_ball(opp_paddle, ballBody)
-    inter_paddle_ball(paddle, ballBody)
+    inter_paddle_ball(opp_paddle, ballBody);
+    // inter_paddle_ball(paddle, ballBody);
 
     paddle.position.copy(paddleBody.position);
     paddle.quaternion.copy(paddleBody.quaternion);
@@ -459,6 +469,8 @@ function animate()
 
     ballMesh.position.copy(ballBody.position);
     ballMesh.quaternion.copy(ballBody.quaternion);
+
+    renderer.render(scene, camera);
 
 
 //////
