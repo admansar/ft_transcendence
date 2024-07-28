@@ -521,6 +521,17 @@ window.addEventListener('resize', onWindowResize, false)
 const container = document.querySelector('#threejs-container')
 container.append(renderer.domElement)
 renderer.render(scene, camera)
+document.addEventListener('mousemove', function(event)
+{
+    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    const paddleRangeX = table_dimensions.x / 1.5;
+    const paddleRangeZ = table_dimensions.z / 1.5;
+
+    paddleBody.position.x = mouseX * paddleRangeX;
+    paddleBody.position.z = -mouseY * paddleRangeZ;
+});
 
 
 animate()
