@@ -16,7 +16,7 @@ let ball_speed = 10
 
 
 /* rackets details */
-
+ 
 let racket_speed = 15
 let racket_width = 20
 let racket_height = 140
