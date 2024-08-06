@@ -4,27 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription au Jeu</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css"> 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../assets/css/css/bootstrap.min.css"> 
+    <link rel="stylesheet" href="../assets/css/css/style.css">
 </head>
 <body>
-    <!-- <canvas id="canvas"></canvas>  -->
-    <!-- <h2>Commencez</h2> -->
+    <canvas id="canvas"></canvas>
+    <h2>Commencez</h2> 
     
-    <!-- <h3>Entrez les informations de votre compte pour découvrir un nouveau monde de jeu</h3> -->
-     
-    <div class="container mt-5">
-        <form action="/submit" method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Entrez votre nom d'utilisateur" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="password" class="form-label">Mot de passe</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Entrez votre mot de passe" required>
-            </div>
-    <!-- <div>
+    <h3>Entrez les informations de votre compte pour découvrir un nouveau monde de jeu</h3>
+    <div>
         <form action="/submit" method="post">
             <label for="username">Nom d'utilisateur</label>
             <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
@@ -39,13 +27,13 @@
             <a href="https://intra.42.fr" class="button" target="_self">Se connecter avec 42 Intra</a>
             
             <br>
-            <a href="index_registration.html" class="button" target="_self">Vous n'avez pas de compte ? Créez-en un !</a>
+            <a href="{% url 'register' %}" class="button" target="_self">Vous n'avez pas de compte ? Créez-en un !</a>
         </form>
-    </div> -->
+    </div>
 
-    <!-- <script src="js/jquery-3.4.1.slim.min.js"></script> -->
-    <!-- <script src="js/popper.min.js"></script> -->
-    <!-- <script src="js/bootstrap.min.js"></script> -->
-    <!-- <script src="../../../../../game/2d/script.js"></script> -->
+    <script src="../assets/js/js/bootstrap.min.js"></script>
+    <script src="../assets/js/js/jquery-3.4.1.slim.min.js"></script>
+    <script src="../assets/js/js/popper.min.js"></script>
+    <script src="../game/2d/script.js"></script>
 </body>
 </html> 

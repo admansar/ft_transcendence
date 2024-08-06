@@ -1,13 +1,9 @@
 from django.shortcuts import render
-
-#i create first page
-def register(request):
-    x = {'name':'ali'}
-    return render(request,'register.html',{'name' : 'Lorku'})
-
-def login(request):
-    x = {'name':'ali'}
-    return render(request,'login.html',{'name' : 'Lorku'})
+from django.http import HttpResponse
 
 
-# Create your views here.
+def loginpage(request):
+    return render(request,'login.html')
+
+def registrationpage(request):
+    return render(request,'register.html')

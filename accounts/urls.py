@@ -2,9 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # path('management',views.userManagement,name='management')
-    path('register/', views.register, name='register'),
-    path('login/', views.login, name='login'),
+    path('', views.loginpage, name='login'),
+    path('register/', views.registrationpage, name='register'),
 ]
 
-#http://127.0.0.1:8000/user/managenet
