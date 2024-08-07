@@ -16,7 +16,7 @@ let ball_speed = 10
 
 
 /* rackets details */
- 
+
 let racket_speed = 15
 let racket_width = 20
 let racket_height = 140
@@ -274,7 +274,7 @@ const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="
 
 
 const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
+const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=true)
 
 
 

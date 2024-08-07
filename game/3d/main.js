@@ -38,6 +38,8 @@ let ball_bonce2 = 0
 let score1 = 0
 let score2 = 0
 
+let scene_moves = true
+
 
 
 
@@ -74,7 +76,7 @@ const light_color = 0xffffff
 const light_intensity = 0.3
 
 // Camera details
-const camera_position = { x: 0, y: 1, z: 2.5 }
+const camera_position = { x: 0, y: 1, z: 3 }
 const camera_fov = 50
 const camera_aspect = width / height
 const camera_near = 0.1
@@ -485,7 +487,64 @@ function merge_visuals_with_phisiques()
 	ballMesh.quaternion.copy(ballBody.quaternion);
 }
 
-function createText(text, font, position, rotation) {
+function sleep(ms)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+let direction_ball = 1
+function game_reset()
+{
+	ballBody.position.x = 0
+	ballBody.position.y = ball_init_pos.y
+	ballBody.position.z = 0
+	ballBody.velocity.x = init_vector_dir.x
+	if ((score1 + score2) % 2 == 0)
+		direction_ball = -direction_ball
+	ballBody.velocity.y = 3 * init_vector_dir.y / 4
+	ballBody.velocity.z = direction_ball * init_vector_dir.z
+	ball_bonce1 = ball_bonce2 = 0
+}
+	
+function game_score ()
+{
+  let who = -1
+	if (ballBody.position.y <= 4 * radius)
+	{
+		if (ballBody.position.z < 0)
+		{
+			ball_bonce1++
+			ball_bonce2 = 0
+			console.log ("bounce lhih");
+		}
+		else if (ballBody.position.z > 0)
+		{
+			ball_bonce2++
+			ball_bonce1 = 0
+			console.log ("bounce hna");
+		}
+	}
+	if (ball_bonce1 >= 2 || ball_bonce2 >= 2)
+	{
+		if (ball_bonce1 >= 2)
+		{
+			score2++
+			who = 0
+		}
+		else if (ball_bonce2 >= 2)
+		{
+			who = 1
+			score1++
+		}
+		ball_bonce1 = 0
+		ball_bonce2 = 0
+		load_text(font_json, who === 1 ? "" + score1 : "" + score2, who === 1 ? { x: -1.5, y: 0.5, z: 0.8 } : { x: -1.5, y: 0.5, z: -0.8 }, { x: 0, y: Math.PI / 2, z: 0 }, who);
+		game_reset ()
+	}
+}
+
+function createText(text, font, position, rotation)
+{
     const geometry = new TextGeometry(text, {
         font: font,
         size: 0.2,
@@ -508,30 +567,54 @@ function createText(text, font, position, rotation) {
 
 const font_json = './fonts/League Spartan_Regular.json'
 
-let textMesh_collector = []
+let textMesh_collector = [null, null]
 
-function load_text(fonts, text, position, rotation)
+function load_text(fontPath, text, position, rotation, index)
 {
-const loader = new FontLoader();
-loader.load(fonts, function (font) 
-	{
-		textMesh_collector.push (createText(text, font, position, rotation));
+	const loader = new FontLoader();
+	loader.load(fontPath, function (font) {
+		if (textMesh_collector[index] === null)
+			textMesh_collector[index] = createText(text, font, position, rotation)
+		else
+			replaceTextMesh(text, font, position, rotation, index)
 	});
 }
 
+function replaceTextMesh(text, font, position, rotation, index)
+{
+    scene.remove(textMesh_collector[index]);
+    textMesh_collector[index].geometry.dispose();
+    textMesh_collector[index].material.dispose();
+    textMesh_collector[index] = createText(text, font, position, rotation);
+}
 
 function removeAllText()
 {
-    textMesh_collector.forEach(mesh => {
-        scene.remove(mesh);
-        mesh.geometry.dispose();
-        mesh.material.dispose();
-    });
-    textMesh_collector = [];
+	textMesh_collector.forEach(mesh => {
+		if (mesh) {
+			scene.remove(mesh);
+			mesh.geometry.dispose();
+			mesh.material.dispose();
+		}
+	});
+	textMesh_collector = [null, null];
 }
 
-load_text(font_json, "" + score1, {x: -1.5, y: 0.5, z: 0.8}, { x: 0, y: Math.PI / 2, z: 0 })
-load_text(font_json, "" + score2, {x: 1.5, y: 0.5, z: -0.8}, { x: 0, y: Math.PI / 2, z: 0 })
+
+function updateCameraPosition()
+{
+	const targetPosition = new THREE.Vector3();
+	paddle.getWorldPosition(targetPosition);
+	targetPosition.z = camera.position.z; // Offset the camera position behind the paddle
+	targetPosition.y = camera.position.y; // Raise the camera position above the paddle
+	targetPosition.x = 0;
+
+	camera.position.lerp(targetPosition, 1); // Smooth movement
+	camera.lookAt(paddle.position);
+}
+
+load_text(font_json, "" + score1, {x: -1.5, y: 0.5, z: 0.8}, { x: 0, y: Math.PI / 2, z: 0 }, 1)
+load_text(font_json, "" + score2, {x: -1.5, y: 0.5, z: -0.8}, { x: 0, y: Math.PI / 2, z: 0 }, 0)
 // Rendering the scene
 let paused = false;
 const KEY_SPACE = 32;
@@ -544,43 +627,17 @@ function animate()
 	check_paddle_limits ();
 
 	///////
-	if (ballBody.position.y <= 4 * radius)
-	{
-		if (ballBody.position.z < 0)
-		{
-			ball_bonce1++
-			ball_bonce2 = 0
-			console.log ("bounce lhih");
-		}
-		else if (ballBody.position.z > 0)
-		{
-			ball_bonce2++
-			ball_bonce1 = 0
-			console.log ("bounce hna");
-		}
-	}
-	if (ball_bonce1 >= 2 || ball_bonce2 >= 2)
-	{
-		if (ball_bonce1 >= 2)
-			score2++
-		else if (ball_bonce2 >= 2)
-			score1++
-		ball_bonce1 = 0
-		ball_bonce2 = 0
-		removeAllText()
-		load_text(font_json, "" + score1, {x: -1.5, y: 0.5, z: 0.8}, { x: 0, y: Math.PI / 2, z: 0 })
-		load_text(font_json, "" + score2, {x: 1.5, y: 0.5, z: -0.8}, { x: 0, y: Math.PI / 2, z: 0 })
-	}
-
-	console.log (score1, score2);
-
+	game_score()
 	world.step(1 / 60);
 
 	inter_opp_paddle(oppPaddleBody, ballBody);
 	inter_paddle(paddleBody, ballBody);
 
 	merge_visuals_with_phisiques();
+	if (scene_moves)
+		updateCameraPosition()
 
+	console.log (camera.position)
 	//////
 	renderer.render(scene, camera)
 }
