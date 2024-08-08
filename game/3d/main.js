@@ -605,11 +605,14 @@ function updateCameraPosition()
 {
 	const targetPosition = new THREE.Vector3();
 	paddle.getWorldPosition(targetPosition);
+	camera.fov = 40
+	camera.updateProjectionMatrix();
+
 	targetPosition.z = camera.position.z; // Offset the camera position behind the paddle
 	targetPosition.y = camera.position.y; // Raise the camera position above the paddle
 	targetPosition.x = 0;
 
-	camera.position.lerp(targetPosition, 1); // Smooth movement
+	camera.position.lerp(targetPosition, 0.1); // Smooth movement
 	camera.lookAt(paddle.position);
 }
 
