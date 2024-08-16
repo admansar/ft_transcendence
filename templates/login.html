@@ -4,36 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription au Jeu</title>
-    <link rel="stylesheet" href="../assets/css/css/bootstrap.min.css"> 
-    <link rel="stylesheet" href="../assets/css/css/style.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
     <canvas id="canvas"></canvas>
     <h2>Commencez</h2> 
-    
     <h3>Entrez les informations de votre compte pour découvrir un nouveau monde de jeu</h3>
     <div>
-        <form action="/submit" method="post">
-            <label for="username">Nom d'utilisateur</label>
-            <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur" required>
-            
-            <label for="password">Mot de passe</label>
-            <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
-            
-            <a href="https://www.google.com" class="button" target="_self" >Se connecter</a>
-            
-            <h8>ou</h4>
-
-            <a href="https://intra.42.fr" class="button" target="_self">Se connecter avec 42 Intra</a>
-            
+        <form method="post" action="{% url 'login' %}"> <!-- Ensure action URL matches your view -->
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p><input type="submit" value="Login"></p>
+            <h4>ou</h4>
+            <a href="https://intra.42.fr" class="btn btn-secondary" target="_self">Se connecter avec 42 Intra</a>
             <br>
-            <a href="{% url 'register' %}" class="button" target="_self">Vous n'avez pas de compte ? Créez-en un !</a>
+            <a href="{% url 'register' %}" class="btn btn-link" target="_self">Vous n'avez pas de compte ? Créez-en un !</a>
         </form>
     </div>
-
-    <script src="../assets/js/js/bootstrap.min.js"></script>
-    <script src="../assets/js/js/jquery-3.4.1.slim.min.js"></script>
-    <script src="../assets/js/js/popper.min.js"></script>
-    <script src="../game/2d/script.js"></script>
+    <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'game/2d/script.js' %}"></script>
 </body>
-</html> 
+</html>
