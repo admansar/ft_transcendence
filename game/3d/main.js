@@ -38,7 +38,7 @@ let ball_bonce2 = 0
 let score1 = 0
 let score2 = 0
 
-let scene_moves = true
+let scene_moves = false
 
 
 
@@ -431,7 +431,7 @@ function intersect_effect(position) {
 	scene.add(particleSystem);
 
 	setTimeout(() => {
-		scenle.remove(particeSystem);
+		scene.remove(particeSystem);
 	}, 500);
 }
 
@@ -505,10 +505,35 @@ function game_reset()
 	ballBody.velocity.z = direction_ball * init_vector_dir.z
 	ball_bonce1 = ball_bonce2 = 0
 }
-	
+
+function showPopupText(message, position = { x: 0, y: 1, z: 0 }, duration = 2000, color = 0xffffff)
+{
+    const loader = new FontLoader();
+    loader.load(font_json, function (font) {
+        const geometry = new TextGeometry(message, {
+            font: font,
+            size: 0.2,
+            height: 0.05,
+        });
+
+        const material = new THREE.MeshStandardMaterial({ color: color });
+        const textMesh = new THREE.Mesh(geometry, material);
+        textMesh.position.set(position.x, position.y, position.z);
+        scene.add(textMesh);
+
+        // Remove text after duration
+        setTimeout(() => {
+            scene.remove(textMesh);
+            geometry.dispose();
+            material.dispose();
+        }, duration);
+    });
+}
+
 function game_score ()
 {
-  let who = -1
+	let who = -1
+//	let reason = ""
 	if (ballBody.position.y <= 4 * radius)
 	{
 		if (ballBody.position.z < 0)
@@ -526,6 +551,7 @@ function game_score ()
 	}
 	if (ball_bonce1 >= 2 || ball_bonce2 >= 2)
 	{
+		//reason = "bounce twice";
 		if (ball_bonce1 >= 2)
 		{
 			score2++
@@ -538,7 +564,12 @@ function game_score ()
 		}
 		ball_bonce1 = 0
 		ball_bonce2 = 0
-		load_text(font_json, who === 1 ? "" + score1 : "" + score2, who === 1 ? { x: -1.5, y: 0.5, z: 0.8 } : { x: -1.5, y: 0.5, z: -0.8 }, { x: 0, y: Math.PI / 2, z: 0 }, who);
+		//showPopupText(reason, { x: 0, y: 1, z: 0 }, 800, 0xff0000);
+		load_text(font_json,
+			who === 1 ? "" + score1 : "" + score2,
+			who === 1 ? { x: -1.5, y: 0.5, z: 0.8 } : { x: -1.5, y: 0.5, z: -0.8 },
+			{ x: 0, y: Math.PI / 2, z: 0 },
+			who);
 		game_reset ()
 	}
 }
@@ -608,8 +639,8 @@ function updateCameraPosition()
 	camera.fov = 40
 	camera.updateProjectionMatrix();
 
-	targetPosition.z = camera.position.z; // Offset the camera position behind the paddle
-	targetPosition.y = camera.position.y; // Raise the camera position above the paddle
+	targetPosition.z = camera.position.z;
+	targetPosition.y = camera.position.y;
 	targetPosition.x = 0;
 
 	camera.position.lerp(targetPosition, 0.1); // Smooth movement
@@ -621,30 +652,123 @@ load_text(font_json, "" + score2, {x: -1.5, y: 0.5, z: -0.8}, { x: 0, y: Math.PI
 // Rendering the scene
 let paused = false;
 const KEY_SPACE = 32;
-function animate()
+
+// Mini-map setup
+const miniMapSize = { width: 100, height: 150 };
+const miniMapCamera = new THREE.OrthographicCamera(
+    -table_dimensions.x / 2, table_dimensions.x / 2,
+    table_dimensions.z / 2, -table_dimensions.z / 2,
+    0.1, 1000
+);
+miniMapCamera.position.set(0, 10, 0);
+miniMapCamera.lookAt(0, 0, 0);
+
+const miniMapRenderer = new THREE.WebGLRenderer({ alpha: true });
+miniMapRenderer.setSize(miniMapSize.width, miniMapSize.height);
+miniMapRenderer.domElement.style.position = 'absolute';
+miniMapRenderer.domElement.style.bottom = '10px';
+miniMapRenderer.domElement.style.left = '10px';
+miniMapRenderer.domElement.style.border = '1px solid white';
+
+document.body.appendChild(miniMapRenderer.domElement);
+
+const miniMapBall = new THREE.Mesh(
+    new THREE.SphereGeometry(radius * 2, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0xffff00 })
+); // just cuz the ball is very small from the sky :)
+scene.add(miniMapBall);
+
+function updateMiniMap()
 {
-	if (paused)
-		return;
-	requestAnimationFrame(animate)
+    miniMapBall.position.copy(ballBody.position);
+    miniMapBall.position.y = 5;
 
-	check_paddle_limits ();
-
-	///////
-	game_score()
-	world.step(1 / 60);
-
-	inter_opp_paddle(oppPaddleBody, ballBody);
-	inter_paddle(paddleBody, ballBody);
-
-	merge_visuals_with_phisiques();
-	if (scene_moves)
-		updateCameraPosition()
-
-	console.log (camera.position)
-	//////
-	renderer.render(scene, camera)
+    miniMapRenderer.render(scene, miniMapCamera);
 }
 
+function predictBouncePosition()
+{
+    if (ballBody.position.z > 0 || ballBody.velocity.z > 0)
+        return null;
+
+    const timeToReach = (opp_paddle_position.z - ballBody.position.z) / ballBody.velocity.z;
+    const bounceX = ballBody.position.x + ballBody.velocity.x * timeToReach;
+    let bounceY = ballBody.position.y + ballBody.velocity.y * timeToReach - 0.5 * GRAVITY * timeToReach * timeToReach;
+    if (bounceY < radius)
+	{
+		const timeToBottom = (ballBody.position.y - radius) / (ballBody.velocity.y - 0.5 * GRAVITY * timeToReach);
+		const remainingTime = timeToReach - timeToBottom;
+		bounceY = radius + (ballBody.velocity.y + GRAVITY * timeToBottom) * remainingTime * BOUNCE;
+	}
+
+	return { x: bounceX, y: bounceY, z: opp_paddle_position.z };
+}
+
+function bot_paddle()
+{
+	const bouncePosition = predictBouncePosition();
+
+	if (bouncePosition)
+	{
+		const paddleCenterY = oppPaddleBody.position.y + paddle_head_dimensions.radiusTop;
+
+		if (Math.abs(ballBody.position.y - paddleCenterY) < 0.05)
+		{
+			const targetX = bouncePosition.x;
+			if (targetX < oppPaddleBody.position.x - paddle_speed)
+				oppPaddleBody.position.x -= paddle_speed;
+			else if (targetX > oppPaddleBody.position.x + paddle_speed)
+				oppPaddleBody.position.x += paddle_speed;
+			else
+				oppPaddleBody.position.x = targetX;
+
+			const targetZ = bouncePosition.z
+			if (targetZ < oppPaddleBody.position.z - paddle_speed)
+				oppPaddleBody.position.z -= paddle_speed;
+			else if (targetZ > oppPaddleBody.position.z + paddle_speed)
+				oppPaddleBody.position.z += paddle_speed;
+			else
+				oppPaddleBody.position.z = targetZ;
+			oppPaddleBody.position.x = Math.max(Math.min(oppPaddleBody.position.x, table_dimensions.x / 2), -table_dimensions.x / 2);
+		}
+	}
+}
+
+let lastTime;
+let accumulator = 0;
+const fixedTimeStep = 1 / 60; // 60 fps
+
+function animate(time)
+{
+    if (paused)
+		return;
+    requestAnimationFrame(animate);
+
+    // to seconds
+    const currentTime = time * 0.001;
+    const deltaTime = lastTime ? (currentTime - lastTime) : 0;
+    lastTime = currentTime;
+    accumulator += deltaTime;
+
+	// just to make sure the physics and the visuals are the same
+    while (accumulator >= fixedTimeStep)
+	{
+        check_paddle_limits();
+        game_score();
+        world.step(fixedTimeStep);
+		bot_paddle();
+        inter_opp_paddle(oppPaddleBody, ballBody);
+        inter_paddle(paddleBody, ballBody);
+        merge_visuals_with_phisiques();
+        accumulator -= fixedTimeStep;
+    }
+    updateMiniMap();
+
+    if (scene_moves)
+		updateCameraPosition();
+
+    renderer.render(scene, camera);
+}
 
 function hooks(e)
 {
