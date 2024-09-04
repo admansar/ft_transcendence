@@ -5,3 +5,6 @@ def game_2d(request):
 
 def game_3d(request):
     return render(request, "game_3d.html")
+
+def select_game(request):
+    return render(request, 'select_game.html')
