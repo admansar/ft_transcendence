@@ -1,3 +1,10 @@
-__py_cache__/
 *.swp
+*.so
+env/
+*.log
 django/
+bin
+lib
+__pycache__/*
+__pycache__/
+*.py[cod]
