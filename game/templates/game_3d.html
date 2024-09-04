@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <title>Three.js - Hello cube</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'game/css/style_3d.css' %}">
+    <link rel="icon" type="image/x-icon" href="{% static 'game/images/140412.png' %}">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="threejs-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
+	<script type="module" src="{% static 'game/js/game_3d.js' %}"></script>
+</body>
+</html>
