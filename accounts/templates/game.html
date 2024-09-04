@@ -1,0 +1,19 @@
+<!-- accounts/templates/game.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Game{% endblock %}
+
+{% block content %}
+<div id="game-container">
+    <canvas id="canvas"></canvas>
+    <script src="{% static 'js/game.js' %}"></script> <!-- Link to your game script -->
+</div>
+
+<!-- Score Display -->
+<p id="score-display">Score: <span id="score-value">0</span></p>
+
+<!-- Button to simulate saving the score without page refresh -->
+<button id="save-score-button">Save Score</button>
+
+{% endblock %}

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+from helpers import expand_from_env
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,9 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-doo93f%s3e=!(@i)jlk8lh^zf6dapiu#ft8ul2z^3-!e_0ugqa'
+SECRET_KEY = expand_from_env('./.env', 'SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -120,6 +120,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
+     BASE_DIR / 'static', 
 )
 
 # Default primary key field type
