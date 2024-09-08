@@ -1,9 +1,144 @@
+
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
 
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
+const win_ratio = window.innerHeight;
+
+let current_player = "not set yet 1";
+let other_player = "not set yet 2";
+let old_data = null;
+let data = null;
+let player_id = 0;
+
+// let roomName = null;
+
+// function createOrJoinRoom()
+// {
+//     roomName = prompt("Enter a room name to create or join:");
+//     if (!roomName)
+//     {
+//         roomName = 'default_room';
+//     }
+//     connectWebSocket();
+// }
+
+let url = `ws://${window.location.host}/ws/game/`;
+const chatSocket = new WebSocket(url);
+
+function send_costum_message(message)
+{
+  if (chatSocket && chatSocket.readyState === WebSocket.OPEN)
+    chatSocket.send(JSON.stringify(message));
+}
+
+function connectWebSocket()
+{
+  chatSocket.onopen = function (e)
+  {
+    // console.log("WebSocket connection established");
+    // console.log (data)
+    // console.log ("--------------------------------------")
+    if (data == null)
+      chatSocket.send(JSON.stringify({
+          'type': 'join_game',
+      }));
+
+  };
+
+  chatSocket.onmessage = function (e) {
+      data = JSON.parse(e.data);
+      if (old_data == null)
+        old_data = data;
+      // console.log('Data received:', data);
+      // console.log('Old data:', old_data);
+      // console.log ('player id : ', player_id)
+
+      if (data.type === 'initial_state')
+      {
+        player_id = old_data.game_state.player_count;
+        player1_name = data.game_state.player1_name;
+        player2_name = data.game_state.player2_name;
+        current_player = (player_id === 1) ? player1_name : player2_name;
+        other_player = (current_player === player1_name) ? player2_name : player1_name;
+        updatePlayerNames();
+      }
+      else if (data.type === 'game_state')
+      {
+        player_id = old_data.game_state.player_count;
+        player1_name = data.player1_name
+        player2_name = data.player2_name
+        current_player = (player_id === 1) ? player1_name : player2_name;
+        other_player = (current_player === player1_name) ? player2_name : player1_name;
+        updatePlayerNames();
+      }
+      else if (data.type === 'game_start')
+      {
+        player1_name = (old_data.player1_name === data.player1_name) ? old_data.player1_name : data.player1_name; 
+        player2_name = data.player2_name
+        current_player = (player_id === 1) ? player1_name : player2_name;
+        other_player = (current_player === player1_name) ? player2_name : player1_name;
+        paused = false;
+        game_loop();
+      }
+      else if (data.type === 'moves')
+      {
+        // console.log ('data : ', data)
+        // console.log ('ball_speed <> paddle_speed : ', ball.speed, racket1.speed)
+        if (data.id !== player_id)
+        {
+          if (data.is_right)
+          {
+            racket2.pos.y = data.position * win_ratio;
+          }
+          else if (data.is_left)
+          {
+            racket1.pos.y = data.position * win_ratio;
+          }
+        }
+      }
+      else if (data.type === 'pause')
+      {
+        paused = true;
+        draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2)
+      }
+      else if (data.type === 'resume')
+      {
+        paused = false;
+        game_loop();
+      }
+  };
+
+
+  chatSocket.onclose = function (e) {
+    connectionStatus.textContent = 'Disconnected. Reconnecting...';
+    setTimeout(connectWebSocket, 1000);
+  };
+
+  chatSocket.onerror = function (e) {
+    console.error('WebSocket error:', e);
+    connectionStatus.textContent = 'Error occurred';
+  };
+
+
+  return chatSocket;
+}
+
+function updatePlayerNames()
+{
+  draw_screen();
+  draw_string(50, "#ffffff", player1_name + " : " + racket1.score.toString(), canvas.width / 4, 100);
+  draw_string(50, "#ffffff", player2_name + " : " + racket2.score.toString(), 3 * canvas.width / 4, 100);
+}
+
+
+// FRONTEND
+
+
+let player1_name = "player1";
+let player2_name = "player2";
 
 
 /* ball details */
@@ -34,7 +169,7 @@ let debug = false
 /* define    */
 
 
-let MAX_SCORE = 5
+let MAX_SCORE = 50000
 let MAX_SPEED = 35
 let SPEED_PERCENT = 5 / 100   // 5 per cent
 
@@ -49,7 +184,7 @@ const KEY_ESC = 27; // esc
 const KEY_R = 82;
 const KEY_W = 87;
 const KEY_S = 83;
-
+const KEY_ENTER = 13;
 
 /* mini menu */
 
@@ -149,6 +284,12 @@ class Racket
     this.pos.y += this.speed
     if (this.pos.y + this.height >= canvas.height)
       this.pos.y = canvas.height - this.height
+      send_costum_message({type: 'move',
+      'position': (this.pos.y / win_ratio),
+      'id': player_id,
+      'is_right': this.is_right,
+      'is_left': this.is_left
+      })
   }
 
   down () // racket goes down
@@ -156,6 +297,15 @@ class Racket
     this.pos.y -= this.speed
     if (this.pos.y <= 0)
       this.pos.y = 0
+    send_costum_message({type: 'move',
+    'position': (this.pos.y / win_ratio),
+    'id': player_id,
+    'is_right': this.is_right,
+    'is_left': this.is_left
+    })
+    // console.log ('position : ', this.pos)
+    // console.log (' win_ratio : ', win_ratio)
+    // console.log ('position / win_ratio : ', (this.pos.y / win_ratio))
   }
 
   update()
@@ -165,18 +315,30 @@ class Racket
       if (this.is_right)
       {
         if (keyPressed[KEY_UP])
+        {
           this.down()
+        }
         else if (keyPressed[KEY_DOWN])
+        {
           this.up()
+        }
       }
       else
       {
         if (keyPressed[KEY_W])
+        {
           this.down()
+        }  
         else if (keyPressed[KEY_S])
+        {
           this.up()
+        } 
       }
     }
+    // if (action)
+    // {
+    //   sendPlayerAction(action);
+    // }
   }
 
   inter_ball(ball)
@@ -274,7 +436,7 @@ const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="
 
 
 const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=true)
+const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
 
 
 
@@ -284,6 +446,48 @@ const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_heigh
 
 /*     key hooks    */
 
+
+// function hooks(e)
+// {
+//   keyPressed[e.keyCode] = true;
+
+//   if (e.keyCode === KEY_SPACE)
+//   {
+//       paused = !paused;
+//       draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2);
+//       if (!paused)
+//         game_loop();
+//   }
+//   else if (e.keyCode === KEY_ESC)
+//   {
+//       showMenu = !showMenu;
+//       if (showMenu)
+//         drawMenu();
+//       else
+//         game_loop();
+//   }
+//   else if (showMenu && e.keyCode === KEY_R)
+//   {
+//       reset_game();
+//       showMenu = false;
+//       game_loop();
+//   }
+//   else
+//   {
+//       let action = null;
+//       if (e.keyCode === KEY_UP || e.keyCode === KEY_DOWN)
+//           action = e.keyCode === KEY_UP ? 'move_up' : 'move_down';
+//       else if (e.keyCode === KEY_W || e.keyCode === KEY_S)
+//           action = e.keyCode === KEY_W ? 'move_up' : 'move_down';
+//       if (action) sendPlayerAction(action);
+//   }
+
+//   if (e.keyCode === KEY_ENTER)
+//       setPlayerReady(true);
+// }
+
+
+
 function hooks(e)
 {
   keyPressed[e.keyCode] = true 
@@ -291,8 +495,13 @@ function hooks(e)
   if (e.keyCode === KEY_SPACE)
   {
     paused = !paused
-    draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2)
+    if (paused)
+    {
+      send_costum_message({type: 'pause'})
+      draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2)
+    }
     if (!paused)
+      send_costum_message({type: 'resume'})
       game_loop()
   }
   else if (e.keyCode === KEY_ESC)
@@ -459,8 +668,8 @@ function game_draw()
   ball.draw()
   racket1.draw()
   racket2.draw()
-  draw_string(50, "#ffffff", racket1.score.toString(), canvas.width / 4, 100)
-  draw_string(50, "#ffffff", racket2.score.toString(), 3 * canvas.width / 4, 100)
+  draw_string(50, "#ffffff", player1_name + " : " + racket1.score.toString(), canvas.width / 4, 100)
+  draw_string(50, "#ffffff", player2_name + " : " + racket2.score.toString(), 3 * canvas.width / 4, 100)
   if (debug)
   {
     let traject = predict_ball_trajectory(ball, 100)
@@ -470,24 +679,27 @@ function game_draw()
   }
 }
 
-function game_over()
+function game_over() // on progress
 {
-  if (racket1.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 2 win", canvas.width / 2, canvas.height / 2)
-    return (1)
-  }
-  if (racket2.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 1 win", canvas.width / 2, canvas.height / 2)
-    return (1)
-  }
-  return (0)
+    let winner = null;
+  
+    if (racket1.score >= MAX_SCORE)
+      winner = player1_name;
+    else if (racket2.score >= MAX_SCORE)
+      winner = player2_name;
+  
+    if (winner) {
+      ball.ray = 0;
+      game_draw();
+      draw_string(100, "#ffffff", `${winner} wins!`, canvas.width / 2, canvas.height / 2);
+      paused = true;
+      send_costum_message({ type: 'game_over', winner: winner });
+      return true;
+    }
+  
+    return false;
 }
+
 
 function game_loop()
 {
@@ -495,38 +707,18 @@ function game_loop()
     return
   game_update()
   game_draw()
+  // if (game_started)
+  //   paused = false
   window.requestAnimationFrame(game_loop)
 }
 
 function main()
 {
+  draw_screen ()
+  paused = true
+  connectWebSocket()
   game_loop()
 }
 
 
 main();
-
-
-function saveScore(score) {
-  fetch('/accounts/save-score/', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRFToken': getCSRFToken(),  // Ensure CSRF token is included
-      },
-      body: `score=${score}`,
-  })
-  .then(response => response.json())
-  .then(data => {
-      if (data.status === 'success') {
-          console.log('Score saved successfully!');
-      } else {
-          console.log('Failed to save score.');
-      }
-  });
-}
-
-// Add this helper to get the CSRF token from the page
-function getCSRFToken() {
-  return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
