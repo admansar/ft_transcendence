@@ -63,8 +63,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             print("Game is full")
             await self.broadcast_game_start()
 
-    async def broadcast_game_state(self):
-        game_state = {
+    async def broadcast_game_state(self) -> None:
+        game_state : dict = {
             'type': 'game_state',
             'player_name': self.role,
             'player1_name': connected_players['player1'].user_name if connected_players['player1'] else 'Waiting...',
@@ -75,8 +75,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             if player is not None:
                 await player.send(json.dumps(game_state))
 
-    async def broadcast_game_start(self):
-        game_start = {
+    async def broadcast_game_start(self) -> None:
+        game_start : dict = {
             'type': 'game_start',
             'player_name': self.role,
             'player1_name': connected_players['player1'].user_name if connected_players['player1'] else 'Waiting...',
@@ -87,8 +87,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             if player is not None:
                 await player.send(json.dumps(game_start))
 
-    async def broadcast_game_moves(self, data : dict[str, str]):
-        game_moves = {
+    async def broadcast_game_moves(self, data : dict[str, str]) -> None:
+        game_moves  : dict = {
             'type': 'moves',
             'position': data['position'],
             'id': data['id'],
@@ -102,7 +102,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 
         
     async def broadcast_game_pause_or_resume(self, message_type : str):
-        game_pause_or_resume = {
+        game_pause_or_resume : dict = {
             'type': message_type,
             'player_name': self.role,
         }

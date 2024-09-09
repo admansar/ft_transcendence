@@ -13,6 +13,7 @@ let old_data = null;
 let data = null;
 let player_id = 0;
 
+
 // let roomName = null;
 
 // function createOrJoinRoom()
@@ -44,6 +45,7 @@ function connectWebSocket()
     if (data == null)
       chatSocket.send(JSON.stringify({
           'type': 'join_game',
+          // 'ball_speed': ball_speed / window.innerWidth,
       }));
 
   };
@@ -80,8 +82,9 @@ function connectWebSocket()
         player2_name = data.player2_name
         current_player = (player_id === 1) ? player1_name : player2_name;
         other_player = (current_player === player1_name) ? player2_name : player1_name;
-        paused = false;
-        game_loop();
+        ball_speed = data.ball_speed * window.innerWidth
+        // paused = false;
+        // game_loop();
       }
       else if (data.type === 'moves')
       {
@@ -502,7 +505,7 @@ function hooks(e)
     }
     if (!paused)
       send_costum_message({type: 'resume'})
-      game_loop()
+      // game_loop()
   }
   else if (e.keyCode === KEY_ESC)
   {
