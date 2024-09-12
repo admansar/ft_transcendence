@@ -55,6 +55,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         if message_type == 'join_game':
             await self.broadcast_game_state()
+        if message_type == 'bounce':
+            await self.bounce (data)
         elif message_type == 'pause' or  message_type == 'resume':
             await self.broadcast_game_pause_or_resume(message_type)
         elif message_type == 'move':
@@ -110,3 +112,18 @@ class GameConsumer(AsyncWebsocketConsumer):
         for player in connected_players.values():
             if player is not None:
                 await player.send(json.dumps(game_pause_or_resume))
+        
+    
+    async def bounce(self, data : dict[str, str]) -> None:
+        game_bounce : dict = {
+            'type': 'bounce',
+            'direction': data['direction'],
+            'id': data['id'],
+            'is_right': data['is_right'],
+            'is_left': data['is_left'],
+        }
+        print (game_bounce)
+
+        for player in connected_players.values():
+            if player is not None:
+                await player.send(json.dumps(game_bounce))

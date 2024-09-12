@@ -84,7 +84,7 @@ function connectWebSocket()
         other_player = (current_player === player1_name) ? player2_name : player1_name;
         ball_speed = data.ball_speed * window.innerWidth
         // paused = false;
-        // game_loop();
+        game_loop();
       }
       else if (data.type === 'moves')
       {
@@ -110,7 +110,37 @@ function connectWebSocket()
       else if (data.type === 'resume')
       {
         paused = false;
+        console.log ('resume time : ', new Date().getTime())
         game_loop();
+      }
+      else if (data.type === 'bounce')
+      {
+        ball.direction = data.direction;
+        if (data.id == 2)
+        {
+          if (data.is_left)
+          {
+            ball.pos.x = racket1.pos.x + racket1.width + ball.ray - 1;
+          }
+          else if (data.is_right)
+          {
+            ball.pos.x = racket2.pos.x - ball.ray;
+          }
+        }
+        else if (data.id == 1)
+        {
+          if (data.is_right)
+          {
+            ball.pos.x = racket2.pos.x - ball.ray;
+          }
+          else if (data.is_left)
+          {
+            ball.pos.x = racket1.pos.x + racket1.width + ball.ray;
+          }
+        }
+        console.log ('ana id : ', data.id)
+        // console.log ('received data : ', data)
+        // ball.speed = ball_speed_calculator();
       }
   };
 
@@ -146,26 +176,27 @@ let player2_name = "player2";
 
 /* ball details */
 
+let racket_pos = {x : window.innerWidth / 50, y : canvas.height / 2}
 let ball_pos = {x : canvas.width / 2, y : canvas.height / 2}
 let ratio = {x : 1, y : 1}
 let direction  = {x : 1, y : 0}
-let ball_ray = 15
-let ball_speed = 10
+let ball_ray = window.innerWidth / 70 // 15
 
 
 /* rackets details */
 
-let racket_speed = 15
-let racket_width = 20
-let racket_height = 140
-let racket1_pos = {x: 100, y: canvas.height / 2}
-let racket2_pos = {x: canvas.width - racket_width - racket1_pos.x, y: canvas.height / 2}
+let racket_width = window.innerWidth / 50// 20
+let racket_height = window.innerHeight / 10// 140
+let racket1_pos = {x: racket_pos.x, y: racket_pos.y}
+let racket2_pos = {x: canvas.width - racket_width - racket_pos.x, y: racket_pos.y}
 
 
+let ball_speed = ball_speed_calculator();
+let racket_speed = ball_speed;
 /*  config or settings  */
 
 
-let animation = false
+let animation = true
 let debug = false
 
 
@@ -194,6 +225,11 @@ const KEY_ENTER = 13;
 let paused = false // Initial game state is not paused
 let showMenu = false;
 
+
+function ball_speed_calculator()
+{
+  return Math.sqrt(((window.innerWidth) * direction.x) ** 2 + ((window.innerHeight - (2 * racket_pos.y) - (racket_height / 2 + ball_ray)) * direction.y) ** 2) / 100.0;
+}
 
 
 /********************************BALL*********************************/
@@ -360,12 +396,22 @@ class Racket
         ball.pos.x = this.pos.x - ball.ray
       ball.direction.x *= -1;
       let delta_y = ball.pos.y - (this.pos.y + this.height / 2);
-      ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
-      if (!is_aprox_inside(ball.direction.y, 0, 1))
-        ball.direction.y -= Math.floor(ball.direction.y)
-      if (ball.direction.y  == 0)
-        ball.direction.y = 0.1
-      ball.speed = Math.min(ball.speed * (1 + SPEED_PERCENT), MAX_SPEED)
+    //  ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
+     if (!is_aprox_inside(ball.direction.y, 0, 1))
+       ball.direction.y -= ball.direction.y
+    //  if (ball.direction.y  == 0)
+    //    ball.direction.y = 0.1
+      console.log ('out : ', new Date().getTime())
+     send_costum_message({type: 'bounce',
+    'direction': ball.direction,
+    'id': player_id,
+    'is_right': this.is_right,
+    'is_left': this.is_left
+     })
+      //
+     console.log ('correction for id : ', (player_id % 2) + 1)
+      // ball.speed = Math.min(ball.speed * (1 + SPEED_PERCENT), MAX_SPEED)
+      ball.speed = ball_speed_calculator()
     }
   }
 
@@ -375,6 +421,7 @@ class Racket
     {
       this.incrementScore()
       ball.reset()
+      console.log ('time : ', new Date().getTime())
     }
   }
 
@@ -643,8 +690,8 @@ function game_update()
   racket1.update()
   racket2.update()
   racket1.inter_ball(ball)
-  racket1.score_update(ball)
   racket2.inter_ball(ball)
+  racket1.score_update(ball)
   racket2.score_update(ball)
   racket1.botv2 (ball)  // always check racket.bot_mode
   racket2.botv2 (ball)
@@ -703,6 +750,7 @@ function game_over() // on progress
     return false;
 }
 
+let i = 0;
 
 function game_loop()
 {
@@ -710,6 +758,8 @@ function game_loop()
     return
   game_update()
   game_draw()
+  // if (i % 1000 === 0)
+    //console.log ('i : ', i++, ' time : ', new Date().getTime())
   // if (game_started)
   //   paused = false
   window.requestAnimationFrame(game_loop)
@@ -720,7 +770,8 @@ function main()
   draw_screen ()
   paused = true
   connectWebSocket()
-  game_loop()
+  // console.log ('time : ', new Date().getTime())
+  // game_loop()
 }
 
 

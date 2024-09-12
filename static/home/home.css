@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #252525;
+    overflow: hidden; /* Prevent scrolling */
+}
+
+.circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px; /* Keeps the gap between circles constant */
+    position: relative; /* Allows positioning of circles within the container */
+    transition: transform 0.5s ease; /* Smooth transition for container movement */
+}
+
+header {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center;
+    padding: 20px 0;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000; /* Ensure it stays on top */
+    background-color: transparent; /* Or match it with your page's background */
+}
+
+.logo-img {
+    max-width: 200px; /* Adjust size as needed */
+    height: auto;
+}
+
+.circle {
+    display: flex; /* Allows centering of text inside the circle */
+    justify-content: center; /* Horizontally centers the text */
+    align-items: center; /* Vertically centers the text */
+    width: 200px;
+    height: 200px;
+    background-color: #FBCC0A;
+    border-radius: 50%;
+    transition: transform 0.3s ease, z-index 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    text-align: center; /* Centers text inside the element */
+    color: white; /* Text color */
+    font-size: 24px; /* Adjust the font size */
+    font-family: 'Kanit', sans-serif; /* Apply Kanit font to circles */
+    margin: -25px;
+}
+
+.circle-text {
+    opacity: 0;
+    
+    position: relative; /* Ensures the text stays inside the circle */
+    z-index: 1; /* Keeps the text above the circle background */
+    text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.5); /* Add shadow to the text */
+    transition: opacity 0.3s ease, text-shadow 0.3s ease; /* Smooth transition for text shadow */
+}
+.circle.active .circle-description {
+    opacity: 1; /* Initially hidden until hover */
+}
+
+.circle-description{
+    opacity: 0;
+    position: absolute; /* Ensures the text stays inside the circle */
+    bottom: -30px;
+    font-size: 8px;
+    font-family: 'arial';
+    z-index: 1; /* Keeps the text above the circle background */
+}
+
+.circle-image {
+    position: absolute;
+    width: 80px; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+    top: 50%; /* Vertically center the image */
+    left: 50%; /* Horizontally center the image */
+    transform: translate(-50%, -50%); /* Center the image within the circle */
+    z-index: 2; /* Ensure the image appears above the circle background */
+    transition: transform 0.3s ease, top 0.3s ease , left 0.3s ease;
+}
+
+.circle.active .circle-image {
+    width: 50px; /* Adjust the width as needed */
+    top: 25%; /* Vertically center the image */
+    left: 50%; /* Horizontally center the image */
+    transform: translate(-50%, -50%) scale(1.2); /* Scale the image slightly when the circle is active */
+}
+
+.circle.active {
+    margin: 141px;
+    transform: scale(2);
+    z-index: 10;
+    box-shadow: 0 4px 50px rgb(255, 196, 0);
+    border: 3px solid #ffffff;
+    transform: transform 0.3s ease, z-index 0.3s ease;
+}
+
+.circle.active .circle-text {
+    opacity: 1;
+    box-shadow: #252525;
+    top: 5%;
+    transform: scale(2.5);
+}

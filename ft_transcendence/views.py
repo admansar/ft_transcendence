@@ -1,7 +1,18 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 
-class HomeView(LoginRequiredMixin, TemplateView):
-    template_name = 'home.html'
-    login_url = '/auth/login/'
+def login_page(request):
+    if request.user.is_authenticated:
+        return redirect('main_page')
+    return render(request, 'home.html')
+
+
+@login_required
+def home_page(request):
+    return render(request, 'frontend/index.html')
+
+def not_found_view(request, exception):
+    # Redirect to the home page in case of page not found
+    return redirect('login_page') 

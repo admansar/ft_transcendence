@@ -1,6 +1,6 @@
 def expand_from_env(file_path: str, var_to_get : str) -> str:
-    env_vars = {}
-    check = ""
+    env_vars : dict = {}
+    check : str = ""
     try:
         with open(file_path) as f:
             for line in f:
