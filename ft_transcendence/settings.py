@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'accounts',
     'game',
     'rest_framework',
+    'rest_framework.authtoken',
+    'api',
     'channels',
 ]
 
