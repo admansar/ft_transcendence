@@ -1,6 +1,9 @@
-def expand_from_env(file_path: str, var_to_get : str) -> str:
-    env_vars : dict = {}
-    check : str = ""
+import socket
+
+
+def expand_from_env(file_path: str, var_to_get: str) -> str:
+    env_vars: dict = {}
+    check: str = ""
     try:
         with open(file_path) as f:
             for line in f:
@@ -12,5 +15,18 @@ def expand_from_env(file_path: str, var_to_get : str) -> str:
     try:
         check = env_vars.get(var_to_get)
     except Exception as e:
-        print (f"{e}")
+        print(f"{e}")
     return check
+
+
+def get_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('8.8.8.8', 80))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = '127.0.0.1'
+    finally:
+        s.close()
+    print(f"Local IP : {local_ip}")
+    return local_ip

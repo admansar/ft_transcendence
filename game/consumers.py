@@ -1,16 +1,16 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-connected_players : dict = {
+connected_players: dict = {
     'player1': None,
     'player2': None,
 }
 
 
 class GameConsumer(AsyncWebsocketConsumer):
-    game_lock : bool = False
-    user_name : str = "no name"
-    role : str = "no role"
+    game_lock: bool = False
+    user_name: str = "no name"
+    role: str = "no role"
 
     async def connect(self):
         user = self.scope["user"]
@@ -49,24 +49,26 @@ class GameConsumer(AsyncWebsocketConsumer):
             connected_players['player2'] = None
         await self.broadcast_game_state()
 
-    async def receive(self, text_data : json):
+    async def receive(self, text_data: json):
         data = json.loads(text_data)
         message_type = data.get('type')
 
         if message_type == 'join_game':
             await self.broadcast_game_state()
         if message_type == 'bounce':
-            await self.bounce (data)
-        elif message_type == 'pause' or  message_type == 'resume':
+            await self.bounce(data)
+        elif message_type == 'pause' or message_type == 'resume':
             await self.broadcast_game_pause_or_resume(message_type)
         elif message_type == 'move':
             await self.broadcast_game_moves(data)
         elif not self.game_lock and sum(1 for p in connected_players.values() if p is not None) == 2 and message_type == 'start_game':
             print("Game is full")
             await self.broadcast_game_start()
+        elif message_type == 'score':
+            await self.broadcast_update_score(data)
 
     async def broadcast_game_state(self) -> None:
-        game_state : dict = {
+        game_state: dict = {
             'type': 'game_state',
             'player_name': self.role,
             'player1_name': connected_players['player1'].user_name if connected_players['player1'] else 'Waiting...',
@@ -78,7 +80,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 await player.send(json.dumps(game_state))
 
     async def broadcast_game_start(self) -> None:
-        game_start : dict = {
+        game_start: dict = {
             'type': 'game_start',
             'player_name': self.role,
             'player1_name': connected_players['player1'].user_name if connected_players['player1'] else 'Waiting...',
@@ -89,8 +91,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             if player is not None:
                 await player.send(json.dumps(game_start))
 
-    async def broadcast_game_moves(self, data : dict[str, str]) -> None:
-        game_moves  : dict = {
+    async def broadcast_game_moves(self, data: dict[str, str]) -> None:
+        game_moves: dict = {
             'type': 'moves',
             'position': data['position'],
             'id': data['id'],
@@ -101,29 +103,26 @@ class GameConsumer(AsyncWebsocketConsumer):
         for player in connected_players.values():
             if player is not None:
                 await player.send(json.dumps(game_moves))
-                
-        
-    async def broadcast_game_pause_or_resume(self, message_type : str):
-        game_pause_or_resume : dict = {
+
+    async def broadcast_game_pause_or_resume(self, message_type: str):
+        game_pause_or_resume: dict = {
             'type': message_type,
             'player_name': self.role,
         }
-
         for player in connected_players.values():
             if player is not None:
                 await player.send(json.dumps(game_pause_or_resume))
-        
-    
-    async def bounce(self, data : dict[str, str]) -> None:
-        game_bounce : dict = {
-            'type': 'bounce',
-            'direction': data['direction'],
-            'id': data['id'],
-            'is_right': data['is_right'],
-            'is_left': data['is_left'],
-        }
-        print (game_bounce)
 
+    async def bounce(self, data: dict[str, str]) -> None:
+        game_bounce: dict = {k: data[k] for k in data.keys()}
         for player in connected_players.values():
             if player is not None:
                 await player.send(json.dumps(game_bounce))
+
+    async def broadcast_update_score(self, data: dict[str, str]) -> None:
+        game_bounce: dict = {k: data[k] for k in data.keys()}
+        for player in connected_players.values():
+            if player is not None:
+                await player.send(json.dumps(game_bounce))
+    
+    
