@@ -1,45 +1,38 @@
 from django.shortcuts import render
-from rest_framework import viewsets
-from .serializers import UserSerializer
-from .models import User
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework.decorators import api_view
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from django.http import JsonResponse
 from .serializers import UserSerializer
-from django.http import HttpResponse
+from rest_framework import status
+from rest_framework.authtoken.models import Token
 
-class RegisterView(APIView):
-    def post(self,request):
-        return HttpResponse('Hello, World!')
-        # serializer = UserSerializer(data=request.data)
-        # serializer.is_valid(raise_exception=True)
-        # serializer.save()
-        # return Response(serializer.data)
-    # khassni nhacher password hanaya 
 
-class LoginView(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    # permission_classes = [IsAuthenticated]
+@api_view(['POST'])
+def signup(request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user = User.objects.get(username=serializer.data['username'])
+            token = Token.objects.get(user=user)
+            serializer = UserSerializer(user)
+            data = {
+                 "user" : serializer.data,
+                "token" : token.key
+            }
+            return Response(data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
-                # class signupView(APIView):
-    # def post(self, request):
-    #     username = request.data.get("username")
-    #     password = request.data.get("password")
 
-    #     user = authenticate(request, username=username, password=password)
-    #     if user is not None:
-
-    #         return Response({"message": "Login successful!"}, status=status.HTTP_200_OK)
-    #     else:
-    #         return Response({"message": "Invalid credentials!"}, status=status.HTTP_401_UNAUTHORIZED)
-from rest_framework.decorators import api_view, permission_classes
+@api_view(['POST'])
+def login(request):
+    return Response({"message" : "login page"})
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def test(request):
-    return Response("from test")
+def TestView(request):
+    return Response({"message" : "Test page"})
 
+@api_view(['POST'])
+def logout(request):
+    return Response({"message" : "logout page"})

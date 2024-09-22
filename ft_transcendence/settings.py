@@ -45,11 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'game',
-    'rest_framework',
-    'api',
     'channels',
+    'rest_framework',
     'rest_framework.authtoken',
-    'djoser'
 ]
 
 MIDDLEWARE = [
@@ -144,22 +142,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # django_project/settings.py
 # settings.py
 
-REST_FRAMEWORK = {
-
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-        # You can include other authentication classes here if needed
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-
-        # You can include other authentication classes here if needed
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
-    ),
-    # Other REST framework settings can go here
-}
