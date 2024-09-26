@@ -1,15 +1,10 @@
-from django.urls import path , include
-from .views import *
-from . import views
-from rest_framework import routers
-from django.urls import path, include
-
-
-
+from django.urls import path
+from .views import Login, SignUp , UserView, Logout , UpdateUser
 
 urlpatterns = [
-    path('login/', views.login),
-    path('signup/', views.signup),
-    path('logout/', views.logout),
-    path('test/', views.TestView),
+    path('login/', Login.as_view()),
+    path('signup/', SignUp.as_view()),
+    path('user/', UserView.as_view()),
+    path('logout/', Logout.as_view()),
+    path('update/', UpdateUser.as_view())
 ]

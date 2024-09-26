@@ -8,5 +8,6 @@ lib
 __pycache__/*
 __pycache__/
 *.py[cod]
-*.sh
 .vscode/
+.venv/
+resetdb.sh
