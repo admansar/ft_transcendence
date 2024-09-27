@@ -10,7 +10,9 @@
   <link rel="icon" type="image/x-icon" href="{% static 'game/images/140412.png' %}">
 </head>
 <body>
-  <canvas id="canvas" width="600" height="400"></canvas>
+  <div id="game-container">
+    <canvas id="canvas"></canvas>
+  </div>
   <script src="{% static 'game/js/game.js' %}"></script>
 </body>
 </html>
