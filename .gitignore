@@ -6,6 +6,8 @@ django/
 bin
 lib
 __pycache__/*
+*/__pycache__/*
+*/__pycache__/
 __pycache__/
 *.py[cod]
 *.sh

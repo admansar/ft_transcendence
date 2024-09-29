@@ -1,602 +1,219 @@
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+// game.js
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
 
 const gameContainer = document.getElementById('game-container');
 canvas.width = gameContainer.clientWidth; 
-canvas.height = gameContainer.clientHeight; 
+canvas.height = gameContainer.clientHeight;
+
+let playerId = null;
+let roomId = null;
+let opponentName = '...';
+let playerName = '...';
+
+// Game state received from server
+let gameState = {
+  ball_pos: {x: 400, y: 300},
+  racket1_pos: {x: 100, y: 230},
+  racket2_pos: {x: 700, y: 230},
+  score1: 0,
+  score2: 0
+};
+
+// WebSocket connection
+let roomName = 'room1'; // This should be dynamic based on matchmaking or user selection
+let url = `ws://${window.location.host}/ws/game/${roomName}/`;
+const gameSocket = new WebSocket(url);
+
+// WebSocket event handlers
+gameSocket.onopen = function () {
+  console.log('Connected to the game server.');
+};
 
 
-// canvas.width = window.innerWidth
-// canvas.height = window.innerHeight
 
-let player = "not set yet"
-let opp_player = "not set yet"
-let old_data = null;
-let data = null;
-let player_id = 0;
-let room_id = ""
-
-let url = `ws://${window.location.host}/ws/game/`;
-const chatSocket = new WebSocket(url);
-
-
- function send_costum_message(message)
- {
-   if (chatSocket && chatSocket.readyState === WebSocket.OPEN)
-     chatSocket.send(JSON.stringify(message));
- }
-
-
-function connectWebSocket()
-{
-  chatSocket.onopen = function (e)
-  {
-    console.log ('welcome from websocket !')
-    if (data == null){
-      send_costum_message({
-      'type': 'joined_game',
-    });
+gameSocket.onmessage = function (e) {
+  const data = JSON.parse(e.data);
+  if (data.type === 'init_state') {
+    playerId = data.game_state.player_id;
+    roomId = data.game_state.room_id;
+    opponentName = data.game_state.opponent;
+    gameState.racket1_pos = data.game_state.racket1_pos;
+    gameState.racket2_pos = data.game_state.racket2_pos;
+    gameState.ball_pos = data.game_state.ball_pos;
+    gameState.score1 = data.game_state.score1;
+    gameState.score2 = data.game_state.score2;
+    playerName = data.game_state.player;
+    renderGame();
   }
-  };
+  else if (data.type === 'game_state') {
+    gameState = data.state;
+    renderGame();
+    const elapsedTime = data.state.elapsed_time;
+    const minutes = Math.floor(elapsedTime / 60);
+    const seconds = elapsedTime % 60;
+    const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    document.getElementById('timer-value').innerText = formattedTime;
+  }
+  else if (data.type === 'player_info') {
+    opponentName = data.opponent;
+    console.log (`Opponent: ${opponentName}`);
+  }
+  else if (data.type === 'notification') {
+    alert(data.message);
+  }
+  else if (data.type === 'game_over') {
+    alert(`${data.winner} wins the game!`);
+    // Optionally, reset the game or provide options to replay
+  }
+};
+
+gameSocket.onclose = function () {
+  console.log('Disconnected from the game server.');
+};
+
+// Sending player moves to the server
+function sendPlayerMove(direction) {
+  if (gameSocket.readyState === WebSocket.OPEN) {
+    gameSocket.send(JSON.stringify({
+      'type': 'player_move',
+      'direction': direction
+    }));
+  }
 }
 
-
-chatSocket.onmessage = function (e)
-{
-    data = JSON.parse(e.data);
-    console.log ('data : ', data)
-    if (data.type == 'joined_game')
-    {
-      player_id = data.id;
-      room_id = data.room_id;
-      player = data.player;
-      opp_player = data.opp_player;
-      updatePlayerNames();
-    }
-    else if (data.type == 'start_game')
-    {
-      player_id = data.id;
-      room_id = data.room_id;
-      player = data.player;
-      opp_player = data.opp_player;
-      updatePlayerNames();
-      paused = false;
-      game_loop();
-    }
-    else if (data.type == 'move')
-    {
-      // if (data.player_nae == player)
-      {
-        if (data.is_left)
-        {
-          racket2.pos.y = data.position;
-        }
-        else if (data.is_right)
-        {
-          racket1.pos.y = data.position;
-        }
-      }
-    }
-}
-
-function updatePlayerNames()
-{
-  draw_screen();
-  draw_string(50, "#ffffff", player + " : " + racket1.score.toString(), canvas.width / 4, 100);
-  draw_string(50, "#ffffff", opp_player + " : " + racket2.score.toString(), 3 * canvas.width / 4, 100);
-}
-
-/* ball details */
-
-let ball_pos = {x : canvas.width / 2, y : canvas.height / 2}
-let ratio = {x : 1, y : 1}
-let direction  = {x : 1, y : 0}
-let ball_ray = 15
-let ball_speed = 10
-
-
-/* rackets details */
-
-let racket_speed = 15
-let racket_width = 20
-let racket_height = 140
-let racket1_pos = {x: 100, y: canvas.height / 2}
-let racket2_pos = {x: canvas.width - racket_width - racket1_pos.x, y: canvas.height / 2}
-
-
-/*  config or settings  */
-
-
-let animation = false
-let debug = false
-
-
-/* define    */
-
-
-let MAX_SCORE = 5000
-let MAX_SPEED = 35
-let SPEED_PERCENT = 5 / 100   // 5 per cent
-
-
-/*  keys  */
-
-const keyPressed = []
-const KEY_UP = 38
-const KEY_DOWN = 40
-const KEY_SPACE = 32 // Spacebar for pause/resume
-const KEY_ESC = 27; // esc
-const KEY_R = 82;
+// Keyboard event listeners
+const keyPressed = {};
+const KEY_UP = 38;
+const KEY_DOWN = 40;
 const KEY_W = 87;
 const KEY_S = 83;
+let moveInterval = null;
+const MOVE_INTERVAL_MS = 60; // Adjust as needed
 
+window.addEventListener('keydown', function(e) {
+    if (keyPressed[e.keyCode]) return; // Prevent multiple intervals
+    keyPressed[e.keyCode] = true;
 
-/* mini menu */
-
-let paused = false // Initial game state is not paused
-let showMenu = false;
-
-
-
-/********************************BALL*********************************/
-
-class Ball
-{
-  constructor(pos, ratio, ray, direction, speed, color="#ffffff")
-  {
-    this.pos = {...pos}
-    this.ratio = {...ratio}
-    this.ray = ray
-    this.direction = {...direction}
-    this.speed = speed
-    this.color = color
-  }
-
-  clone ()
-  {
-    return new Ball(this.pos, this.ratio, this.ray, this.direction, this.speed, this.color)
-  }
-
-  check_edges()
-  {
-    if (this.pos.y - this.ray < 0)
-    {
-      this.pos.y = this.ray;
-      this.direction.y *= -1;
+    if (playerId === 1) { // Player 1 controls racket1
+        if (e.keyCode === KEY_UP) {
+            sendPlayerMove('up');
+            moveInterval = setInterval(() => sendPlayerMove('up'), MOVE_INTERVAL_MS);
+        }
+        else if (e.keyCode === KEY_DOWN) {
+            sendPlayerMove('down');
+            moveInterval = setInterval(() => sendPlayerMove('down'), MOVE_INTERVAL_MS);
+        }
     }
-    else if (this.pos.y + this.ray >= canvas.height)
-    {
-      this.pos.y = canvas.height - this.ray;
-      this.direction.y *= -1;
+    else if (playerId === 2) { // Player 2 controls racket2
+        if (e.keyCode === KEY_UP) {
+            sendPlayerMove('up');
+            moveInterval = setInterval(() => sendPlayerMove('up'), MOVE_INTERVAL_MS);
+        }
+        else if (e.keyCode === KEY_DOWN) {
+            sendPlayerMove('down');
+            moveInterval = setInterval(() => sendPlayerMove('down'), MOVE_INTERVAL_MS);
+        }
     }
-  }
+});
 
-  update()
-  {
-    this.pos.x += this.ratio.x * this.direction.x * this.speed
-    this.pos.y += this.ratio.y * this.direction.y * this.speed
-    this.check_edges()
-  }
-  draw()
-  {
-    ctx.fillStyle = this.color
-    ctx.beginPath()
-    ctx.arc(ball.pos.x, ball.pos.y, ball.ray, 0, 2 * Math.PI)
-    ctx.fill()
-    ctx.stroke()
-  }
+window.addEventListener('keyup', function(e) {
+    keyPressed[e.keyCode] = false;
+    if (moveInterval) clearInterval(moveInterval);
+});
 
-  reset()
-  {
-    this.pos = {...ball_pos}
-    this.speed = ball_speed
-    this.ray = ball_ray
-  }
+
+function resizeCanvas() {
+  canvas.width = gameContainer.clientWidth; 
+  canvas.height = gameContainer.clientHeight;
+  renderGame();
 }
 
-/*********************************************************************/
+window.addEventListener('resize', resizeCanvas);
+// Rendering the game state
 
-
-
-/*******************************RACKET*********************************/
-
-class Racket
-{
-  score = 0
-  constructor(pos, speed, width, height, color="#ffffff", bot_mode=false)
-  {
-    this.pos = {...pos}
-    this.speed = speed
-    this.width = width
-    this.height = height
-    this.bot_mode = bot_mode
-    this.color = color
-    this.score = 0
-    if (this.pos.x <= canvas.width / 2)
-    {
-      this.is_left = true
-      this.is_right = false
-    }
-    else
-    {
-      this.is_left = false
-      this.is_right = true
-    }
-  }
-
-  up () // racket goes up
-  {
-    this.pos.y += this.speed
-    if (this.pos.y + this.height >= canvas.height)
-      this.pos.y = canvas.height - this.height
-    send_costum_message({
-      'type' : 'move',
-      'position' : this.pos.y,
-      'is_right' : this.is_right,
-      'is_left' : this.is_left
-    })
-  }
-
-  down () // racket goes down
-  {
-    this.pos.y -= this.speed
-    if (this.pos.y <= 0)
-      this.pos.y = 0
-    send_costum_message({
-      'type' : 'move',
-      'position' : this.pos.y,
-      'is_right' : this.is_right,
-      'is_left' : this.is_left
-    })
-  }
-
-  update()
-  {
-    if (!this.bot_mode)
-    {
-      if (this.is_right)
-      {
-        if (keyPressed[KEY_UP])
-          this.down()
-        else if (keyPressed[KEY_DOWN])
-          this.up()
-      }
-      else
-      {
-        if (keyPressed[KEY_W])
-          this.down()
-        else if (keyPressed[KEY_S])
-          this.up()
-      }
-    }
-  }
-
-  inter_ball(ball)
-  {
-    let racket_left = this.pos.x;
-    let racket_right = this.pos.x + this.width;
-    let racket_top = this.pos.y;
-    let racket_bottom = this.pos.y + this.height;
-    
-    if (ball.pos.x + ball.ray > racket_left && ball.pos.x - ball.ray < racket_right &&
-      ball.pos.y + ball.ray >= racket_top && ball.pos.y - ball.ray <= racket_bottom)
-    {
-      if (this.is_left && ball.pos.x - ball.speed <= this.pos.x + this.width) // left
-        ball.pos.x = this.pos.x + ball.ray + this.width
-      else if (this.is_right && ball.pos.x + ball.speed >= this.pos.x)
-        ball.pos.x = this.pos.x - ball.ray
-      ball.direction.x *= -1;
-      let delta_y = ball.pos.y - (this.pos.y + this.height / 2);
-      ball.direction.y = delta_y * 0.01; // adjust ball direction based on where it hits
-      if (!is_aprox_inside(ball.direction.y, 0, 1))
-        ball.direction.y -= Math.floor(ball.direction.y)
-      if (ball.direction.y  == 0)
-        ball.direction.y = 0.1
-      // ball.speed = Math.min(ball.speed * (1 + SPEED_PERCENT), MAX_SPEED)
-    }
-  }
-
-  score_update(ball)
-  {
-    if ((ball.pos.x - ball.ray < 0 && this.is_right) || (ball.pos.x + ball.ray >= canvas.width && this.is_left))
-    {
-      this.incrementScore()
-      ball.reset()
-    }
-  }
-
-  draw()
-  {
-    ctx.fillStyle = this.color
-    ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height)
-  }
-
-  getCentre()
-  {
-    return {x: this.width / 2, y: this.height / 2}
-  }
-
-  incrementScore()
-  {
-    this.score++
-  }
-
-  bot (ball) // hard coded
-  {
-    if (this.bot_mode)
-    {
-      if (this.is_right && ball.direction.x > 0) // right racket (PLAYER 2)
-      {
-        if (ball.pos.y > this.pos.y + this.width / 2)
-          this.up()
-        else if (ball.pos.y < this.pos.y - this.width / 2)
-          this.down()
-      }
-      else if (this.is_left && ball.direction.x < 0) // left (PLAYER 1)
-      {
-        if (ball.pos.y > this.pos.y + this.width / 2)
-          this.up()
-        else if (ball.pos.y < this.pos.y - this.width / 2)
-          this.down()
-      }
-    }
-  }
-
-  botv2 (ball) // smart, stable and improved
-  {
-    if (this.bot_mode)
-    {
-      let traject = predict_ball_racket_inter(ball, 100, this);
-      let translated_y = this.pos.y + this.height / 2 // to make the ball hit the middle of the racket so db the racket is up to the middle
-      if (is_aprox_inside(traject.x, this.pos.x, this.width))
-      {
-        if (translated_y < traject.y - this.width / 2)
-          this.up()
-        else if (translated_y > traject.y + this.width / 2)
-          this.down()
-      }
-    }
-  }
-}
-
-/**********************************************************************/
-
-
-const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
-
-
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
-
-
-
-
-
-
-
-/*     key hooks    */
-
-function hooks(e)
-{
-  keyPressed[e.keyCode] = true 
-
-  if (e.keyCode === KEY_SPACE)
-  {
-    paused = !paused
-    draw_string(100, "#ffffff", "Pause", canvas.width / 2, canvas.height / 2)
-    if (!paused)
-      game_loop()
-  }
-  else if (e.keyCode === KEY_ESC)
-  {
-    showMenu = !showMenu;
-    if (showMenu)
-      drawMenu();
-    else
-      game_loop();
-  }
-  else if (showMenu && e.keyCode === KEY_R)
-  {
-    reset_game();
-    showMenu = false;
-    game_loop();
-  }
-}
-
-window.addEventListener('keydown', hooks)
-
-window.addEventListener('keyup', function(e){
- keyPressed[e.keyCode] = false
-})
-
-/*     helper functions     */
-
-function dist_two_point(a, b)
-{
-  return Math.sqrt (Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
-}
-
-
-
-function drawMenu()
-{
-  ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  draw_string(50, "#ffffff", "Game Menu", canvas.width / 2, canvas.height / 2 - 100);
-  draw_string(30, "#ffffff", "Press R to Restart", canvas.width / 2, canvas.height / 2);
-  draw_string(30, "#ffffff", "Press ESC to Resume", canvas.width / 2, canvas.height / 2 + 50);
-}
-
-function is_inside (to_cmp, a, b)
-{
-  let max = a > b ? a : b;
-  let min = a > b ? b : a;
-  return (to_cmp >= min && to_cmp <= max)
-}
-
-function is_aprox_inside(to_cmp, centre_intervale, epsilon)
-{
-  return (to_cmp >= centre_intervale - epsilon && to_cmp <= centre_intervale + epsilon)
-}
-
-
-function draw_string(fontSize=50, color, string_to_print, x, y)
-{
-  ctx.font = `${fontSize}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = color
-  ctx.fillText(string_to_print, x, y)
-}
-
-function draw_traject(trajectory)
-{
-  ctx.strokeStyle = "#ff0000"; // color for the predicted path
+function drawRoundedRect(x, y, width, height, radius, fillColor) {
   ctx.beginPath();
-  for (let i = 0; i < trajectory.length - 1; i++)
-  {
-    ctx.moveTo(trajectory[i].x, trajectory[i].y);
-    ctx.lineTo(trajectory[i + 1].x, trajectory[i + 1].y);
-  }
-  ctx.stroke();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
 }
 
 
-/*   smart bot calcultors    */
 
-function predict_ball_trajectory(ball, future_frames) //segment ball estimations
-{
-  let future_ball = ball.clone()
-  let trajectory = []
 
-  for (let i = 0; i < future_frames; i++)
-  {
-    future_ball.pos.x += future_ball.ratio.x * future_ball.direction.x * future_ball.speed;
-    future_ball.pos.y += future_ball.ratio.y * future_ball.direction.y * future_ball.speed;
-    
-    if (future_ball.pos.y - future_ball.ray < 0 || future_ball.pos.y + future_ball.ray > canvas.height)
-      future_ball.direction.y *= -1;
+function renderGame() {
+  // Clear the canvas
   
-    // console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
-    trajectory.push({ x: future_ball.pos.x, y: future_ball.pos.y});
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#eac646';
+  ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the net
+  ctx.beginPath();
+  ctx.setLineDash([20, 10]);
+  ctx.moveTo(canvas.width / 2, 0);
+  ctx.lineTo(canvas.width / 2, canvas.height);
+  ctx.strokeStyle = '#eac646';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+
+  // Draw the ball
+  ctx.fillStyle = "#FFFFFF";
+  ctx.beginPath();
+  ctx.arc(gameState.ball_pos.x, gameState.ball_pos.y, 15, 0, 2 * Math.PI);
+  ctx.fill();
+  // ctx.stroke();
+
+  // Draw racket1
+  ctx.fillStyle = "#33FF00";
+  drawRoundedRect(gameState.racket1_pos.x, gameState.racket1_pos.y, 20, 120, 10, "#33FF00");
+
+  // Draw racket2
+  ctx.fillStyle = "#FF3333";
+  drawRoundedRect(gameState.racket2_pos.x, gameState.racket2_pos.y, 20, 120, 10, "#FF3333");
+  // Draw scores
+  // ctx.font = "30px Arial";
+  // ctx.fillStyle = "#FFFFFF";
+  // ctx.textAlign = "center";
+  // ctx.fillText(`${gameState.score1}`, canvas.width / 4, 50);
+  // ctx.fillText(`${gameState.score2}`, 3 * canvas.width / 4, 50);
+
+  // // Draw player names
+  // ctx.fillText(`${playerName}`, canvas.width / 4, 80);
+  // ctx.fillText(`${opponentName}`, 3 * canvas.width / 4, 80);
+  const player1NameElement = document.getElementById('player1-name');
+  const player2NameElement = document.getElementById('player2-name');
+  const score1Element = document.getElementById('score1');
+  const score2Element = document.getElementById('score2');
+
+  if (player1NameElement) {
+    player1NameElement.textContent = playerName;
+  }
+  if (player2NameElement) {
+    player2NameElement.textContent = opponentName;
+  }
+  if (score1Element) {
+    score1Element.textContent = gameState.score1;
+  }
+  if (score2Element) {
+    score2Element.textContent = gameState.score2;
   }
 
-  return trajectory;
 }
 
-let TRAJECTORY = {x: 0, y: 0}  // no static, so ill use global as a static
-
-function predict_ball_racket_inter(ball, future_frames, racket)
-{
-  let future_ball = ball.clone()
-
-  for (let i = 0; i < future_frames; i++)
-  {
-    future_ball.pos.x += future_ball.ratio.x * future_ball.direction.x * future_ball.speed;
-    future_ball.pos.y += future_ball.ratio.y * future_ball.direction.y * future_ball.speed;
-
-    if (future_ball.pos.y - future_ball.ray < 0 || future_ball.pos.y + future_ball.ray > canvas.height)
-      future_ball.direction.y *= -1;
-
-    if (is_aprox_inside(future_ball.pos.x, racket.pos.x, racket.width))
-    {
-      TRAJECTORY = {x:  future_ball.pos.x , y: future_ball.pos.y}
-      break ;
-    }
-  }
-  return TRAJECTORY;
-}
-
-/* some additons */
-
-function reset_game()
-{
-  racket1.score = 0;
-  racket2.score = 0;
-  ball.reset()
-  paused = false;
-}
-
-function game_update()
-{
-  ball.update()
-  racket1.update()
-  racket2.update()
-  racket1.inter_ball(ball)
-  racket1.score_update(ball)
-  racket2.inter_ball(ball)
-  racket2.score_update(ball)
-  racket1.botv2 (ball)  // always check racket.bot_mode
-  racket2.botv2 (ball)
-}
-
-
-function draw_screen() // the background
-{
-  if (animation)
-  {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.2)"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-  }
-  else
-  {
-    ctx.fillStyle = "#000000"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-  }
-}
-
-function game_draw()
-{
-  draw_screen()
-  ball.draw()
-  racket1.draw()
-  racket2.draw()
-  draw_string(50, "#ffffff", player + " : " + racket1.score.toString(), canvas.width / 4, 100);
-  draw_string(50, "#ffffff", opp_player + " : " + racket2.score.toString(), 3 * canvas.width / 4, 100);
-  // updatePlayerNames();
-  if (debug)
-  {
-    let traject = predict_ball_trajectory(ball, 100)
-   
-    draw_string (50, "#ffffff", ".", TRAJECTORY.x, TRAJECTORY.y)
-    draw_traject(traject)
-  }
-}
-
-function game_over()
-{
-  if (racket1.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 2 win", canvas.width / 2, canvas.height / 2)
-    return (1)
-  }
-  if (racket2.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 1 win", canvas.width / 2, canvas.height / 2)
-    return (1)
-  }
-  return (0)
-}
-
-function game_loop()
-{
-  if (game_over() || paused || showMenu)
-    return
-  game_update()
-  game_draw()
-  window.requestAnimationFrame(game_loop)
-}
-
-function main()
-{
-  draw_screen ()
-  connectWebSocket()
-  paused = true
-  game_loop()
-}
-
-main();
