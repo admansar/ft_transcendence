@@ -13,7 +13,7 @@ BALL_RADIUS = 15
 RACKET_WIDTH = 20
 RACKET_HEIGHT = 140
 INITIAL_BALL_SPEED = 10
-MAX_SCORE = 5000
+MAX_SCORE = 50
 GAME_TICK_RATE = 60  # Updates per second
 RACKET_POS = 50
 
@@ -65,6 +65,8 @@ class GameState:
                 self.ball_dir['x'] *= -1
                 # Adjust ball direction based on where it hits the racket
                 delta_y = self.ball_pos['y'] - (self.racket2_pos['y'] + RACKET_HEIGHT / 2)
+                if delta_y == 0:
+                    delta_y = 0.01
                 self.ball_dir['y'] = delta_y / (RACKET_HEIGHT / 2)
                 self.normalize_ball_dir()
 
