@@ -111,24 +111,24 @@ window.addEventListener('keyup', function(e) {
 // Update paddle position based on key state
 function updatePaddlePosition() {
     if (playerId === 1) { // Player 1 controls racket1
-        if (isMovingUp) {
-            gameState.racket1_pos.y -= MOVE_SPEED;
-            gameState.racket1_pos.y = Math.max(0, gameState.racket1_pos.y);
-        }
-        if (isMovingDown) {
-            gameState.racket1_pos.y += MOVE_SPEED;
-            gameState.racket1_pos.y = Math.min(canvas.height - 120, gameState.racket1_pos.y);
-        }
-    }
-    else if (playerId === 2) { // Player 2 controls racket2
-        if (isMovingUp) {
-            gameState.racket2_pos.y -= MOVE_SPEED;
-            gameState.racket2_pos.y = Math.max(0, gameState.racket2_pos.y);
-        }
-        if (isMovingDown) {
-            gameState.racket2_pos.y += MOVE_SPEED;
-            gameState.racket2_pos.y = Math.min(canvas.height - 120, gameState.racket2_pos.y);
-        }
+    //     if (isMovingUp) {
+    //         gameState.racket1_pos.y -= MOVE_SPEED;
+    //         gameState.racket1_pos.y = Math.max(0, gameState.racket1_pos.y);
+    //     }
+    //     if (isMovingDown) {
+    //         gameState.racket1_pos.y += MOVE_SPEED;
+    //         gameState.racket1_pos.y = Math.min(canvas.height - 120, gameState.racket1_pos.y);
+    //     }
+    // }
+    // else if (playerId === 2) { // Player 2 controls racket2
+    //     if (isMovingUp) {
+    //         gameState.racket2_pos.y -= MOVE_SPEED;
+    //         gameState.racket2_pos.y = Math.max(0, gameState.racket2_pos.y);
+    //     }
+    //     if (isMovingDown) {
+    //         gameState.racket2_pos.y += MOVE_SPEED;
+    //         gameState.racket2_pos.y = Math.min(canvas.height - 120, gameState.racket2_pos.y);
+    //     }
     }
 }
 
