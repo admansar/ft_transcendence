@@ -12,6 +12,7 @@ services:
       - .env
     networks:
       - ft_transcendence_network
+    restart: always
 
   ft_transcendence:
     build: .
@@ -26,7 +27,16 @@ services:
       - inventory_db
     networks:
       - ft_transcendence_network
-    restart: on-failure
+    restart: always
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - ft_transcendence_network
+    restart: always
 
 networks:
   ft_transcendence_network:

@@ -6,10 +6,7 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
 from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
-
+from django.db.models import Q
 
 class SignUp(APIView):
     def post(self, request):
@@ -18,15 +15,14 @@ class SignUp(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
-
 User = get_user_model()
 
 class Login(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        user = User.objects.filter(username=username).first()
+        email = request.data['email']
+        user = User.objects.filter(Q(username=username) | Q(email=email)).first()
         if user is None:
             raise AuthenticationFailed('User not found')
         if not user.check_password(password):
