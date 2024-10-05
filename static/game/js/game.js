@@ -1,4 +1,3 @@
-
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -12,6 +11,7 @@ let opponentName = '...';
 let playerName = '...';
 let fps_ratio = 1;
 let server_fps = 30;
+
 
 // Game state received from server
 let gameState = {
@@ -70,14 +70,15 @@ gameSocket.onmessage = function (e) {
     console.log(`Opponent: ${opponentName}`);
   }
   else if (data.type === 'notification') {
-    alert(data.message);
-
+    show_notification(data.message);
+    if (data.message.indexOf ('has disconnected.') != -1)
+      setTimeout (function () {window.location.href = '/';
+      }, 1000)
   }
   else if (data.type === 'game_over') {
-    alert(`${data.winner} wins the game!`);
-    window.location.href = '/';
-    // process.exit (1)
-    // Optionally, reset the game or provide options to replay
+    show_notification(`${data.winner} wins the game!`);
+    setTimeout (function () {window.location.href = '/';
+  }, 1000)
   }
   else if (data.type === 'broadcast_game_state')
   {
@@ -109,13 +110,33 @@ function sendPlayerMove(direction) {
   }
 }
 
+function show_notification(message) {
+  const modal = document.getElementById('notification-modal');
+  const modalMessage = document.getElementById('modal-message');
+  const modalClose = document.getElementById('modal-close');
+
+  modalMessage.textContent = message;
+  modal.style.display = 'block';
+
+  modalClose.onclick = function() {
+      modal.style.display = 'none';
+  };
+
+  window.onclick = function(event) {
+      if (event.target == modal) {
+          modal.style.display = 'none';
+      }
+  };
+}
+
+
 // Keyboard event listeners
 const keyPressed = {};
 const KEY_UP = 38; // Arrow Up
 const KEY_DOWN = 40; // Arrow Down
 let isMovingUp = false;
 let isMovingDown = false;
-const MOVE_SPEED = 5; // Adjust paddle speed here
+const MOVE_SPEED = 3; // Adjust paddle speed here
 
 window.addEventListener('keydown', function(e) {
     if (e.keyCode === KEY_UP) {

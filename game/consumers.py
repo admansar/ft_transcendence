@@ -12,8 +12,8 @@ CANVAS_HEIGHT = 600
 BALL_RADIUS = 15
 RACKET_WIDTH = 20
 RACKET_HEIGHT = 140
-INITIAL_BALL_SPEED = 20
-MAX_SCORE = 50
+INITIAL_BALL_SPEED = 10
+MAX_SCORE = 500
 GAME_TICK_RATE = 30  # Updates per second
 RACKET_POS = 50
 RACKET_SPEED = 20
@@ -234,6 +234,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             'racket1_pos': data.get('racket1_pos'),
             'racket2_pos': data.get('racket2_pos')
         }))
+        pass
         
 
     async def player_disconnected(self, event):
@@ -275,7 +276,15 @@ class GameConsumer(AsyncWebsocketConsumer):
         game_state.ball_pos['y'] += game_state.ball_dir['y'] * game_state.ball_speed
 
         # Check for collisions with top and bottom walls
-        if game_state.ball_pos['y'] - BALL_RADIUS <= 0 or game_state.ball_pos['y'] + BALL_RADIUS >= CANVAS_HEIGHT:
+        if game_state.ball_pos['y'] - BALL_RADIUS < 0:  # Collision with top wall
+            game_state.ball_pos['y'] = (BALL_RADIUS) # Reset position to avoid overlap
+            game_state.ball_dir['y'] *= -1  # Reverse direction
+
+        elif game_state.ball_pos['y'] + BALL_RADIUS > CANVAS_HEIGHT:  # Collision with bottom wall
+            game_state.ball_pos['y'] = CANVAS_HEIGHT - (BALL_RADIUS)  # Reset position to avoid overlap
+            game_state.ball_dir['y'] *= -1  # Reverse direction
+
+        elif game_state.ball_pos['y'] - BALL_RADIUS < 0 or game_state.ball_pos['y'] + BALL_RADIUS > CANVAS_HEIGHT:
             game_state.ball_dir['y'] *= -1
 
         # Check for collisions with rackets
