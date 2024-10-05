@@ -15,3 +15,7 @@ def game_3d(request):
 @login_required
 def select_game(request):
     return render(request, 'select_game.html')
+
+
+def game_2d_off(request):
+    return render(request, 'offline_2dgame.html')

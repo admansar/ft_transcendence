@@ -12,10 +12,11 @@ CANVAS_HEIGHT = 600
 BALL_RADIUS = 15
 RACKET_WIDTH = 20
 RACKET_HEIGHT = 140
-INITIAL_BALL_SPEED = 10
+INITIAL_BALL_SPEED = 20
 MAX_SCORE = 50
-GAME_TICK_RATE = 60  # Updates per second
+GAME_TICK_RATE = 30  # Updates per second
 RACKET_POS = 50
+RACKET_SPEED = 20
 
 # In-memory storage for game rooms
 # For scalability, consider using Redis or a database
@@ -27,6 +28,7 @@ class GameState:
         self.ball_pos = {'x': CANVAS_WIDTH / 2, 'y': CANVAS_HEIGHT / 2}
         self.ball_dir = {'x': 1, 'y': 0}  # Direction vector
         self.ball_speed = INITIAL_BALL_SPEED
+        self.racket_speed = RACKET_SPEED
         self.racket1_pos = {'x': RACKET_POS, 'y': CANVAS_HEIGHT / 2 - RACKET_HEIGHT / 2}
         self.racket2_pos = {'x': CANVAS_WIDTH - RACKET_POS - RACKET_WIDTH, 'y': CANVAS_HEIGHT / 2 - RACKET_HEIGHT / 2}
         self.score1 = 0
@@ -76,10 +78,20 @@ class GameState:
         if magnitude != 0:
             self.ball_dir['x'] /= magnitude
             self.ball_dir['y'] /= magnitude
+            
+
+class GameRoom:
+    def __init__(self, room_id):
+        self.room_id = room_id
+        self.players = []
+        self.game_state = GameState(room_id)
+        self.game_loop_task = None
+
 
 class GameConsumer(AsyncWebsocketConsumer):
     room_id: int
     room_group_name: str
+    room: GameRoom
 
     async def connect(self):
         self.user = self.scope['user']
@@ -95,12 +107,13 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
         await self.send_init_state()
-        room = game_rooms[self.room_id]
-        if len(room.players) == 2 and not room.game_loop_task:
-            other_player = room.players[0] if room.players[1] == self else room.players[1]
+        self.room = game_rooms[self.room_id]
+        if len(self.room.players) == 2 and not self.room.game_loop_task:
+            other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
             await other_player.send_player_info(self.user.username)
-            room.game_state.start_game()
-            room.game_loop_task = asyncio.create_task(self.game_loop(room))
+            self.room.game_state.start_game()
+            self.room.game_loop_task = asyncio.create_task(self.game_loop(self.room))
+            # asyncio.create_task(self.paddle_loop(self.room))
             
     async def send_player_info(self, opponent):
         await self.send(text_data=json.dumps({
@@ -117,9 +130,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
         # Remove player from room
-        room = game_rooms.get(self.room_id)
-        if room:
-            room.players = [p for p in room.players if p.channel_name != self.channel_name]
+        self.room = game_rooms.get(self.room_id)
+        if self.room:
+            self.room.players = [p for p in self.room.players if p.channel_name != self.channel_name]
             # Notify the other player
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -129,11 +142,11 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
             # If the game loop is running, cancel it
-            if room.game_loop_task:
-                room.game_loop_task.cancel()
-                room.game_loop_task = None
+            if self.room.game_loop_task:
+                self.room.game_loop_task.cancel()
+                self.room.game_loop_task = None
             # If no players left, delete the room
-            if not room.players:
+            if not self.room.players:
                 del game_rooms[self.room_id]
 
     async def receive(self, text_data):
@@ -141,17 +154,18 @@ class GameConsumer(AsyncWebsocketConsumer):
         message_type = data.get('type')
 
         if message_type == 'player_move':
+            await self.update_paddles(data)
             direction = data.get('direction')  # 'up' or 'down'
             await self.handle_player_move(direction)
 
     async def handle_player_move(self, direction):
-        room = game_rooms.get(self.room_id)
-        if not room:
+        self.room = game_rooms.get(self.room_id)
+        if not self.room:
             return
 
         # Determine which racket this player controls
         player_index = None
-        for idx, player in enumerate(room.players):
+        for idx, player in enumerate(self.room.players):
             if player.channel_name == self.channel_name:
                 player_index = idx
                 break
@@ -162,37 +176,43 @@ class GameConsumer(AsyncWebsocketConsumer):
         if player_index == 0:
             # Player 1 controls racket1
             if direction == 'up':
-                room.game_state.racket1_pos['y'] -= room.game_state.ball_speed  # You can adjust speed
-                room.game_state.racket1_pos['y'] = max(0, room.game_state.racket1_pos['y'])
+                self.room.game_state.racket1_pos['y'] -= self.room.game_state.racket_speed  # You can adjust speed
+                self.room.game_state.racket1_pos['y'] = max(0, self.room.game_state.racket1_pos['y'])
             elif direction == 'down':
-                room.game_state.racket1_pos['y'] += room.game_state.ball_speed
-                room.game_state.racket1_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, room.game_state.racket1_pos['y'])
+                self.room.game_state.racket1_pos['y'] += self.room.game_state.racket_speed
+                self.room.game_state.racket1_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, self.room.game_state.racket1_pos['y'])
         elif player_index == 1:
             # Player 2 controls racket2
             if direction == 'up':
-                room.game_state.racket2_pos['y'] -= room.game_state.ball_speed
-                room.game_state.racket2_pos['y'] = max(0, room.game_state.racket2_pos['y'])
+                self.room.game_state.racket2_pos['y'] -= self.room.game_state.racket_speed
+                self.room.game_state.racket2_pos['y'] = max(0, self.room.game_state.racket2_pos['y'])
             elif direction == 'down':
-                room.game_state.racket2_pos['y'] += room.game_state.ball_speed
-                room.game_state.racket2_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, room.game_state.racket2_pos['y'])
+                self.room.game_state.racket2_pos['y'] += self.room.game_state.racket_speed
+                self.room.game_state.racket2_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, self.room.game_state.racket2_pos['y'])
+
 
     async def send_init_state(self):
-        room = game_rooms.get(self.room_id)
-        if not room:
+        self.room = game_rooms.get(self.room_id)
+        if not self.room:
             return
 
         game_state = {
             'type': 'init_state',
             'game_state': {
-                'player_id': room.players.index(self) + 1,
+                'player_id': self.room.players.index(self) + 1,
                 'room_id': self.room_id,
-                'racket1_pos': room.game_state.racket1_pos,
-                'racket2_pos': room.game_state.racket2_pos,
-                'ball_pos': room.game_state.ball_pos,
-                'score1': room.game_state.score1,
-                'score2': room.game_state.score2,
-                'player': room.players[0].user.username,
-                'opponent': room.players[1].user.username if len(room.players) > 1 else 'waiting...'
+                'ball_speed': self.room.game_state.ball_speed,
+                'racket1_pos': self.room.game_state.racket1_pos,
+                'racket2_pos': self.room.game_state.racket2_pos,
+                'ball_pos': self.room.game_state.ball_pos,
+                'score1': self.room.game_state.score1,
+                'score2': self.room.game_state.score2,
+                'player': self.room.players[0].user.username,
+                'opponent': self.room.players[1].user.username if len(self.room.players) > 1 else 'waiting...',
+                'direction': self.room.game_state.ball_dir,
+                'racket_speed': self.room.game_state.racket_speed,
+                'racket_width': RACKET_WIDTH,
+                'racket_height': RACKET_HEIGHT,
             }
         }
 
@@ -201,38 +221,53 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def send_game_state(self, state):
         await self.send(text_data=json.dumps({
             'type': 'game_state',
-            'state': state
+            'state': state,
+            'direction': self.room.game_state.ball_dir,
+            'ball_speed': self.room.game_state.ball_speed,
         }))
+        
+    async def update_paddles(self, data):
+        self.room.game_state.racket1_pos = data.get('racket1_pos')
+        self.room.game_state.racket2_pos = data.get('racket2_pos')
+        await self.send(text_data=json.dumps({
+            'type': 'update_paddles',
+            'racket1_pos': data.get('racket1_pos'),
+            'racket2_pos': data.get('racket2_pos')
+        }))
+        
 
     async def player_disconnected(self, event):
         message = event['message']
         await self.send(text_data=json.dumps({
             'type': 'notification',
-            'message': message
+            'message': message,
         }))
 
     async def game_loop(self, room):
         try:
             while True:
                 await asyncio.sleep(1 / GAME_TICK_RATE)
-                self.update_game_state(room.game_state)
-                elapsed_time = room.game_state.get_elapsed_time()
+                self.update_game_state(self.room.game_state)
+                elapsed_time = self.room.game_state.get_elapsed_time()
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
                         'type': 'broadcast_game_state',
                         'state': {
-                            'ball_pos': room.game_state.ball_pos,
-                            'racket1_pos': room.game_state.racket1_pos,
-                            'racket2_pos': room.game_state.racket2_pos,
-                            'score1': room.game_state.score1,
-                            'score2': room.game_state.score2,
+                            'ball_pos': self.room.game_state.ball_pos,
+                            'racket1_pos': self.room.game_state.racket1_pos,
+                            'racket2_pos': self.room.game_state.racket2_pos,
+                            'score1': self.room.game_state.score1,
+                            'score2': self.room.game_state.score2,
                             'elapsed_time': elapsed_time,
+                            'fps': GAME_TICK_RATE
                             }
                     }
                 )
         except asyncio.CancelledError:
             pass
+
+
 
     def update_game_state(self, game_state):
         # Update ball position
@@ -277,11 +312,11 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send_game_state(state)
 
     async def notify_game_over(self):
-        room = game_rooms.get(self.room_id)
-        if not room:
+        self.room = game_rooms.get(self.room_id)
+        if not self.room:
             return
 
-        winner = 'Player 1' if room.game_state.score1 >= MAX_SCORE else 'Player 2'
+        winner = self.room.players[0].user.username if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user.username
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -300,19 +335,12 @@ class GameConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def assign_room(self, username):
         # Assign the player to an existing room with less than 2 players or create a new room
-        for room_id, room in game_rooms.items():
-            if len(room.players) < 2:
-                room.players.append(self)
+        for room_id, self.room in game_rooms.items():
+            if len(self.room.players) < 2:
+                self.room.players.append(self)
                 return room_id
         # Create a new room
         new_room_id = len(game_rooms)
         game_rooms[new_room_id] = GameRoom(room_id=new_room_id)
         game_rooms[new_room_id].players.append(self)
         return new_room_id
-
-class GameRoom:
-    def __init__(self, room_id):
-        self.room_id = room_id
-        self.players = []
-        self.game_state = GameState(room_id)
-        self.game_loop_task = None

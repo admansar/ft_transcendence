@@ -10,6 +10,8 @@ let playerId = null;
 let roomId = null;
 let opponentName = '...';
 let playerName = '...';
+let fps_ratio = 1;
+let server_fps = 30;
 
 // Game state received from server
 let gameState = {
@@ -17,7 +19,9 @@ let gameState = {
   racket1_pos: {x: 100, y: 230},
   racket2_pos: {x: 700, y: 230},
   score1: 0,
-  score2: 0
+  score2: 0,
+  ball_speed: 20,
+  direction: {x: 1, y: 0},
 };
 
 // WebSocket connection
@@ -32,6 +36,10 @@ gameSocket.onopen = function () {
 
 gameSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
+  if (data.type !== 'broadcast_game_state')
+   console.log ('data type : ', data.type)
+
+  // console.log ('data type : ', data.type)
   if (data.type === 'init_state') {
     playerId = data.game_state.player_id;
     roomId = data.game_state.room_id;
@@ -42,10 +50,14 @@ gameSocket.onmessage = function (e) {
     gameState.score1 = data.game_state.score1;
     gameState.score2 = data.game_state.score2;
     playerName = data.game_state.player;
+    gameState.ball_speed = data.game_state.ball_speed;
+    gameState.direction = data.game_state.direction;
     renderGame();
   }
   else if (data.type === 'game_state') {
     gameState = data.state;
+    gameState.ball_speed = data.ball_speed;
+    gameState.direction = data.direction;
     renderGame();
     const elapsedTime = data.state.elapsed_time;
     const minutes = Math.floor(elapsedTime / 60);
@@ -59,10 +71,24 @@ gameSocket.onmessage = function (e) {
   }
   else if (data.type === 'notification') {
     alert(data.message);
+
   }
   else if (data.type === 'game_over') {
     alert(`${data.winner} wins the game!`);
+    window.location.href = '/';
+    // process.exit (1)
     // Optionally, reset the game or provide options to replay
+  }
+  else if (data.type === 'broadcast_game_state')
+  {
+    gameState.ball_speed = data.game_state.ball_speed;
+    gameState.direction = data.game_state.direction;
+    server_fps = data.fps_ratio;
+  }
+  else if (data.type === 'update_paddles')
+  {
+    gameState.racket1_pos = data.racket1_pos;
+    gameState.racket2_pos = data.racket2_pos;
   }
 };
 
@@ -72,10 +98,13 @@ gameSocket.onclose = function () {
 
 // Sending player moves to the server
 function sendPlayerMove(direction) {
+  console.log ('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
   if (gameSocket.readyState === WebSocket.OPEN) {
     gameSocket.send(JSON.stringify({
       'type': 'player_move',
-      'direction': direction
+      'direction': direction,
+      'racket1_pos': gameState.racket1_pos,
+      'racket2_pos': gameState.racket2_pos,
     }));
   }
 }
@@ -108,40 +137,7 @@ window.addEventListener('keyup', function(e) {
     }
 });
 
-// Update paddle position based on key state
-function updatePaddlePosition() {
-    if (playerId === 1) { // Player 1 controls racket1
-    //     if (isMovingUp) {
-    //         gameState.racket1_pos.y -= MOVE_SPEED;
-    //         gameState.racket1_pos.y = Math.max(0, gameState.racket1_pos.y);
-    //     }
-    //     if (isMovingDown) {
-    //         gameState.racket1_pos.y += MOVE_SPEED;
-    //         gameState.racket1_pos.y = Math.min(canvas.height - 120, gameState.racket1_pos.y);
-    //     }
-    // }
-    // else if (playerId === 2) { // Player 2 controls racket2
-    //     if (isMovingUp) {
-    //         gameState.racket2_pos.y -= MOVE_SPEED;
-    //         gameState.racket2_pos.y = Math.max(0, gameState.racket2_pos.y);
-    //     }
-    //     if (isMovingDown) {
-    //         gameState.racket2_pos.y += MOVE_SPEED;
-    //         gameState.racket2_pos.y = Math.min(canvas.height - 120, gameState.racket2_pos.y);
-    //     }
-    }
-}
-
-// Game loop to continuously update paddle position
-function gameLoop() {
-    updatePaddlePosition();
-    renderGame();
-    requestAnimationFrame(gameLoop);
-}
-
 // Start the game loop
-gameLoop();
-
 function resizeCanvas() {
     canvas.width = gameContainer.clientWidth; 
     canvas.height = gameContainer.clientHeight;
@@ -219,3 +215,69 @@ function renderGame() {
         score2Element.textContent = gameState.score2;
     }
 }
+
+let lastTime = performance.now();
+let frameCount = 0;
+let fps = 0;
+
+function fps_calculator()
+{
+    const now = performance.now();
+    frameCount++;
+
+    const elapsedTime = now - lastTime;
+    if (elapsedTime >= 1000)
+    {
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = now;
+    }
+    return fps;
+}
+
+let predictedRacket1PosY = gameState.racket1_pos.y;
+let predictedRacket2PosY = gameState.racket2_pos.y;
+
+function updatePaddlePosition() {
+    if (playerId === 1) {
+        if (isMovingUp) {
+            predictedRacket1PosY -= MOVE_SPEED;
+            predictedRacket1PosY = Math.max(0, predictedRacket1PosY);
+        }
+        if (isMovingDown) {
+            predictedRacket1PosY += MOVE_SPEED;
+            predictedRacket1PosY = Math.min(canvas.height - 120, predictedRacket1PosY);
+        }
+        gameState.racket1_pos.y = predictedRacket1PosY; // Move locally
+    } else if (playerId === 2) {
+        if (isMovingUp) {
+            predictedRacket2PosY -= MOVE_SPEED;
+            predictedRacket2PosY = Math.max(0, predictedRacket2PosY);
+        }
+        if (isMovingDown) {
+            predictedRacket2PosY += MOVE_SPEED;
+            predictedRacket2PosY = Math.min(canvas.height - 120, predictedRacket2PosY);
+        }
+        gameState.racket2_pos.y = predictedRacket2PosY; // Move locally
+    }
+}
+
+function updateBallPosition()
+{
+  let current_fps = fps_calculator();
+  fps_ratio = current_fps / server_fps;
+  gameState.ball_pos.x += (gameState.ball_speed / fps_ratio) * gameState.direction.x;
+  gameState.ball_pos.y += (gameState.ball_speed / fps_ratio) * gameState.direction.y;
+  // console.log('Ball speed ', gameState.ball_speed);
+}
+
+// Game loop
+function game_loop() {
+  updatePaddlePosition();
+  updateBallPosition();
+  renderGame();
+  requestAnimationFrame(game_loop);
+}
+
+// Start the game loop
+game_loop();
