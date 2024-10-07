@@ -2,7 +2,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const gameContainer = document.getElementById('game-container');
-canvas.width = gameContainer.clientWidth; 
+canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
 let playerId = null;
@@ -36,9 +36,6 @@ gameSocket.onopen = function () {
 
 gameSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
-  if (data.type !== 'broadcast_game_state')
-   console.log ('data type : ', data.type)
-
   // console.log ('data type : ', data.type)
   if (data.type === 'init_state') {
     playerId = data.game_state.player_id;
@@ -52,6 +49,9 @@ gameSocket.onmessage = function (e) {
     playerName = data.game_state.player;
     gameState.ball_speed = data.game_state.ball_speed;
     gameState.direction = data.game_state.direction;
+    gameContainer.style.width = data.game_state.canvas_width;
+    gameContainer.style.height = data.game_state.canvas_height;
+    resizeCanvas();
     renderGame();
   }
   else if (data.type === 'game_state') {
@@ -86,10 +86,17 @@ gameSocket.onmessage = function (e) {
     gameState.direction = data.game_state.direction;
     server_fps = data.fps_ratio;
   }
-  else if (data.type === 'update_paddles')
+  // else if (data.type === 'update_paddles')
+  // {
+  //   gameState.racket1_pos = data.racket1_pos;
+  //   gameState.racket2_pos = data.racket2_pos;
+  // }
+  else if (data.type === 'moves')
   {
-    gameState.racket1_pos = data.racket1_pos;
-    gameState.racket2_pos = data.racket2_pos;
+    if (playerId === 1)
+      gameState.racket2_pos = data.racket2_pos;
+    else if (playerId === 2)
+      gameState.racket1_pos = data.racket1_pos;
   }
 };
 
@@ -103,12 +110,13 @@ function sendPlayerMove(direction) {
   if (gameSocket.readyState === WebSocket.OPEN) {
     gameSocket.send(JSON.stringify({
       'type': 'player_move',
-      'direction': direction,
       'racket1_pos': gameState.racket1_pos,
       'racket2_pos': gameState.racket2_pos,
+      'player_id': playerId,
     }));
   }
 }
+
 
 function show_notification(message) {
   const modal = document.getElementById('notification-modal');
@@ -136,26 +144,26 @@ const KEY_UP = 38; // Arrow Up
 const KEY_DOWN = 40; // Arrow Down
 let isMovingUp = false;
 let isMovingDown = false;
-const MOVE_SPEED = 3; // Adjust paddle speed here
+const MOVE_SPEED = 10; // Adjust paddle speed here
 
 window.addEventListener('keydown', function(e) {
     if (e.keyCode === KEY_UP) {
         isMovingUp = true;
-        sendPlayerMove('up');
+        // sendPlayerMove('up');
     }
     else if (e.keyCode === KEY_DOWN) {
         isMovingDown = true;
-        sendPlayerMove('down');
+        // sendPlayerMove('down');
     }
 });
 
 window.addEventListener('keyup', function(e) {
     if (e.keyCode === KEY_UP) {
         isMovingUp = false;
-    }
-    else if (e.keyCode === KEY_DOWN) {
+      }
+      else if (e.keyCode === KEY_DOWN) {
         isMovingDown = false;
-    }
+      }
 });
 
 // Start the game loop
@@ -256,31 +264,35 @@ function fps_calculator()
     return fps;
 }
 
-let predictedRacket1PosY = gameState.racket1_pos.y;
-let predictedRacket2PosY = gameState.racket2_pos.y;
 
-function updatePaddlePosition() {
-    if (playerId === 1) {
-        if (isMovingUp) {
-            predictedRacket1PosY -= MOVE_SPEED;
-            predictedRacket1PosY = Math.max(0, predictedRacket1PosY);
-        }
-        if (isMovingDown) {
-            predictedRacket1PosY += MOVE_SPEED;
-            predictedRacket1PosY = Math.min(canvas.height - 120, predictedRacket1PosY);
-        }
-        gameState.racket1_pos.y = predictedRacket1PosY; // Move locally
-    } else if (playerId === 2) {
-        if (isMovingUp) {
-            predictedRacket2PosY -= MOVE_SPEED;
-            predictedRacket2PosY = Math.max(0, predictedRacket2PosY);
-        }
-        if (isMovingDown) {
-            predictedRacket2PosY += MOVE_SPEED;
-            predictedRacket2PosY = Math.min(canvas.height - 120, predictedRacket2PosY);
-        }
-        gameState.racket2_pos.y = predictedRacket2PosY; // Move locally
-    }
+function updatePaddlePosition()
+{
+  if (playerId === 1) { // Player 1 controls racket1
+      if (isMovingUp) {
+          gameState.racket1_pos.y -= MOVE_SPEED;
+          gameState.racket1_pos.y = Math.max(0, gameState.racket1_pos.y);
+      }
+      else if (isMovingDown) {
+          gameState.racket1_pos.y += MOVE_SPEED;
+          gameState.racket1_pos.y = Math.min(canvas.height - 120, gameState.racket1_pos.y);
+      }
+  }
+  else if (playerId === 2) { // Player 2 controls racket2
+      if (isMovingUp) {
+          gameState.racket2_pos.y -= MOVE_SPEED;
+          gameState.racket2_pos.y = Math.max(0, gameState.racket2_pos.y);
+      }
+      else if (isMovingDown) {
+          gameState.racket2_pos.y += MOVE_SPEED;
+          gameState.racket2_pos.y = Math.min(canvas.height - 120, gameState.racket2_pos.y);
+      }
+  }
+  if (isMovingDown || isMovingUp) {
+
+    sendPlayerMove(isMovingDown ? 'down' : 'up');
+
+    console.log ("r1: ", gameState.racket1_pos,", r2: " , gameState.racket2_pos)
+  }
 }
 
 function updateBallPosition()
@@ -293,8 +305,12 @@ function updateBallPosition()
 }
 
 // Game loop
-function game_loop() {
-  updatePaddlePosition();
+function game_loop()
+{
+  if (isMovingDown || isMovingUp)
+  {
+    updatePaddlePosition();
+  }
   updateBallPosition();
   renderGame();
   requestAnimationFrame(game_loop);

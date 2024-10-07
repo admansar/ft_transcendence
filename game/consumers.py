@@ -13,7 +13,7 @@ BALL_RADIUS = 15
 RACKET_WIDTH = 20
 RACKET_HEIGHT = 140
 INITIAL_BALL_SPEED = 10
-MAX_SCORE = 500
+MAX_SCORE = 5
 GAME_TICK_RATE = 30  # Updates per second
 RACKET_POS = 50
 RACKET_SPEED = 20
@@ -114,7 +114,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.room.game_state.start_game()
             self.room.game_loop_task = asyncio.create_task(self.game_loop(self.room))
             # asyncio.create_task(self.paddle_loop(self.room))
-            
+
     async def send_player_info(self, opponent):
         await self.send(text_data=json.dumps({
             'type': 'player_info',
@@ -154,41 +154,28 @@ class GameConsumer(AsyncWebsocketConsumer):
         message_type = data.get('type')
 
         if message_type == 'player_move':
-            await self.update_paddles(data)
-            direction = data.get('direction')  # 'up' or 'down'
-            await self.handle_player_move(direction)
+            await self.update_paddles_position(data)
+            self.room.game_state.racket1_pos = data.get('racket1_pos')
+            self.room.game_state.racket2_pos = data.get('racket2_pos')
 
-    async def handle_player_move(self, direction):
-        self.room = game_rooms.get(self.room_id)
-        if not self.room:
-            return
-
-        # Determine which racket this player controls
-        player_index = None
-        for idx, player in enumerate(self.room.players):
-            if player.channel_name == self.channel_name:
-                player_index = idx
-                break
-        if player_index is None:
-            return
-
-        # Update racket position based on direction
-        if player_index == 0:
-            # Player 1 controls racket1
-            if direction == 'up':
-                self.room.game_state.racket1_pos['y'] -= self.room.game_state.racket_speed  # You can adjust speed
-                self.room.game_state.racket1_pos['y'] = max(0, self.room.game_state.racket1_pos['y'])
-            elif direction == 'down':
-                self.room.game_state.racket1_pos['y'] += self.room.game_state.racket_speed
-                self.room.game_state.racket1_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, self.room.game_state.racket1_pos['y'])
-        elif player_index == 1:
-            # Player 2 controls racket2
-            if direction == 'up':
-                self.room.game_state.racket2_pos['y'] -= self.room.game_state.racket_speed
-                self.room.game_state.racket2_pos['y'] = max(0, self.room.game_state.racket2_pos['y'])
-            elif direction == 'down':
-                self.room.game_state.racket2_pos['y'] += self.room.game_state.racket_speed
-                self.room.game_state.racket2_pos['y'] = min(CANVAS_HEIGHT - RACKET_HEIGHT, self.room.game_state.racket2_pos['y'])
+    async def update_paddles_position(self, data):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'moves',
+                'racket1_pos': data.get('racket1_pos'),
+                'racket2_pos': data.get('racket2_pos')
+            }
+        )
+        
+    async def moves(self, event):
+        racket1_pos = event['racket1_pos']
+        racket2_pos = event['racket2_pos']
+        await self.send(text_data=json.dumps({
+            'type': 'moves',
+            'racket1_pos': racket1_pos,
+            'racket2_pos': racket2_pos
+        }))
 
 
     async def send_init_state(self):
@@ -213,6 +200,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'racket_speed': self.room.game_state.racket_speed,
                 'racket_width': RACKET_WIDTH,
                 'racket_height': RACKET_HEIGHT,
+                'canvas_width': CANVAS_WIDTH,
+                'canvas_height': CANVAS_HEIGHT,
             }
         }
 
