@@ -9,10 +9,14 @@ def login_page(request):
     return render(request, 'home.html')
 
 
-@login_required
-def home_page(request):
-    return render(request, 'frontend/index.html')
+# @login_required
+# def home_page(request):
+#     return render(request, 'frontend/index.html')
 
 def not_found_view(request, exception):
     # Redirect to the home page in case of page not found
-    return redirect('login_page') 
+    return redirect('login_page')
+
+def index(request, path=''):
+    print('Path is =>', path)
+    return render(request, 'index.html')

@@ -19,9 +19,10 @@ User = get_user_model()
 
 class Login(APIView):
     def post(self, request):
+        print('Herre')
         username = request.data.get('username')
         password = request.data.get('password')
-        email = request.data['email']
+        email = request.data.get('email')
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
         if user is None:
             raise AuthenticationFailed('User not found')

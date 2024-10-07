@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-in</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="login">
+        <img src="src/pingpong-logo.png" class="logo-log">
+        <div class="log-contain">
+            <form action="/log.html" method="post">
+                <input type="text" id="fname" name="fname" placeholder="Username">
+                <input type="password" id="pwd" name="pwd" placeholder="Password">
+                <!-- Use an <a> tag styled as a button for redirection -->
+                    <a href="index.html" class="submit-button">Submit</a>
+                    <div class="stay-sign">
+                        <input type="checkbox" id="stay-sign" name="stay-sign" value="stay-signed-in">
+                        <label for="stay-sign"> Stay Signed-in</label>
+                    </div>
+                <div class="line"></div> <!-- Add a <div> for the line -->
+                </form>
+            <div class="Sign-in">
+                <div class ="message">not registed yet ?</div>
+                <div class="Sign-in-button">Sign-in</div>
+            </div>
+            <div class="button-logs">
+                <button class="btn1" type="button"></button>
+                <button class="btn2" type="button"></button>
+                <button class="btn3" type="button"></button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
