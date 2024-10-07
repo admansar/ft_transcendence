@@ -2,6 +2,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const gameContainer = document.getElementById('game-container');
+
 canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
@@ -40,6 +41,7 @@ gameSocket.onmessage = function (e) {
   if (data.type === 'init_state') {
     playerId = data.game_state.player_id;
     roomId = data.game_state.room_id;
+    roomName = data.game_state.room_name;
     opponentName = data.game_state.opponent;
     gameState.racket1_pos = data.game_state.racket1_pos;
     gameState.racket2_pos = data.game_state.racket2_pos;
@@ -49,10 +51,11 @@ gameSocket.onmessage = function (e) {
     playerName = data.game_state.player;
     gameState.ball_speed = data.game_state.ball_speed;
     gameState.direction = data.game_state.direction;
-    gameContainer.style.width = data.game_state.canvas_width;
-    gameContainer.style.height = data.game_state.canvas_height;
+    gameContainer.style.width = data.game_state.canvas_width + 'px';
+    gameContainer.style.height = data.game_state.canvas_height + 'px';
+    
     resizeCanvas();
-    renderGame();
+    // renderGame();
   }
   else if (data.type === 'game_state') {
     gameState = data.state;
@@ -176,21 +179,39 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 
 // Rendering the game state
+// function drawRoundedRect(x, y, width, height, radius, fillColor)
+// {
+//     ctx.beginPath();
+//     ctx.moveTo(x + radius, y);
+//     ctx.lineTo(x + width - radius, y);
+//     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+//     ctx.lineTo(x + width, y + height - radius);
+//     ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+//     ctx.lineTo(x + radius, y + height);
+//     ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+//     ctx.lineTo(x, y + radius);
+//     ctx.quadraticCurveTo(x, y, x + radius, y);
+//     ctx.closePath();
+//     ctx.fillStyle = fillColor;
+//     ctx.fill();
+// }
+
 function drawRoundedRect(x, y, width, height, radius, fillColor) {
-    ctx.beginPath();
-    ctx.moveTo(x + radius, y);
-    ctx.lineTo(x + width - radius, y);
-    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-    ctx.lineTo(x + width, y + height - radius);
-    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-    ctx.lineTo(x + radius, y + height);
-    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-    ctx.lineTo(x, y + radius);
-    ctx.quadraticCurveTo(x, y, x + radius, y);
-    ctx.closePath();
-    ctx.fillStyle = fillColor;
-    ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
 }
+
 
 function renderGame() {
     // Clear the canvas
@@ -218,12 +239,12 @@ function renderGame() {
     ctx.fill();
 
     // Draw racket1
-    ctx.fillStyle = "#33FF00";
-    drawRoundedRect(gameState.racket1_pos.x, gameState.racket1_pos.y, 20, 120, 10, "#33FF00");
+    let racket1_color = "#eac646";
+    drawRoundedRect(gameState.racket1_pos.x, gameState.racket1_pos.y, 20, 120, 10, racket1_color);
 
     // Draw racket2
-    ctx.fillStyle = "#FF3333";
-    drawRoundedRect(gameState.racket2_pos.x, gameState.racket2_pos.y, 20, 120, 10, "#FF3333");
+    let racket2_color = "#eac646";
+    drawRoundedRect(gameState.racket2_pos.x, gameState.racket2_pos.y, 20, 120, 10, racket2_color);
 
     // Draw player names and scores
     const player1NameElement = document.getElementById('player1-name');
