@@ -2,6 +2,13 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
 const gameContainer = document.getElementById('game-container');
+const countdownElement = document.querySelector('.countdown');
+const player1NameElement = document.getElementById('player1-name');
+const player2NameElement = document.getElementById('player2-name');
+const score1Element = document.getElementById('score1');
+const score2Element = document.getElementById('score2');
+
+
 
 canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
@@ -26,9 +33,8 @@ let gameState = {
 };
 
 // WebSocket connection
-let roomName = 'room1'; // This should be dynamic based on matchmaking or user selection
-let url = `ws://${window.location.host}/ws/game/${roomName}/`;
-const gameSocket = new WebSocket(url);
+let roomName = 'room_1'; // This should be dynamic based on matchmaking or user selection
+let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/`);
 
 // WebSocket event handlers
 gameSocket.onopen = function () {
@@ -53,9 +59,28 @@ gameSocket.onmessage = function (e) {
     gameState.direction = data.game_state.direction;
     gameContainer.style.width = data.game_state.canvas_width + 'px';
     gameContainer.style.height = data.game_state.canvas_height + 'px';
-    
+    // if (gameSocket.readyState === WebSocket.OPEN) {
+    //   gameSocket.close();
+    // }
+
+    // gameSocket.onclose = function() {
+    //   // After the WebSocket is closed, open a new one
+    //   gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/`);
+    //   resizeCanvas();
+    //   console.log("New WebSocket opened after closing the previous one.");
+    // };
     resizeCanvas();
     // renderGame();
+  }
+  else if (data.type === 'countdown') {
+    console.log('Countdown: ', data.countdown);
+    let dict = {
+      '3': 'Ready',
+      '2': 'Set',
+      '1': 'Go!',
+    };
+    updateCountdown(dict[data.countdown]);
+
   }
   else if (data.type === 'game_state') {
     gameState = data.state;
@@ -89,11 +114,6 @@ gameSocket.onmessage = function (e) {
     gameState.direction = data.game_state.direction;
     server_fps = data.fps_ratio;
   }
-  // else if (data.type === 'update_paddles')
-  // {
-  //   gameState.racket1_pos = data.racket1_pos;
-  //   gameState.racket2_pos = data.racket2_pos;
-  // }
   else if (data.type === 'moves')
   {
     if (playerId === 1)
@@ -178,24 +198,6 @@ function resizeCanvas() {
 
 window.addEventListener('resize', resizeCanvas);
 
-// Rendering the game state
-// function drawRoundedRect(x, y, width, height, radius, fillColor)
-// {
-//     ctx.beginPath();
-//     ctx.moveTo(x + radius, y);
-//     ctx.lineTo(x + width - radius, y);
-//     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-//     ctx.lineTo(x + width, y + height - radius);
-//     ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-//     ctx.lineTo(x + radius, y + height);
-//     ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-//     ctx.lineTo(x, y + radius);
-//     ctx.quadraticCurveTo(x, y, x + radius, y);
-//     ctx.closePath();
-//     ctx.fillStyle = fillColor;
-//     ctx.fill();
-// }
-
 function drawRoundedRect(x, y, width, height, radius, fillColor) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -247,10 +249,6 @@ function renderGame() {
     drawRoundedRect(gameState.racket2_pos.x, gameState.racket2_pos.y, 20, 120, 10, racket2_color);
 
     // Draw player names and scores
-    const player1NameElement = document.getElementById('player1-name');
-    const player2NameElement = document.getElementById('player2-name');
-    const score1Element = document.getElementById('score1');
-    const score2Element = document.getElementById('score2');
 
     if (player1NameElement) {
         player1NameElement.textContent = playerName;
@@ -284,6 +282,7 @@ function fps_calculator()
     }
     return fps;
 }
+
 
 
 function updatePaddlePosition()
@@ -325,6 +324,9 @@ function updateBallPosition()
   // console.log('Ball speed ', gameState.ball_speed);
 }
 
+
+
+
 // Game loop
 function game_loop()
 {
@@ -337,5 +339,11 @@ function game_loop()
   requestAnimationFrame(game_loop);
 }
 
-// Start the game loop
+function updateCountdown(txt = '') {
+  countdownElement.textContent = txt;
+  countdownElement.style.animation = 'none';
+  countdownElement.offsetHeight; // Trigger reflow
+  countdownElement.style.animation = null;
+}
+
 game_loop();

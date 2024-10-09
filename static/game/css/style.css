@@ -92,3 +92,34 @@ canvas {
   font-weight: bold;
   cursor: pointer;
 }
+
+.countdown {
+  font-size: 120px;
+  color: white;
+  text-align: center;
+  animation: countdownAnimation 3s linear forwards;
+  opacity: 1;
+}
+
+@keyframes countdownAnimation {
+  0% {
+      transform: scale(0.5);
+      opacity: 0;
+  }
+  10% {
+      transform: scale(1.2);
+      opacity: 1;
+  }
+  20% {
+      transform: scale(1);
+      opacity: 1;
+  }
+  90% {
+      transform: scale(1);
+      opacity: 1;
+  }
+  100% {
+      transform: scale(0.5);
+      opacity: 0;
+  }
+}

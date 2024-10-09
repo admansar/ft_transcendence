@@ -97,6 +97,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
         self.room_id = await self.assign_room(self.user.username)
         self.room_group_name = f'room_{self.room_id}'
+        print (f"creating room : {self.room_group_name}")
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name,
@@ -108,15 +109,36 @@ class GameConsumer(AsyncWebsocketConsumer):
         if len(self.room.players) == 2 and not self.room.game_loop_task:
             other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
             await other_player.send_player_info(self.user.username)
+            await self.start_countdown(other_player)
             self.room.game_state.start_game()
             self.room.game_loop_task = asyncio.create_task(self.game_loop())
-            # asyncio.create_task(self.paddle_loop(self.room))
 
     async def send_player_info(self, opponent: str) -> None:
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'player_info',
+                'opponent': opponent
+            }
+        )
+        
+    async def player_info(self, event: Any) -> None:
+        opponent = event['opponent']
         await self.send(text_data=json.dumps({
             'type': 'player_info',
             'opponent': opponent
         }))
+    async def start_countdown(self, other) -> None:
+        data: dict = {
+                    'type': 'countdown',
+                    'countdown': ""
+                }
+        changes: list = [n for n in range(3, 0, -1)]
+        for change in changes:
+            data['countdown'] = change
+            await self.send(text_data=json.dumps(data))
+            await other.send(text_data=json.dumps(data))
+            await asyncio.sleep(1)
 
 
     async def disconnect(self, data) -> None:
@@ -215,16 +237,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             'direction': self.room.game_state.ball_dir,
             'ball_speed': self.room.game_state.ball_speed,
         }))
-        
-    async def update_paddles(self, data: dict[str, Any]) -> None:
-        self.room.game_state.racket1_pos = data.get('racket1_pos')
-        self.room.game_state.racket2_pos = data.get('racket2_pos')
-        await self.send(text_data=json.dumps({
-            'type': 'update_paddles',
-            'racket1_pos': data.get('racket1_pos'),
-            'racket2_pos': data.get('racket2_pos')
-        }))
-        pass
         
 
     async def player_disconnected(self, event:  Any) -> None:
