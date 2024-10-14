@@ -1,0 +1,32 @@
+<!-- templates/select_game.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 100px;
+            background-color: #000000;
+        }
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select a Game</h1>
+    <button onclick="window.location.href='{% url 'game_2d' %}'">2d remote Game</button>
+    <button onclick="window.location.href='{% url 'game_3d' %}'">3d offline Game (beta)</button>
+    <button onclick="window.location.href='{% url 'game_2d_off' %}'">2d Game vs ai bot</button>
+    <button onclick="window.location.href='{% url 'tournament' %}'">tournament</button>
+</body>
+</html>
