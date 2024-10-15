@@ -29,6 +29,31 @@ function routing() {
                 selectedGame();
             }, 200);
             break;
+        case '/game_offline_2d':
+            setTimeout(() => {
+                document.body.setAttribute('style', '');
+                document.body.innerHTML = ''
+                document.head.innerHTML = ''
+                document.body.innerHTML = game2dOfflineBody;
+                // i want to get the jwt token from the local storage
+                import('../gamess/js/game_offline.js').then(module => {
+                    module.game_2d_offline();
+                }
+                )
+            }, 200);
+            break;
+        case '/game_2d':
+            setTimeout(() => {
+                document.body.setAttribute('style', '');
+                document.body.innerHTML = ''
+                document.head.innerHTML = ''
+                document.body.innerHTML = game2dBody;
+                import('../gamess/js/game.js').then(module => {
+                    module.game_2d();
+                }
+                )
+            }, 200);
+            break;
     }
 }
 
@@ -114,6 +139,71 @@ let selectGame = `
     <h1>Select a Game</h1>
 </body>
 `
+
+
+let game2dOfflineBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ping pong game</title>
+  <link rel="stylesheet" href="gamess/css/game_style_offline.css">
+  <link rel="icon" type="image/x-icon" href="gamess/images/140412.png">
+</head>
+<body>
+  <canvas id="canvas" width="600" height="400"></canvas>
+  <script src="gamess/js/game_offline.js"></script>
+</body>
+</html>
+
+`
+
+let game2dBody = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ping Pong Game</title>
+  <link rel="stylesheet" href="gamess/css/style.css">
+  <link rel="icon" type="image/x-icon" href="gamess/images/140412.png">
+</head>
+<body>
+  <div id="header">
+    <div id="score-board">
+      <div>
+        <span id="player1-name"></span> vs <span id="player2-name"></span>
+      </div>
+    <div id="timer">Time: <span id="timer-value">0:00</span></div>
+      <div>
+        <span id="score1">0</span> : <span id="score2">0</span>
+      </div>
+
+    </div>
+  </div>
+  
+  <div id="game-container">
+    <canvas id="canvas"></canvas>
+  </div>
+  
+  <div id="notification-modal" class="modal">
+    <div class="modal-content">
+      <span id="modal-close" class="close">&times;</span>
+      <p id="modal-message"></p>
+    </div>
+    
+  </div>
+  <div class="countdown"></div>
+
+  <script src="game/js/game.js"></script>
+</body>
+</html>
+`
+
+
 
 async function selectedGame() {
     console.log('Select game!');

@@ -270,6 +270,9 @@ class Racket
 /**********************************************************************/
 
 
+let color = "#ffffff";
+let bot_mode = true;
+
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
@@ -519,11 +522,10 @@ function game_loop()
   fps_counter();
 }
 
-function main()
+export function game_2d_offline()
 {
   game_loop()
 }
 
 
-main();
 

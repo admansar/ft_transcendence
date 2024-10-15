@@ -20,7 +20,7 @@ services:
     restart: always
 
   ft_transcendence:
-    build: 
+    build:
       context: ./containers/python
       dockerfile: Dockerfile
       args:

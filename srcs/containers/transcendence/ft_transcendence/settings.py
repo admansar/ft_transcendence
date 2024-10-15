@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
+    '0.0.0.0',
     get_ip(), # changes with post
 ]
 
@@ -36,17 +37,17 @@ ALLOWED_HOSTS = [
 
 INSTALLED_APPS = [
     'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
-    'game',
-    'channels',
     'rest_framework',
     'rest_framework.authtoken',
+    'accounts',
+    'game',
     'tournament',
     'corsheaders',
 ]
@@ -98,7 +99,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis', 6379)],
         },
     },
 }
@@ -160,7 +161,6 @@ STATIC_URL = 'static/'
 #     os.path.join(BASE_DIR, 'frontend'),
 #     # BASE_DIR / 'static',
 # )
-print('Hereeeee', os.getenv('PYTHONUNBUFFERED'))
 if os.getenv('PRODUCTION'):
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

@@ -33,8 +33,9 @@ let gameState = {
 };
 
 // WebSocket connection
+const token = localStorage.getItem('jwtToken');
 let roomName = 'room_1'; // This should be dynamic based on matchmaking or user selection
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/`);
+let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
 
 // WebSocket event handlers
 gameSocket.onopen = function () {
@@ -346,4 +347,8 @@ function updateCountdown(txt = '') {
   countdownElement.style.animation = null;
 }
 
-game_loop();
+export function game_2d()
+{
+  game_loop();
+}
+

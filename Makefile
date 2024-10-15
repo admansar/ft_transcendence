@@ -16,12 +16,15 @@ show:
 clean:
 	@docker compose -f ./srcs/docker-compose.yml down
 	@if [ -n "$(containers)" ]; then docker rm -f $(containers); fi
-	# @if [ -n "$(images)" ]; then docker rmi -f $(images); fi
 
 fclean: clean
+	@if [ -n "$(images)" ]; then docker rmi -f $(images); fi
 	@if [ -n "$(volume)" ]; then docker volume prune -f; fi
 	@if [ -n "$(network)" ]; then docker network prune -f; fi
 	@docker system prune -af
+
+stop:
+	@docker compose -f ./srcs/docker-compose.yml stop
 
 re: clean all
 

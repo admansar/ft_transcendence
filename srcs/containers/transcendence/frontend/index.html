@@ -6,6 +6,16 @@
     <title>TRANCENDENCE</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
+
 </head>
 <body>
     <header>
@@ -116,7 +126,7 @@
             </div>
         </span>
     </div>
-    <script src="script.js"></script>
-    <script src="js/router.js"></script>
+    <script  type="module" src="script.js"></script>
+    <script  type="module" src="js/router.js"></script>
 </body>
 </html>

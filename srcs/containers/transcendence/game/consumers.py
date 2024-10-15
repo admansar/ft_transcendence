@@ -1,4 +1,4 @@
-# your_game_app/consumers.py
+# game.consumers
 
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -6,6 +6,8 @@ from channels.db import database_sync_to_async
 import asyncio
 import time
 from typing import Any
+import jwt
+from django.contrib.auth.models import User
 
 
 # Constants
@@ -86,16 +88,31 @@ class GameRoom:
 
 
 class GameConsumer(AsyncWebsocketConsumer):
-    room_id: int
-    room_group_name: str
-    room: GameRoom
+    room_group_name: str = "room_1" # default room
+    room_id: int = 1 # default room
+    room: GameRoom = None
+    user: User | dict = None
 
     async def connect(self,) -> None:
-        self.user = self.scope['user']
-        if not self.user.is_authenticated:
-            await self.close()
-            return
-        self.room_id = await self.assign_room(self.user.username)
+        if "=" in self.scope['query_string'].decode():
+            self.token = self.scope['query_string'].decode().split('=')[1]
+            print (f"Token : {self.token}")
+            user = await self.authenticate_user(self.token)
+            print (f"User : {user}")
+            if user is not None:
+                self.user = user
+            else:
+                await self.close()
+                return
+        else:
+            self.user = self.scope['user']
+            if not self.user.is_authenticated:
+                await self.close()
+                return
+        if isinstance(self.user, User):
+            self.room_id = await self.assign_room(self.user.username)
+        elif isinstance(self.user, dict):
+            self.room_id = await self.assign_room(self.user['username'])
         self.room_group_name = f'room_{self.room_id}'
         print (f"creating room : {self.room_group_name}")
         await self.channel_layer.group_add(
@@ -108,10 +125,21 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room = game_rooms[self.room_id]
         if len(self.room.players) == 2 and not self.room.game_loop_task:
             other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
-            await other_player.send_player_info(self.user.username)
+            await other_player.send_player_info(self.user['username'])
             await self.start_countdown(other_player)
             self.room.game_state.start_game()
             self.room.game_loop_task = asyncio.create_task(self.game_loop())
+        
+        
+    async def authenticate_user(self, token):
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            print  (f"Payload : {payload}")
+            return payload
+        except Exception as e:
+            print (f"Error in authenticate_user : {e}")
+            return None
+
 
     async def send_player_info(self, opponent: str) -> None:
         await self.channel_layer.group_send(
@@ -142,31 +170,35 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
     async def disconnect(self, data) -> None:
-        # Leave the room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
-
-        # Remove player from room
-        self.room = game_rooms.get(self.room_id)
-        if self.room:
-            self.room.players = [p for p in self.room.players if p.channel_name != self.channel_name]
-            # Notify the other player
-            await self.channel_layer.group_send(
+        try:
+            # Leave the room group
+            await self.channel_layer.group_discard(
                 self.room_group_name,
-                {
-                    'type': 'player_disconnected',
-                    'message': f'{self.user.username} has disconnected.'
-                }
+                self.channel_name
             )
-            # cancel game loop
-            if self.room.game_loop_task:
-                self.room.game_loop_task.cancel()
-                self.room.game_loop_task = None
-            # If no players left, delete the room
-            if not self.room.players:
-                del game_rooms[self.room_id]
+
+            # Remove player from room
+            self.room = game_rooms.get(self.room_id)
+            if self.room:
+                self.room.players = [p for p in self.room.players if p.channel_name != self.channel_name]
+                # Notify the other player
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'player_disconnected',
+                        'message': f'{self.user.username} has disconnected.'
+                    }
+                )
+                # cancel game loop
+                if self.room.game_loop_task:
+                    self.room.game_loop_task.cancel()
+                    self.room.game_loop_task = None
+                # If no players left, delete the room
+                if not self.room.players:
+                    del game_rooms[self.room_id]
+        except Exception as e:
+            print (f"Error in disconnect : {e}")
+            pass
 
     async def receive(self, text_data: Any) -> None:
         data = json.loads(text_data)
@@ -217,8 +249,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'ball_pos': self.room.game_state.ball_pos,
                 'score1': self.room.game_state.score1,
                 'score2': self.room.game_state.score2,
-                'player': self.room.players[0].user.username,
-                'opponent': self.room.players[1].user.username if len(self.room.players) > 1 else 'waiting...',
+                'player': self.room.players[0].user['username'],
+                'opponent': self.room.players[1].user['username'] if len(self.room.players) > 1 else 'waiting...',
                 'direction': self.room.game_state.ball_dir,
                 'racket_speed': self.room.game_state.racket_speed,
                 'racket_width': RACKET_WIDTH,
@@ -327,7 +359,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         if not self.room:
             return
 
-        winner = self.room.players[0].user.username if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user.username
+        winner = self.room.players[0].user['username'] if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user['username']
         await self.channel_layer.group_send(
             self.room_group_name,
             {
