@@ -232,6 +232,53 @@ let game3dBody = `
 </html>
 `
 
+let BodyTournament = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Pong Tournament - 4 Players</title>
+    <link rel="stylesheet" href="tournament/css/tournament.css">
+</head>
+<body>
+    <div class="tournament-frame">
+        <h1>🏓 Ping Pong Tournament 🏓</h1>
+        
+        <div class="tournament-bracket">
+            <div class="round">
+                <div class="match">
+                    <div class="player1">...</div>
+                    <div class="player2">...</div>
+                </div>
+                <div class="match">
+                    <div class="player3">...</div>
+                    <div class="player4">...</div>
+                </div>
+            </div>
+            
+            <div class="round">
+                <div class="match">
+                    <div class="winner1">...</div>
+                    <div class="winner2">...</div>
+                </div>
+            </div>
+            
+            <div class="round">
+                <div class="match">
+                    <div class="winner_winner_chicken_dinner">Champion</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="register-btn">Register Now</button>
+    </div>
+
+    <script src="tournament/js/tournament.js"></script>
+</body>
+</html>
+`
+
 
 
 async function selectedGame() {
@@ -337,11 +384,38 @@ function game_2d_offline() {
     import('../gamess/js/game_offline.js').then(module => {module.game_2d_offline();})
 }
 
+function tournament() {
+    import('../tournament/js/tournament.js').then(module => {module.tournament();})
+}
+
 
 // routing();
 document.addEventListener('DOMContentLoaded', routing);
 
 
+function go_to_path(body, fun) {
+    setTimeout(() => {
+        document.body.setAttribute('style', '');
+        document.body.innerHTML = ''
+        document.head.innerHTML = ''
+        document.body.innerHTML = body;
+        fun()
+    }, 100);
+}
+
+export function navigate(url) {
+    let check = false;
+    for (const route of routes) {
+        if (route.path === url) {
+            history.pushState(null, null, url);
+            go_to_path(route.body, route.component);
+            check = true;
+        }
+    }
+    if (check === false) {
+        console.log('Page not found ', url);
+    }
+}
 
 
 
@@ -375,6 +449,11 @@ export let routes = [
         path: '/game_3d',
         body: game3dBody,
         component: game_3d
+    },
+    {
+        path: '/tournament',
+        body: BodyTournament,
+        component: tournament
     },
 
 ]

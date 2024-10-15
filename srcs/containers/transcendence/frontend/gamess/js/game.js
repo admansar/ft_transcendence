@@ -1,3 +1,5 @@
+import { navigate } from "../../js/router.js";
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -101,13 +103,13 @@ gameSocket.onmessage = function (e) {
   else if (data.type === 'notification') {
     show_notification(data.message);
     if (data.message.indexOf ('has disconnected.') != -1)
-      setTimeout (function () {window.location.href = '/';
-      }, 1000)
+      setTimeout (function () {}, 1000)
+      navigate('/')
   }
   else if (data.type === 'game_over') {
     show_notification(`${data.winner} wins the game!`);
-    setTimeout (function () {window.location.href = '/';
-  }, 1000)
+    setTimeout (function () {}, 1000)
+    navigate('/')
   }
   else if (data.type === 'broadcast_game_state')
   {
@@ -351,7 +353,8 @@ export function game_2d()
 {
   if (token === null) {
     show_notification('You must login first!');
-    window.location.href = '/login';
+    // window.location.href = '/login';
+    navigate('/login');
   }
   game_loop();
 }

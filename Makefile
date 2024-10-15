@@ -26,6 +26,12 @@ fclean: clean
 stop:
 	@docker compose -f ./srcs/docker-compose.yml stop
 
+down:
+	@docker compose -f ./srcs/docker-compose.yml down
+
+logs:
+	@docker compose -f ./srcs/docker-compose.yml logs -f
+
 re: clean all
 
 reshow: clean show

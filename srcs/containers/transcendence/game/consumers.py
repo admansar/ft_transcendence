@@ -186,7 +186,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     self.room_group_name,
                     {
                         'type': 'player_disconnected',
-                        'message': f'{self.user.username} has disconnected.'
+                        'message': f'{self.user['username']} has disconnected.'
                     }
                 )
                 # cancel game loop
@@ -358,7 +358,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room = game_rooms.get(self.room_id)
         if not self.room:
             return
-
+        for player in self.room.players:
+            print (f"player : {player.user}")
         winner = self.room.players[0].user['username'] if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user['username']
         await self.channel_layer.group_send(
             self.room_group_name,
