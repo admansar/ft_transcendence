@@ -596,7 +596,7 @@ function createText(text, font, position, rotation)
     return textMesh;
 }
 
-const font_json = '/static/game/js/fonts/League_Spartan_Regular.json'
+let font_json = './fonts/League_Spartan_Regular.json';
 
 let textMesh_collector = [null, null]
 
@@ -824,5 +824,12 @@ document.addEventListener('mousemove', function(event)
 		paddleBody.position.z = -mouseY * paddleRangeZ;
 	});
 
-
-animate()
+export function game_3d()
+{
+	// how can i check if jwt is valid or not
+	if (localStorage.getItem('jwtToken') === null)
+	{
+		window.location.replace('/login')
+	}
+	animate()
+}

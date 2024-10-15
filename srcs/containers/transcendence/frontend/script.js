@@ -1,3 +1,5 @@
+import { routes } from './js/router.js';
+
 const circles = document.querySelectorAll('.circle');
 const container = document.querySelector('.circle-container');
 const playModal = document.getElementById('play-modal'); // Get the modal element
@@ -7,8 +9,11 @@ const modeButtons = document.querySelectorAll('.mode-button'); // All game mode 
 const buttons = document.querySelectorAll('.mode-button');
 const switch1 = document.getElementById('switch-1');
 const switch2 = document.getElementById('switch-2');
-// Function to handle circle click event
 
+
+let jwt = localStorage.getItem('jwtToken');
+
+// Function to handle circle click event
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -183,4 +188,52 @@ document.getElementById('textInput').addEventListener('keypress', function(event
         event.preventDefault(); // Prevent form submission or default behavior
         sendMessage(); // Call the sendMessage function
     }
+});
+
+window.onload = function() {
+    if (jwt == null && window.location.pathname !== '/login') {
+        window.location.href = '/login';
+    }
+};
+
+function go_to_path(body, fun) {
+    setTimeout(() => {
+        document.body.setAttribute('style', '');
+        document.body.innerHTML = ''
+        document.head.innerHTML = ''
+        document.body.innerHTML = body;
+        fun()
+    }, 100);
+}
+
+function navigate(url) {
+    let check = false;
+    for (const route of routes) {
+        if (route.path === url) {
+            history.pushState(null, null, url);
+            go_to_path(route.body, route.component);
+            check = true;
+        }
+    }
+    if (check === false) {
+        console.log('Page not found ', url);
+    }
+}
+
+const online = document.getElementById('online-btn');
+
+online.addEventListener('click', function() {
+    navigate('/game_2d');
+});
+
+const offline_2d = document.getElementById('player-vs-computer-btn');
+
+offline_2d.addEventListener('click', function() {
+    navigate('/game_offline_2d');
+});
+
+const offline_3d = document.getElementById('player-vs-player-btn');
+
+offline_3d.addEventListener('click', function() {
+    navigate('/game_3d');
 });

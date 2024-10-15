@@ -349,6 +349,10 @@ function updateCountdown(txt = '') {
 
 export function game_2d()
 {
+  if (token === null) {
+    show_notification('You must login first!');
+    window.location.href = '/login';
+  }
   game_loop();
 }
 

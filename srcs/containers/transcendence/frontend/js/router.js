@@ -35,11 +35,7 @@ function routing() {
                 document.body.innerHTML = ''
                 document.head.innerHTML = ''
                 document.body.innerHTML = game2dOfflineBody;
-                // i want to get the jwt token from the local storage
-                import('../gamess/js/game_offline.js').then(module => {
-                    module.game_2d_offline();
-                }
-                )
+                game_2d_offline();
             }, 200);
             break;
         case '/game_2d':
@@ -48,12 +44,19 @@ function routing() {
                 document.body.innerHTML = ''
                 document.head.innerHTML = ''
                 document.body.innerHTML = game2dBody;
-                import('../gamess/js/game.js').then(module => {
-                    module.game_2d();
-                }
-                )
+                game_2d();
             }, 200);
             break;
+        case '/game_3d':
+            setTimeout(() => {
+                document.body.setAttribute('style', '');
+                document.body.innerHTML = ''
+                document.head.innerHTML = ''
+                document.body.innerHTML = game3dBody;
+                game_3d();
+            }, 200);
+            break;
+
     }
 }
 
@@ -169,7 +172,7 @@ let game2dBody = `
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ping Pong Game</title>
   <link rel="stylesheet" href="gamess/css/style.css">
-  <link rel="icon" type="image/x-icon" href="gamess/images/140412.png">
+  <link rel="icon" type="image/x-icon" href="game/images/140412.png">
 </head>
 <body>
   <div id="header">
@@ -198,7 +201,33 @@ let game2dBody = `
   </div>
   <div class="countdown"></div>
 
-  <script src="game/js/game.js"></script>
+  <script src="gamess/js/game.js"></script>
+</body>
+</html>
+`
+
+let game3dBody = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+    <title>Three.js - Hello cube</title>
+    <link rel="stylesheet" href="gamess/css/style_3d.css">
+    <link rel="icon" type="image/x-icon" href="game/images/140412.png">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="threejs-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
+	<script type="module" src="gamess/js/game_3d.js"></script>
 </body>
 </html>
 `
@@ -296,6 +325,56 @@ function login() {
     })
 }
 
+function game_2d() {
+    import('../gamess/js/game.js').then(module => {module.game_2d();})
+}
+
+function game_3d() {
+    import('../gamess/js/game_3d.js').then(module => {module.game_3d();})
+}
+
+function game_2d_offline() {
+    import('../gamess/js/game_offline.js').then(module => {module.game_2d_offline();})
+}
+
+
 // routing();
 document.addEventListener('DOMContentLoaded', routing);
 
+
+
+
+
+export let routes = [
+    {
+        path: '/register',
+        body: registerBody,
+        component: register
+    },
+    {
+        path: '/login',
+        body: loginBody,
+        component: login
+    },
+    {
+        path: '/game',
+        body: selectGame,
+        component: selectedGame
+    },
+    {
+        path: '/game_offline_2d',
+        body: game2dOfflineBody,
+        component: game_2d_offline
+    },
+    {
+        path: '/game_2d',
+        body: game2dBody,
+        component: game_2d
+    },
+    {
+        path: '/game_3d',
+        body: game3dBody,
+        component: game_3d
+    },
+
+]
