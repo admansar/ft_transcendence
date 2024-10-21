@@ -7,6 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 import jwt
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class SignUp(APIView):
     def post(self, request):
@@ -29,16 +30,22 @@ class Login(APIView):
         if not user.check_password(password):
             raise AuthenticationFailed('Incorrect password')
 
-        payload = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email
-        }
-        token = jwt.encode(payload, 'secret', algorithm='HS256')
+        # payload = {
+        #     'id': user.id,
+        #     'username': user.username,
+        #     'email': user.email
+        # }
+        # token = jwt.encode(payload, 'secret', algorithm='HS256')
+        # response.set_cookie(key='jwt', value=token, httponly=True)
+        # response.data = {
+        #     'jwt': token
+        # }
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
         response = Response()
-        response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
-            'jwt': token
+            'access': str(access),
+            'refresh': str(refresh)
         }
         return response
 
