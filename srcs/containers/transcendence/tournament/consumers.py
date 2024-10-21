@@ -6,27 +6,51 @@ players = []
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.user = self.scope['user']
-        if not self.user.is_authenticated:
-            await self.close()
-            return
+        if "=" in self.scope['query_string'].decode():
+            self.token = self.scope['query_string'].decode().split('=')[1]
+            print (f"Token : {self.token}")
+            user = await self.authenticate_user(self.token)
+            print (f"User : {user}")
+            if user is not None:
+                self.user = user
+            else:
+                await self.close()
+                return
+        else:
+            self.user = self.scope['user']
+            if not self.user.is_authenticated:
+                await self.close()
+                return
         
-        self.group_name = 'tournament'
+        self.room_id = await self.assign_room(self.user['username'])
+        self.group_name = f'tour_room{self.room_id}'
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name
         )
         await self.accept()
         players.append(self)
-        # print (self.user.username, ' connected')
+        print (self.user.username, ' connected')
         for player in players:
             player.broadcast_usernames()
         if len(players) == 4:
             print ('Game started')
-            pass
+        else:
+            print (f'number of online players is : {len(players)}')
                 
         # Code to handle connection
         pass
+    
+            
+    async def authenticate_user(self, token):
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            print  (f"Payload : {payload}")
+            return payload
+        except Exception as e:
+            print (f"Error in authenticate_user : {e}")
+            return None
+
 
     async def broadcast_usernames(self):
         print ('Broadcasting usernames')

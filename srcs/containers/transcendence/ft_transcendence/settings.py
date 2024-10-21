@@ -29,7 +29,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '0.0.0.0',
-    get_ip(), # changes with post
+    # get_ip(), # changes with post
 ]
 
 

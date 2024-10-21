@@ -50,8 +50,9 @@ const players = [
 
 
 
-let room_name = "room_0";
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/${room_name}/`);
+let room_name = "tour_room";
+const token = localStorage.getItem('jwtToken');
+let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/${room_name}/?token=${token}`);
 
 gameSocket.onopen = function () {
     console.log('Connection opened');

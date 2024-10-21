@@ -239,7 +239,7 @@ let BodyTournament = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ping Pong Tournament - 4 Players</title>
-    <link rel="stylesheet" href="tournament/css/tournament.css">
+    <link rel="stylesheet" href="tournoi/css/tournament.css">
 </head>
 <body>
     <div class="tournament-frame">
@@ -274,7 +274,7 @@ let BodyTournament = `
         <button class="register-btn">Register Now</button>
     </div>
 
-    <script src="tournament/js/tournament.js"></script>
+    <script src="tournoi/js/tournament.js"></script>
 </body>
 </html>
 `
@@ -385,7 +385,7 @@ function game_2d_offline() {
 }
 
 function tournament() {
-    import('../tournament/js/tournament.js').then(module => {module.tournament();})
+    import('../tournoi/js/tournament.js').then(module => {module.tournament();})
 }
 
 

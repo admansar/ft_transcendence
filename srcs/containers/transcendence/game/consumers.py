@@ -88,7 +88,7 @@ class GameRoom:
 
 
 class GameConsumer(AsyncWebsocketConsumer):
-    room_group_name: str = "room_1" # default room
+    room_group_name: str = "room_01" # default room
     room_id: int = 1 # default room
     room: GameRoom = None
     user: User | dict = None

@@ -36,7 +36,7 @@ let gameState = {
 
 // WebSocket connection
 const token = localStorage.getItem('jwtToken');
-let roomName = 'room_1'; // This should be dynamic based on matchmaking or user selection
+let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
 
 // WebSocket event handlers
