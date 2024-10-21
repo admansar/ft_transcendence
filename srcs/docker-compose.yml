@@ -19,7 +19,7 @@ services:
       - ft_transcendence_network
     restart: always
 
-  ft_transcendence:
+  backend:
     build:
       context: ./containers/python
       dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
         - PYTHONUNBUFFERED=1
         - SECRET_KEY=${SECRET_KEY}
         - PRODUCTION=${PRODUCTION}
-    container_name: ft_transcendence
+    container_name: backend
     ports:
       - "8000:8000"
     volumes:
@@ -48,7 +48,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - ft_transcendence
+      - backend
     volumes:
       - ./containers/transcendence/frontend:/usr/share/nginx/html
       - ./containers/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
