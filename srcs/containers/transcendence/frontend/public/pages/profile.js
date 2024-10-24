@@ -153,6 +153,9 @@ class Profile extends HTMLElement {
                 </body>
             </html>
             `
+            const avatar = document.querySelector('.profile-photo');
+            avatar.style.backgroundImage = `url(${userData.avatar})`;
+            avatar.style.backgroundSize = 'cover';
         } catch (e) {
             console.log(e);
             Router.findRoute('/login');
