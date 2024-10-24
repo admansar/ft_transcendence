@@ -12,10 +12,11 @@ from rest_framework.views import APIView
 
 
 @api_view(['GET'])
+# @permission_classes([IsAuthenticated])
 def select_game(request):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    print(request.user.username)
+    print('Here', request.user.username)
 
 
     return Response({"message": f"Welcome, {request.user.username}"}, status=200)
