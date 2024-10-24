@@ -70,6 +70,8 @@ function registerLogin(page) {
             </div>
         `;
 
+
+
     const registerForm = `
         <div class="registing" style="background-color: rgba(72, 95, 125, 0.6);">
             <img src="public/src/img/pingpong-logo.png" class="logo-log" style="margin: 10px;">
@@ -105,7 +107,11 @@ function registerLogin(page) {
     else {
         app.innerHTML = loginForm;
         login();
+        Oauth42();
     }
+
+
+
 
     // Add event listener to switch between forms
     document.addEventListener('click', function (event) {
@@ -120,6 +126,16 @@ function registerLogin(page) {
         }
     });
     // });
+}
+
+function Oauth42() {
+    const button = document.querySelector('.btn1');  // Target the button with class 'btn1'
+
+    button.addEventListener('click', async () => {
+        document.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Fapi%2Faccounts%2Foauth42%2F&response_type=code';
+    });
+    
+
 }
 
 function register() {
