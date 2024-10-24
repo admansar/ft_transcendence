@@ -2,10 +2,32 @@ body {
     margin: 0;
     display: flex;
     justify-content: center;
+    align-items: center;
     height: 100vh;
     background-color: #252525;
-    background: radial-gradient(circle, green, rgba(0, 0, 0, 1));
+    background-size: cover;
+    background-position: center;
+    /* background: radial-gradient(circle, green, rgba(0, 0, 0, 1)); */
+    transition: background-image 5s;
     overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(31, 31, 31);
+    opacity: 0;
+    transition: opacity 1s ease-in-out; /* Fade to black */
+    z-index: -1; /* Ensure it stays behind content */
+    pointer-events: none; /* Make sure it doesn't block user interaction */
+}
+
+body.fade-to-black::before {
+    opacity: 1; /* Black overlay fades in */
 }
 
 .circle-container {
@@ -63,12 +85,6 @@ header {
     margin: 20px;
     opacity: 0.8;
 }
-@media screen and (max-width:1124px) {
-    .circle{
-        width: 150px;
-        height: 150px;
-    }
-}
 /* When the current .circle is active, push its next sibling (adjacent) */
 
 .circle.active {
@@ -80,10 +96,11 @@ header {
     background-color:rgba(255, 196, 0, 1);
     box-shadow: 0 4px 50px rgb(255, 196, 0);
     border: 3px solid #ffffff;
-    transition: all 0.8s ease-in-out;
+    transition: all 0.5s ease-in-out;
 }
 .circle:hover{
-    background-color: #fade6d;
+    background-color: #ffbb00;
+    box-shadow: 0px 0px 50px #ffffff, inset 0px 0px 50px #ffec7d;
 }
 
 .circle-text {
@@ -136,7 +153,7 @@ header {
 }
 
 .circle.active .circle-text:hover{
-    text-shadow: 0px 0px 10px rgba(0, 250, 46, 0.85)
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.785);
 }
 /* Modal styling */
 .modal {
@@ -391,17 +408,17 @@ input[type="password"]:hover {
 }
 
 .btn1 {
-    background-image: url('src/42-logo.png'); /* Image for the first button */
+    background-image: url('../../src/img/42-logo.png'); /* Image for the first button */
     background-size: 50%;
 }
 
 .btn2 {
-    background-image: url('src/fb-logo.png'); /* Image for the second button */
+    background-image: url('../../src/img/fb-logo.png'); /* Image for the second button */
     background-size: 20%;
 }
 
 .btn3 {
-    background-image: url('src/google-logo.png'); /* Image for the third button */
+    background-image: url('../../src/img/google-logo.png'); /* Image for the third button */
     background-size: 30%;
 }
 
@@ -418,6 +435,29 @@ input[type="password"]:hover {
     width: 100%;           /* Use full width of its container */
     height: auto;          /* Maintain aspect ratio */
     margin-bottom: 20px;   /* Space below the logo */
+}
+
+.connect-button {
+    padding: 8px 110px;
+    display: inline-block;
+    background-color: #202020; /* Green background */
+    color: white; /* White text color */
+    text-align: center;
+    font-family: 'Kanit', sans-serif;
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px;
+    border: 2px solid #202020; /* Border color matching the background */
+    cursor: pointer;
+    margin-top: 10px; /* Space above the button */
+    transition: border-color 0.5s ease-in-out,box-shadow 0.5s ease-in-out, color 0.5s ease-in-out,background-color 0.5s ease-in-out;
+}
+
+.connect-button:hover {
+    background-color: #ffcc00; /* Darker green background on hover */
+    border-color: #ffcc00; /* Darker border on hover */
+    color: #202020;
+    box-shadow: 0px 0px 50px rgb(255, 196, 0);
+    transition: box-shadow 0.8s ease-in-out,color 0.5s ease-in-out,background-color 0.5s ease-in-out;
 }
 
 .submit-button {
@@ -506,7 +546,7 @@ input[type="password"]:hover {
 .registing{
     position: relative;
     width: 600px;
-    height: 600px;
+    height: 800px;
     background-color: rgba(255, 208, 0, 0.187);
     border-radius: 70px;
     border: 6px solid #FBCC0A;
@@ -591,10 +631,11 @@ input[type=search]{
 }
 
 .messanger{
+    display: grid;
     position: fixed;
     top: 75%;
-    left: 94%;
-    align-items: column;
+    right: 1px;
+    align-content: center;
     justify-content: center;
     transition: all 0.3s ease-in-out;
 }
@@ -638,13 +679,16 @@ input[type=search]{
     transition: all 0.3s ease-in-out;
 }
 
-.profile{
+.friend-profile{
     margin: 5px;
     background-color: #202020;
     width: 50px;
     height: 50px;
     border-radius: 50px;
     cursor: pointer;
+    display: flex;
+    align-items: end;
+    justify-content: end;
 }
 
 .profile:hover{
@@ -732,7 +776,7 @@ input[type=text-chat]{
     height: 40px;
     width: 40px;
     border-radius: 50%;
-    background-image: url(src/Send.png);
+    background-image: url(../../src/img/Send.png);
     background-size: 60%; /* Adjusts the image to fit within the button */
     background-position: center; /* Centers the image */
     background-repeat: no-repeat;
@@ -761,7 +805,7 @@ input[type=text-chat]{
     padding: 10px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
-    color: #ccc;
+    color: #fff;
     margin: 3px;
     border-radius: 20px; /* Rounded edges for the message */
     word-wrap: break-word; /* Breaks long words */
@@ -790,3 +834,408 @@ input[type=text-chat]{
     clear: both;           /* Ensures each message starts on a new line */
 }
 
+.friend-profile-status{
+    width: 15px;
+    height: 15px;
+    background-color: #3a3a3a;
+    display: flex;
+    right: 15px;
+    border-radius: 50%;
+    top: 100px;
+}
+
+.profile{
+    height: 50px;
+    width: 50px;
+    background-color: #bebebe;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+    position: absolute;
+    left: 12%;
+    top: 17%;
+    background-image: url(../../src/img/profile.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.dashbord-main{
+    bottom: -20px;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+	background-color: rgb(49, 48, 41);
+    border: 2px solid #ffc800;
+    border-radius: 20px;
+	width: 85%;
+	height: 90%;
+}
+
+.left-side-dashbord{
+    margin-left: 50px;
+    /* display: flex; */
+    justify-content: center;
+    /* border: 2px solid #ffffff; */
+    width: 58%;
+    height: 80%;
+    border-radius: 10px;
+}
+
+.right-side-dashbord{
+    margin-left: 20px;
+    margin-top: 20px;
+    display: flex;
+    border: 2px solid #ffe8aa;
+    border-radius: 25px;
+    width: 30%;
+    height: 80%;
+
+    min-width: 400px;
+}
+
+.profile-dashbord{
+    display: inline-block;
+    justify-content: center;
+    align-items: center;
+    width: 95%;
+    height: 20%;
+}
+
+.username-profile-dashbord{
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 65px;
+    width: 95%;
+    height: 45%;
+}
+
+.lvl-profile-dashbord{
+    color: #ffd900;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 32px;
+    width: 95%;
+    height: 25%;
+}
+.expbar-profile-dashbord{
+    display: flex;
+    border: 2px solid #ffe8aa;
+    border-radius: 20px;
+    width: 95%;
+    height: 10%;
+}
+
+.user_exp{
+    background-color: #ffc800;
+    border-radius: 20px;
+    width: 80%;
+    height: 100%;
+}
+
+
+
+.profile-avatar{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 400px;
+    min-height: 600px;
+    width: 100%;
+    height: 100%;
+}
+
+.pingpong-avatar-bar {
+    display: flex;
+    justify-content: center;
+    background-image: url('../../src/img/pingpong-avatar.png');
+    width: 100%; /* Adjust to your desired size */
+    height: 70%; /* Adjust to your desired size */
+    background-position: center;
+    background-size: cover; /* This will ensure the image covers the entire div */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    background-size: 90%;
+    max-width: 400px;
+    max-height: 600px;
+}
+
+.profile-photo{
+    margin-top: 40px;
+    background-color: #bababa;
+    border: 2px solid #bababa;
+    background-image: url(../../src/img/profile.png);
+    background-position: center;
+    background-size: cover; 
+    width: 85%;
+    height: 57%;
+    border-radius: 50%;
+}
+.profile-photo:hover{
+    box-shadow: inset 0px 0px 50px #fffac9;
+}
+.welcome-message{
+    color: #fff;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 13px;
+    position: fixed;
+    top: 10%;
+    text-align: start;
+}
+
+.profile-status{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    border-radius: 20px;
+    border : 2px solid #ffbb00;
+    background-color: #4a4a4a;
+    box-shadow: 0px 8px 10px #000000;
+    width: 300px;
+    height: 20%;
+}
+
+.gird_status{
+    display: inline-grid;
+    align-items: center;
+    grid-template-columns: auto auto auto auto;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fff;
+    padding: 10px;
+}
+
+.grid-item {
+
+    padding: 10px;
+    font-size: 20px;
+    text-align: center;
+}
+
+.match-history-bar{
+    border: 2px solid #ffe8aa;
+    display: grid;
+    align-content: start;
+    gap: 50px;
+    justify-content: center;
+    padding-top: 40px;
+    border-radius: 20px;
+    width: 100%;
+    height: 82%;
+    box-shadow: inset 6px 6px 20px 0 rgba(32, 32, 32, 0.5);
+}
+
+.history-bar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 600px;
+    height: 80px;
+}
+.my_profile_bar{
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #d7d7d7;
+    z-index: 1;
+}
+.score_bar{
+    display: flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    justify-content: space-between;
+    width: 360px;
+    height: 80px;
+    border-radius: 50px;
+    background-color: #8e8e8e;
+    z-index: 0;
+}
+.challenger_bar{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #d7d7d7;
+    z-index: 1;
+}
+
+.registing input[type="text_reg"] {
+    outline: none;
+    margin: 10px;
+    width: 400px;
+    padding: 10px 10px;
+    text-align: center;
+    border-radius: 20px;
+    color:#fade6d;
+    background-color: #181818;
+    border: 1px solid #ffc800;
+}
+
+.registing input[type="text_reg"]:hover {
+    width: 450px;
+    padding: 13px 13px;
+    color: rgb(255, 196, 0);
+    box-shadow: 0px 0px 10px rgb(255, 196, 0);
+    transition: all 0.2s ease-out;
+}
+
+.registing input[type="email_reg"] {
+    outline: none;
+    margin: 10px;
+    width: 400px;
+    padding: 10px 10px;
+    text-align: center;
+    border-radius: 20px;
+    color:#fade6d;
+    background-color: #181818;
+    border: 1px solid #ffc800;
+}
+
+.registing input[type="email_reg"]:hover {
+    width: 450px;
+    padding: 13px 13px;
+    color: rgb(255, 196, 0);
+    box-shadow: 0px 0px 10px rgb(255, 196, 0);
+    transition: all 0.2s ease-out;
+}
+
+.registing input[type="password"] {
+    outline: none;
+    margin: 10px;
+    width: 400px;
+    padding: 10px 10px;
+    text-align: center;
+    border-radius: 20px;
+    color:#fade6d;
+    background-color: #181818;
+    border: 1px solid #ffc800;
+}
+
+.registing input[type="password"]:hover {
+    width: 450px;
+    padding: 13px 13px;
+    color: rgb(255, 196, 0);
+    font-size: 18px;
+    box-shadow: 0px 0px 10px rgb(255, 196, 0);
+    border: 3px solid #ffc800;
+    transition: all 0.2s ease-out;
+}
+
+.score_main{
+    font-size: 58px;
+    color: #fff;
+    margin-left: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.score_guest{
+    font-size: 58px;
+    color: #fff;
+    margin-right: 30px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.status{
+    font-size: 38px;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.close-register{
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #dfdfdf;
+    border-radius: 5px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    width: 100px;
+    height: 30px;
+    background-color: rgb(141, 36, 36);
+    transition: all 0.2s ease;
+
+}
+
+.close-register:hover{
+    background-color: rgb(255, 0, 0);
+    box-shadow: 0px 0px 40px red;
+}
+
+/* The Modal (hidden by default) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 300px;
+}
+
+/* Close button */
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+@media screen and (max-width:1200px) {
+    .circle{
+        width: 150px;
+        height: 150px;
+    }
+    .dashbord-main{
+        flex-direction: column;
+    }
+    .left-side-dashbord{
+        width: 98%;
+        margin-left: unset;
+    }
+    .profile-dashbord{
+        margin-left: 2.5%;
+        margin-bottom: 2.5%;
+        display: inline-grid;
+        text-align: center;
+    }
+    .username-profile-dashbord{
+        font-size: 50px;
+    }
+    .lvl-profile-dashbord{
+        font-size: 15px;
+        height: 50%;
+    }
+    .expbar-profile-dashbord{
+        width: 100%;
+        height: 100%;
+    }
+    .pingpong-avatar-bar{
+        max-width: 250px;
+        max-height: 400px;
+    }
+    .right-side-dashbord{
+        display: flex;
+        width: 90%;
+    }
+    .profile-photo{
+        height: 52%;
+    }
+    .profile-status{
+        width: 300px;
+    }
+}

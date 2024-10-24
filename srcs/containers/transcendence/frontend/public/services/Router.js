@@ -24,14 +24,20 @@ export const routes = [
     },
     {
         path: '/register',
-        component: () => import('../pages/register.js').then(module => {
-            module.attachDOM()
+        component: () => import('../pages/auth.js').then(module => {
+            module.attachDOM('register')
         })
     },
     {
         path: '/login',
-        component: () => import('../pages/login.js').then(module => {
-            module.attachDOM()
+        component: () => import('../pages/auth.js').then(module => {
+            module.attachDOM('login')
+        })
+    },
+    {
+        path: '/profile',
+        component: () => import('../pages/profile.js').then(module => {
+            module.attachDOM();
         })
     },
 ]
