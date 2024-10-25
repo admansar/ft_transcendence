@@ -8,7 +8,12 @@ import jwt
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 import requests
+
+
+User = get_user_model()
 
 class Oauth42(APIView):
     def get(self, request):
@@ -46,35 +51,56 @@ class Oauth42(APIView):
 
         try:
             response = requests.get('https://api.intra.42.fr/v2/me', headers=headers)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequetException as e:
             raise AuthenticationFailed(f'Error fetching user info: {str(e)}')
 
         if response.status_code != 200:
             raise AuthenticationFailed('Failed to fetch user information')
 
         user_info = response.json()
-        payload = {
-            'id': user_info['id'],
-            'username': user_info['login'],
-            'email': user_info['email']
-        }
-        token = jwt.encode(payload, 'secret', algorithm='HS256')
-        print(token)
-        decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        print(decode)
-        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        user_profile , created  = User.objects.get_or_create(username=decode['username'], email=decode['email'])
-        print(user_profile)
+        print('user_info', user_info)
+        user, created = User.objects.get_or_create(
+            email=user_info.get('email', ''),  # Use email instead of username
+            defaults={
+                'username': user_info['login'],  # If you still need a username, set it here
+                'first_name': user_info.get('first_name', ''),
+                'last_name': user_info.get('last_name', ''),
+                'is_active': True,
+                'is_staff': False,
+                'is_superuser': False,
+                'avatar': user_info.get('image', {}).get('link', ''),
+            }
+        )
         if created:
-            user_profile.save()
+            user.save()
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        
+
+        # token = jwt.encode(payload, 'secret', algorithm='HS256')
+        # print(token)
+        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
+        # print(decode)
+        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
+        # user_profile , created  = User.objects.get_or_create(username=user_info['username'], email=user_info['email'])
+        # print(user_profile)
+        # if created:
+        #     user_profile.save()
         
     # ow i save in database after decode 
+        # response = Response()
+        # response.set_cookie(key='jwt', value=token)
+        # response.data = {
+        #     'jwt': token
+        # }
         response = Response()
-        response.set_cookie(key='jwt', value=token, httponly=True)
         response.data = {
-            'jwt': token
+            'access': str(access),
+            'refresh': str(refresh)
         }
+        response.set_cookie(key='jwt', value=str(access))
         return response
+
 
 class SignUp(APIView):
     def post(self, request):
@@ -82,8 +108,6 @@ class SignUp(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-User = get_user_model()
 
 class Login(APIView):
     def post(self, request):
@@ -117,15 +141,18 @@ class Login(APIView):
         return response
 
 class UserView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
-        token = request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-        user = User.objects.filter(id=payload['id']).first()
+        # token = request.COOKIES.get('jwt')
+        # if not token:
+        #     raise AuthenticationFailed('Unauthenticated')
+        # try:
+        #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        # except jwt.ExpiredSignatureError:
+        #     raise AuthenticationFailed('Unauthenticated')
+        user = request.user
+        print('User is =>', user)
         serializer = UserSerializer(user)
         return Response(serializer.data)
     

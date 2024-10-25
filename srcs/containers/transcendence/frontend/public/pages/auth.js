@@ -1,3 +1,5 @@
+import { Router } from '../services/Router.js'
+
 class Auth extends HTMLElement {
     constructor() {
         super()
@@ -146,7 +148,7 @@ function register() {
         const last_name = document.getElementById('lname').value;
         const email = document.getElementById('email').value;
         const password = document.getElementById('pwd').value;
-    
+
         try {
             let response = await fetch('http://localhost:8000/api/accounts/register/', {
                 method: 'POST',
@@ -163,7 +165,8 @@ function register() {
             })
             if (response.ok) {
                 alert('Registration successful!')
-                window.location.href = '/login'
+                Router.findRoute('/login');
+                // window.location.href = '/login'
             } else {
                 alert(`Error: ${response.message}`)
             }
@@ -197,6 +200,7 @@ function login() {
                 localStorage.setItem('access', token.access);
                 localStorage.setItem('refresh', token.refresh);
                 alert('Login successful!')
+                // Router.findRoute('/');
                 window.location.href = '/'
             } else {
                 logout();

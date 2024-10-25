@@ -6,9 +6,9 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=255, null=True)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
+    avatar = models.URLField(null=True)
     
     score = models.SmallIntegerField(null=True)
-    # opponent = models.
     num_wins = models.IntegerField(null=True)
     num_losses = models.IntegerField(null=True)
     '''

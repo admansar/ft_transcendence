@@ -9,8 +9,11 @@ export const Router = {
         if (route !== '/')
             Router.goto(routes[0])
     },
-    goto: async (route) => {
+    goto: async (route, addHistory = true) => {
         console.log(`Going to ${route.path}`);
+        if (addHistory) {         
+            history.pushState(null, null, route.path);
+        }
         await route.component();
     }
 }
