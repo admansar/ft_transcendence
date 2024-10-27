@@ -271,7 +271,7 @@ let BodyTournament = `
             </div>
         </div>
 
-        <button class="register-btn">Register Now</button>
+        <div class="register-btn" id="register-id">waiting for players</div>
     </div>
 
     <script src="tournoi/js/tournament.js"></script>
@@ -399,8 +399,10 @@ function go_to_path(body, fun) {
         document.body.innerHTML = ''
         document.head.innerHTML = ''
         document.body.innerHTML = body;
-        fun()
     }, 100);
+    setTimeout(() => {
+        fun()
+    }, 200);
 }
 
 export function navigate(url) {

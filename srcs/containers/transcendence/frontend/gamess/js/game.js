@@ -47,7 +47,8 @@ gameSocket.onopen = function () {
 gameSocket.onmessage = function (e) {
   const data = JSON.parse(e.data);
   // console.log ('data type : ', data.type)
-  if (data.type === 'init_state') {
+  if (data.type === 'init_state')
+  {
     playerId = data.game_state.player_id;
     roomId = data.game_state.room_id;
     roomName = data.game_state.room_name;
@@ -62,16 +63,6 @@ gameSocket.onmessage = function (e) {
     gameState.direction = data.game_state.direction;
     gameContainer.style.width = data.game_state.canvas_width + 'px';
     gameContainer.style.height = data.game_state.canvas_height + 'px';
-    // if (gameSocket.readyState === WebSocket.OPEN) {
-    //   gameSocket.close();
-    // }
-
-    // gameSocket.onclose = function() {
-    //   // After the WebSocket is closed, open a new one
-    //   gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/`);
-    //   resizeCanvas();
-    //   console.log("New WebSocket opened after closing the previous one.");
-    // };
     resizeCanvas();
     // renderGame();
   }
@@ -353,9 +344,7 @@ export function game_2d()
 {
   if (token === null) {
     show_notification('You must login first!');
-    // window.location.href = '/login';
     navigate('/login');
   }
   game_loop();
 }
-

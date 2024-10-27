@@ -14,7 +14,6 @@ show:
 	@docker compose -f ./srcs/docker-compose.yml up --build
 
 clean:
-	@docker compose -f ./srcs/docker-compose.yml down
 	@if [ -n "$(containers)" ]; then docker rm -f $(containers); fi
 
 fclean: clean

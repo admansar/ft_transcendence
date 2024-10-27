@@ -1,46 +1,3 @@
-// // Assuming this script runs after the DOM is fully loaded
-
-// const registerBtn = document.querySelector('.register-btn');
-
-// if (registerBtn) {
-//     registerBtn.onclick = () => {
-//         alert('Registration form coming soon! Stay tuned for updates.');
-//     };
-// }
-
-// // Simulating a tournament progress
-// const players = document.querySelectorAll('.player');
-// let currentRound = 0;
-// const rounds = [
-//     [0, 2, 1, 3],  // First round winners
-//     [0, 2],        // Second round winners
-//     [0]            // Final winner
-// ];
-
-// function advanceTournament() {
-//     if (currentRound < rounds.length) {
-//         rounds[currentRound].forEach(index => {
-//             if (players[index]) {
-//                 players[index].classList.add('winner');
-//             }
-//         });
-//         currentRound++;
-
-//         // When the final round is reached, declare the winner
-//         if (currentRound === rounds.length && players[0]) {
-//             players[0].textContent = "Player 1";  // You might want to dynamically handle the final winner
-//             players[0].classList.add('champion');  // Add a special class for the final winner
-//         }
-//     }
-// }
-
-// // Click anywhere to advance the tournament, but prevent advancing on the register button click
-// document.body.onclick = (e) => {
-//     if (!registerBtn || e.target !== registerBtn) {
-//         advanceTournament();
-//     }
-// };
-
 const players = [
     document.querySelector('.player1'),
     document.querySelector('.player2'),
@@ -48,11 +5,12 @@ const players = [
     document.querySelector('.player4')
 ]
 
-
-
+let register = document.getElementById('register-id');
+let data = null;
 let room_name = "tour_room";
+let winners = [];
 const token = localStorage.getItem('jwtToken');
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/${room_name}/?token=${token}`);
+let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/?token=${token}`);
 
 gameSocket.onopen = function () {
     console.log('Connection opened');
@@ -60,8 +18,25 @@ gameSocket.onopen = function () {
 
 gameSocket.onmessage = function (e) {
     console.log('Message received');
-    let data = JSON.parse(e.data);
-    console.log(data);
+    data = JSON.parse(e.data);
+    console.log("the type of this data is : ", data.type);
+    if (data.type === 'usernames')
+    {
+        for (let i = 0; i < data.player_num; i++)
+            if ( i < data.usernames.length)
+                players[i].innerHTML = data.usernames[i];
+            else
+                players[i].innerHTML = '...';
+        register.innerHTML = `waiting for ${data.player_num - data.usernames.length} players`;
+    }
+    else if (data.type === 'start_game') {
+        console.log('game started');
+        import('./tournament_game.js').then(module => {
+            module.tour_game().then(winner => {
+                console.log('Winner:', winner);
+            });
+        });
+    }
 }
 
 gameSocket.onclose = function (e) {
@@ -70,13 +45,6 @@ gameSocket.onclose = function (e) {
 
 export function tournament() {
     console.log('Tournament page loaded');
-    console.log(players);
-    players.forEach(player => {
-        player.onclick = () => {
-            console.log('Player clicked');
-            gameSocket.send(JSON.stringify({
-                'message': 'Player clicked'
-            }));
-        }
-    });
+    
 }
+
