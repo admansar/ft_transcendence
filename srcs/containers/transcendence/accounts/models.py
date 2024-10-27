@@ -6,6 +6,17 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=255, null=True)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
+    avatar = models.URLField(null=True)
+    
+    score = models.SmallIntegerField(null=True)
+    num_wins = models.IntegerField(null=True)
+    num_losses = models.IntegerField(null=True)
+    '''
+        score (int)
+        against (user)
+        num_wins
+        num_losses
+    '''
 
     USERNAME_FIELD = 'email'  # Use email as the username
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']  # No additional fields required for createsuperuser

@@ -7,7 +7,7 @@ import asyncio
 import time
 from typing import Any
 import jwt
-from django.contrib.auth.models import User
+from accounts.models import User
 
 
 # Constants
@@ -367,6 +367,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'type': 'game_over',
                 'winner': winner
             }
+            # GameScore.winner
         )
 
     async def game_over(self, event: Any) -> None:
