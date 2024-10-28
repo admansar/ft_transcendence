@@ -5,13 +5,13 @@ network = $(shell docker network ls -q)
 
 
 all:
-	@docker compose -f ./srcs/docker-compose.yml up --build -d
+	@docker compose -f ./docker-compose.yml up --build -d
 
 build:
-	@docker compose -f ./srcs/docker-compose.yml build
+	@docker compose -f ./docker-compose.yml build
 
 show:
-	@docker compose -f ./srcs/docker-compose.yml up --build
+	@docker compose -f ./docker-compose.yml up --build
 
 clean:
 	@if [ -n "$(containers)" ]; then docker rm -f $(containers); fi
@@ -23,13 +23,13 @@ fclean: clean
 	@docker system prune -af
 
 stop:
-	@docker compose -f ./srcs/docker-compose.yml stop
+	@docker compose -f ./docker-compose.yml stop
 
 down:
-	@docker compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./docker-compose.yml down
 
 logs:
-	@docker compose -f ./srcs/docker-compose.yml logs -f
+	@docker compose -f ./docker-compose.yml logs -f
 
 re: clean all
 

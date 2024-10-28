@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   postgres:
     build:
-      context: ./containers/postgres
+      context: ./srcs/containers/postgres
       dockerfile: Dockerfile
       args:
         - POSTGRES_USER=${POSTGRES_USER}
@@ -22,7 +20,7 @@ services:
 
   backend:
     build:
-      context: ./containers/python
+      context: ./srcs/containers/python
       dockerfile: Dockerfile
       args:
         - PYTHONUNBUFFERED=1
@@ -32,7 +30,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./containers/transcendence:/app
+      - ./srcs/containers/transcendence:/app
     env_file:
       - .env
     depends_on:
@@ -43,7 +41,7 @@ services:
 
   nginx:
     build:
-      context: ./containers/nginx
+      context: ./srcs/containers/nginx
       dockerfile: Dockerfile
     container_name: nginx
     ports:
@@ -51,15 +49,15 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./containers/transcendence/frontend:/usr/share/nginx/html
-      - ./containers/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./srcs/containers/transcendence/frontend:/usr/share/nginx/html
+      - ./srcs/containers/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - ft_transcendence_network
     restart: always
 
   adminer:
     build: 
-      context: ./containers/adminer
+      context: ./srcs/containers/adminer
       dockerfile: Dockerfile
     container_name: adminer
     ports:
@@ -70,7 +68,7 @@ services:
   
   redis:
     build:
-      context: ./containers/redis
+      context: ./srcs/containers/redis
       dockerfile: Dockerfile
     container_name: redis
     networks:
