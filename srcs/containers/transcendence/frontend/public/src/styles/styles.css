@@ -98,6 +98,8 @@ header {
     border: 3px solid #ffffff;
     transition: all 0.5s ease-in-out;
 }
+
+
 .circle:hover{
     background-color: #ffbb00;
     box-shadow: 0px 0px 50px #ffffff, inset 0px 0px 50px #ffec7d;
@@ -210,9 +212,11 @@ header {
 }
 
 .modal-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: -webkit-center;
+    align-content: center;
+    /* display: flex;
+    justify-content: space-between; */
+    /* align-items: center; */
     height: 100%; /* Ensure full height for centering */
 }
 
@@ -247,7 +251,7 @@ header {
 .mode-button {
     background-color: #FBCC0A;
     color: #ffffff;
-    padding: 10px 20px;
+    padding: 10px 10px;
     font-size: 24px;
     border: none;
     border-radius: 20px;
@@ -255,6 +259,9 @@ header {
     font-family: 'Kanit', sans-serif;
     text-shadow: 0px 2px 2px rgba(0, 0, 0, 0.5);
     transition: background-color 0.3s ease;
+    width: 400px;
+    height: 100px;
+    align-self: center;
 }
 
 .mode-button:hover {
@@ -1178,11 +1185,11 @@ input[type=text-chat]{
 
 /* Modal Content */
 .modal-content {
-    background-color: white;
+    background-color: transparent;
     padding: 20px;
     border-radius: 8px;
     text-align: center;
-    width: 300px;
+    width: 420px;
 }
 
 /* Close button */

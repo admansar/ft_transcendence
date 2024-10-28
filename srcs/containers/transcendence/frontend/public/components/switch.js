@@ -9,6 +9,6 @@ export function setupSwitches() {
         otherSwitch.style.backgroundColor = '#383838';
     };
 
-    switch1.addEventListener('click', () => toggleSwitch(switch1, switch2));
-    switch2.addEventListener('click', () => toggleSwitch(switch2, switch1));
+    // switch1.addEventListener('click', () => toggleSwitch(switch1, switch2));
+    // switch2.addEventListener('click', () => toggleSwitch(switch2, switch1));
 }

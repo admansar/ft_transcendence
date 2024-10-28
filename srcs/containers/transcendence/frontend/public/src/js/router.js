@@ -1,42 +1,42 @@
 function routing() {
     const path = window.location.pathname;
     switch (path) {
-        case '/game':
-            setTimeout(() => {
-                document.body.setAttribute('style', '');
-                document.body.innerHTML = ''
-                document.head.innerHTML = ''
-                document.body.innerHTML = selectGame;
-                selectedGame();
-            }, 200);
-            break;
-        case '/game_offline_2d':
-            setTimeout(() => {
-                document.body.setAttribute('style', '');
-                document.body.innerHTML = ''
-                document.head.innerHTML = ''
-                document.body.innerHTML = game2dOfflineBody;
-                game_2d_offline();
-            }, 200);
-            break;
-        case '/game_2d':
-            setTimeout(() => {
-                document.body.setAttribute('style', '');
-                document.body.innerHTML = ''
-                document.head.innerHTML = ''
-                document.body.innerHTML = game2dBody;
-                game_2d();
-            }, 200);
-            break;
-        case '/game_3d':
-            setTimeout(() => {
-                document.body.setAttribute('style', '');
-                document.body.innerHTML = ''
-                document.head.innerHTML = ''
-                document.body.innerHTML = game3dBody;
-                game_3d();
-            }, 200);
-            break;
+        // case '/game':
+        //     setTimeout(() => {
+        //         document.body.setAttribute('style', '');
+        //         document.body.innerHTML = ''
+        //         document.head.innerHTML = ''
+        //         document.body.innerHTML = selectGame;
+        //         selectedGame();
+        //     }, 200);
+        //     break;
+        // case '/game_offline_2d':
+        //     setTimeout(() => {
+        //         document.body.setAttribute('style', '');
+        //         document.body.innerHTML = ''
+        //         document.head.innerHTML = ''
+        //         document.body.innerHTML = game2dOfflineBody;
+        //         game_2d_offline();
+        //     }, 200);
+        //     break;
+        // case '/game_2d':
+        //     setTimeout(() => {
+        //         document.body.setAttribute('style', '');
+        //         document.body.innerHTML = ''
+        //         document.head.innerHTML = ''
+        //         document.body.innerHTML = game2dBody;
+        //         game_2d();
+        //     }, 200);
+        //     break;
+        // case '/game_3d':
+        //     setTimeout(() => {
+        //         document.body.setAttribute('style', '');
+        //         document.body.innerHTML = ''
+        //         document.head.innerHTML = ''
+        //         document.body.innerHTML = game3dBody;
+        //         game_3d();
+        //     }, 200);
+        //     break;
 
     }
 }

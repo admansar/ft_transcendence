@@ -43,4 +43,28 @@ export const routes = [
             module.attachDOM();
         })
     },
+    {
+        path: '/offline_game',
+        component: () => import('../pages/game_offline.js').then(module => {
+            module.attachDOM();
+        })
+    },
+    {
+        path: '/online_game',
+        component: () => import('../pages/game_online.js').then(module => {
+            module.attachDOM();
+        })
+    },
+    {
+        path: '/game_3d',
+        component: () => import('../pages/3d_ping_pong.js').then(module => {
+            module.attachDOM();
+        })
+    },
+    {
+        path: '/tournament',
+        component: () => import('../pages/tournament_component.js').then(module => {
+            module.attachDOM();
+        })
+    }
 ]
