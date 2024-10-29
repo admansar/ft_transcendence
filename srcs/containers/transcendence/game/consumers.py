@@ -8,7 +8,8 @@ import time
 from typing import Any
 import jwt
 from accounts.models import User
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Constants
 CANVAS_WIDTH: int = 1000
@@ -16,7 +17,7 @@ CANVAS_HEIGHT: int = 800
 BALL_RADIUS: int = 15
 RACKET_WIDTH: float = 20
 RACKET_HEIGHT: float = 140
-INITIAL_BALL_SPEED: int = 15
+INITIAL_BALL_SPEED: int = 18
 MAX_SCORE: int = 5
 GAME_TICK_RATE: int = 30  # fps
 RACKET_POS: float = 50
@@ -88,31 +89,21 @@ class GameRoom:
 
 
 class GameConsumer(AsyncWebsocketConsumer):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     room_group_name: str = "room_01" # default room
     room_id: int = 1 # default room
     room: GameRoom = None
     user: User | dict = None
+    user_name: str = None
 
-    async def connect(self,) -> None:
-        if "=" in self.scope['query_string'].decode():
-            self.token = self.scope['query_string'].decode().split('=')[1]
-            print (f"Token : {self.token}")
-            user = await self.authenticate_user(self.token)
-            print (f"User : {user}")
-            if user is not None:
-                self.user = user
-            else:
-                await self.close()
-                return
-        else:
-            self.user = self.scope['user']
-            if not self.user.is_authenticated:
-                await self.close()
-                return
-        if isinstance(self.user, User):
-            self.room_id = await self.assign_room(self.user.username)
-        elif isinstance(self.user, dict):
-            self.room_id = await self.assign_room(self.user['username'])
+    # def get
+            
+
+    async def connect(self) -> None:
+        print (f"Scope : {self.scope}")
+        await self.get_username_from_db()
+        self.room_id = await self.assign_room(self.user_name)
         self.room_group_name = f'room_{self.room_id}'
         print (f"creating room : {self.room_group_name}")
         await self.channel_layer.group_add(
@@ -125,19 +116,44 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room = game_rooms[self.room_id]
         if len(self.room.players) == 2 and not self.room.game_loop_task:
             other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
-            await other_player.send_player_info(self.user['username'])
+            await other_player.send_player_info(self.user_name)
             await self.start_countdown(other_player)
             self.room.game_state.start_game()
             self.room.game_loop_task = asyncio.create_task(self.game_loop())
         
         
-    async def authenticate_user(self, token):
+    async def get_username_from_db(self):
+        if "=" in self.scope['query_string'].decode():
+            self.token = self.scope['query_string'].decode().split('=')[1]
+            print (f"Token : {self.token}")
+            if self.token == 'null': # means i got token=null from the frontend
+                print ('--------so its an intra-------')
+                self.token = self.scope['cookies'].get('jwt')
+            user = await self.authenticate_user(self.token)
+            self.user_name = user.username
+            print (f"User : {user.username}")
+            if user is not None:
+                self.user = user
+            else:
+                await self.close()
+                return
+        else:
+            self.user = self.scope['user']
+            self.user_name = self.user.username
+            if not self.user.is_authenticated:
+                await self.close()
+                return
+        pass
+
+
+    @database_sync_to_async
+    def authenticate_user(self, token):
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-            print  (f"Payload : {payload}")
-            return payload
-        except Exception as e:
-            print (f"Error in authenticate_user : {e}")
+            jwt_auth = JWTAuthentication()
+            validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
+            user = jwt_auth.get_user(validated_token)  # This is also a sync method
+            return user
+        except (User.DoesNotExist):
             return None
 
 
@@ -186,7 +202,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     self.room_group_name,
                     {
                         'type': 'player_disconnected',
-                        'message': f'{self.user['username']} has disconnected.'
+                        'message': f'{self.user_name} has disconnected.'
                     }
                 )
                 # cancel game loop
@@ -249,8 +265,8 @@ class GameConsumer(AsyncWebsocketConsumer):
                 'ball_pos': self.room.game_state.ball_pos,
                 'score1': self.room.game_state.score1,
                 'score2': self.room.game_state.score2,
-                'player': self.room.players[0].user['username'],
-                'opponent': self.room.players[1].user['username'] if len(self.room.players) > 1 else 'waiting...',
+                'player': self.room.players[0].user_name,
+                'opponent': self.room.players[1].user_name if len(self.room.players) > 1 else 'waiting...',
                 'direction': self.room.game_state.ball_dir,
                 'racket_speed': self.room.game_state.racket_speed,
                 'racket_width': RACKET_WIDTH,
@@ -360,7 +376,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
         for player in self.room.players:
             print (f"player : {player.user}")
-        winner = self.room.players[0].user['username'] if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user['username']
+        winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
         await self.channel_layer.group_send(
             self.room_group_name,
             {

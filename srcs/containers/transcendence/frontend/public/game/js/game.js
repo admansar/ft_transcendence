@@ -35,7 +35,13 @@ let gameState = {
 };
 
 // WebSocket connection
-const token = localStorage.getItem('jwtToken');
+let token = localStorage.getItem('access');
+if (token == null)
+{
+  token = document.cookie;
+  token = token.slice(token.indexOf('=') + 1, token.indexOf(';'));
+}
+
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
 
@@ -342,9 +348,9 @@ function updateCountdown(txt = '') {
 
 export function game_2d()
 {
-  if (token === null) {
-    show_notification('You must login first!');
-    navigate('/login');
-  }
+  //if (token === null) {
+  //  show_notification('You must login first!');
+  //  navigate('/login');
+  //}
   game_loop();
 }

@@ -827,9 +827,9 @@ document.addEventListener('mousemove', function(event)
 export function game_3d()
 {
 	// how can i check if jwt is valid or not
-	if (localStorage.getItem('jwtToken') === null)
-	{
-		window.location.replace('/login')
-	}
+	// if (localStorage.getItem('jwtToken') === null)
+	// {
+	// 	window.location.replace('/login')
+	// }
 	animate()
 }
