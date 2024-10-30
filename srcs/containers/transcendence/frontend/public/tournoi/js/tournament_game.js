@@ -1,13 +1,16 @@
-import { navigate } from "../../js/router.js";
+//import { navigate } from "../../js/router.js";
+
+import { Router } from "../../services/Router.js";
 
 await new Promise(r => setTimeout(r, 1000));
+let breaker = 0;
 //document.head.innerHTML = ''
 document.head.innerHTML = `
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ping Pong Game</title>
-  <link rel="stylesheet" href="tournoi/css/tournament.css"></link>
+  <link rel="stylesheet" href="public/tournoi/css/tournament.css"></link>
   `
 
 document.body.innerHTML = `
@@ -37,7 +40,7 @@ document.body.innerHTML = `
   </div>
   <div class="countdown"></div>
 
-  <script src="tournoi/js/game.js"></script>
+  <script type="module" src="public/tournoi/js/game.js"></script>
 ` 
 
 
@@ -79,8 +82,12 @@ let gameState = {
 };
 
 // WebSocket connection
-const token = localStorage.getItem('jwtToken');
-let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
+let token = localStorage.getItem('access');
+if (!token)
+{
+  token = document.cookie;
+  token = token.slice(token.indexOf('=') + 1, token.indexOf(';'));
+}let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament_game/${roomName}/?token=${token}`);
 
 // WebSocket event handlers
@@ -108,6 +115,7 @@ export function tour_game()
       gameState.score2 = data.game_state.score2;
       playerName = data.game_state.player;
       gameState.ball_speed = data.game_state.ball_speed;
+      console.log ('Ball speed: ', gameState.ball_speed);
       gameState.direction = data.game_state.direction;
       gameContainer.style.width = data.game_state.canvas_width + 'px';
       gameContainer.style.height = data.game_state.canvas_height + 'px';
@@ -152,11 +160,9 @@ export function tour_game()
     else if (data.type === 'game_over')
     {
       show_notification(`${data.winner} wins the game!`);
-      winner = data.winner;
-      setTimeout(() => {
-        navigate('/');
-        resolve(winner);
-      }, 1000);
+      // winner = data.winner;
+      breaker = 1;
+      gameSocket.close();
     }
     else if (data.type === 'broadcast_game_state')
     {
@@ -174,8 +180,8 @@ export function tour_game()
   };
 
   gameSocket.onclose = function ()
-    {
-    console.log('Disconnected from the game server.');
+  {
+    console.log('Disconnected from the tournamet game server.');
   };
 
   // Sending player moves to the server
@@ -401,6 +407,11 @@ export function tour_game()
   // Game loop
   function game_loop()
   {
+    if (breaker === 1)
+    {
+      resolve(winner);
+      return;
+    }
     if (isMovingDown || isMovingUp)
     {
       updatePaddlePosition();
@@ -419,10 +430,10 @@ export function tour_game()
   }
 
   {
-    if (token === null)
+    if (!token)
     {
       show_notification('You must login first!');
-      navigate('/login');
+      Router.findRoute('/login');
     }
     game_loop();
   }

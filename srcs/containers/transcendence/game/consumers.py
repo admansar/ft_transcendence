@@ -17,7 +17,7 @@ CANVAS_HEIGHT: int = 800
 BALL_RADIUS: int = 15
 RACKET_WIDTH: float = 20
 RACKET_HEIGHT: float = 140
-INITIAL_BALL_SPEED: int = 18
+INITIAL_BALL_SPEED: int = 15
 MAX_SCORE: int = 5
 GAME_TICK_RATE: int = 30  # fps
 RACKET_POS: float = 50
@@ -102,7 +102,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def connect(self) -> None:
         print (f"Scope : {self.scope}")
-        await self.get_username_from_db()
+        try:
+            self.user_name = await self.get_username_from_db() 
+        except Exception as e:
+            print (f"Error in connect : {e}")
+            await self.close()
+            r
         self.room_id = await self.assign_room(self.user_name)
         self.room_group_name = f'room_{self.room_id}'
         print (f"creating room : {self.room_group_name}")
@@ -143,17 +148,17 @@ class GameConsumer(AsyncWebsocketConsumer):
             if not self.user.is_authenticated:
                 await self.close()
                 return
-        pass
+        return self.user_name
 
 
     @database_sync_to_async
-    def authenticate_user(self, token):
+    def authenticate_user(self, token: str) -> User | None :
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
             user = jwt_auth.get_user(validated_token)  # This is also a sync method
             return user
-        except (User.DoesNotExist):
+        except Exception as e:
             return None
 
 
@@ -185,7 +190,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             await asyncio.sleep(1)
 
 
-    async def disconnect(self, data) -> None:
+    async def disconnect(self, keycode) -> None:
         try:
             # Leave the room group
             await self.channel_layer.group_discard(
@@ -356,6 +361,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             game_state.score2 = 0
             # Notify players about game over
             asyncio.create_task(self.notify_game_over())
+            self.close()
 
     def serialize_game_state(self, game_state: GameState) -> dict:
         return {

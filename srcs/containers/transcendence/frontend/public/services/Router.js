@@ -66,5 +66,16 @@ export const routes = [
         component: () => import('../pages/tournament_component.js').then(module => {
             module.attachDOM();
         })
-    }
+    },
 ]
+
+
+
+
+function handleBackNavigation() {
+    let path = window.location.pathname;
+    console.log ('path', path);
+    app.router.findRoute(path);
+};
+
+window.addEventListener('popstate', handleBackNavigation);

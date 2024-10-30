@@ -28,3 +28,5 @@ offline3D.addEventListener('click', () => Router.findRoute('/game_3d'));
 
 const tournament = document.getElementById('tournament-btn');
 tournament.addEventListener('click', () => Router.findRoute('/tournament'));
+
+// const profile 
