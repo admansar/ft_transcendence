@@ -11,12 +11,6 @@ class User(AbstractUser):
     score = models.SmallIntegerField(null=True)
     num_wins = models.IntegerField(null=True)
     num_losses = models.IntegerField(null=True)
-    '''
-        score (int)
-        against (user)
-        num_wins
-        num_losses
-    '''
 
     USERNAME_FIELD = 'email'  # Use email as the username
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']  # No additional fields required for createsuperuser

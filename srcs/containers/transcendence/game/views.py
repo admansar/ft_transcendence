@@ -16,8 +16,6 @@ from rest_framework.views import APIView
 def select_game(request):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    print('Here', request.user.username)
-
 
     return Response({"message": f"Welcome, {request.user.username}"}, status=200)
     # return render(request, 'select_game.html')
