@@ -9,7 +9,8 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from django.http import HttpResponseRedirect
 import requests
 from django.shortcuts import redirect
 
@@ -77,15 +78,14 @@ class Oauth42(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         
-        response = Response()
+        response = HttpResponseRedirect("http://localhost/")
         response.data = {
             'access': str(access),
             'refresh': str(refresh)
         }
         response.set_cookie(key='access', value=str(access))
         response.set_cookie(key='refresh', value=str(refresh))
-        return response
-        # return redirect('http://localhost/profile')
+        return response 
 
 
 class SignUp(APIView):
