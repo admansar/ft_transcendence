@@ -42,12 +42,13 @@ gameSocket.onmessage = function (e) {
         register.innerHTML = `waiting for ${data.player_num - data.usernames.length} players`;
     }
     else if (data.type === 'start_game') {
+    console.log ('data received: ', data);
     (async () => {
         let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
         console.log('game started');
     
         const module = await import('./tournament_game.js');
-        const winner = await module.tour_game();
+        await module.tour_game(data.self, data.opponent);
     
         // console.log('Winner:', winner);
         console.log('lets continue the tournament');

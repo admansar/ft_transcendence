@@ -51,12 +51,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         # Start the game if enough players are in the room
         if len(players) == self.player_num:  # self.player_num:
-            mapper: int = 0
-            for player in players:
-                mapper += 1
-                if mapper % 2 == 0:
-                    await asyncio.sleep(1 / 10)
-                await player.start_match()
+            for idx, player in enumerate(players):
+                player.opponent = players[idx + 1] if idx % 2 == 0 else players[idx - 1]
+            for idx, player in enumerate(players):
+                print (f"player: {player.user_name}, opponent: {player.opponent.user_name} idx : {idx}")
+            print (f"starting match {self.user_name} : {self.opponent.user_name}")
+            await self.start_match(self, self.opponent)
 
         elif len(players) > self.player_num:
             # wait for the next round
@@ -100,9 +100,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         
 
-    async def start_match(self):
-        print('Starting 1v1 match')
-        await self.send(text_data=json.dumps({'type': 'start_game'}))
+    async def start_match(self, player1, player2):
+        # Notify players about the match
+        print (f"Starting match between {player1.user_name} and {player2.user_name}")
+        for player in players:
+            await player.send(text_data=json.dumps({
+                'type': 'start_game',
+                'self': player1.user_name,
+                'opponent': player2.user_name
+            }))
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -237,7 +243,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             
     async def connect(self) -> None:
         await self.get_username_from_db()#
-        self.room_id = await self.assign_room(self.user_name)
+        self.room_id = await self.assign_room()
         self.room_group_name = f'room_{self.room_id}'
         print (f"creating room : {self.room_group_name}")
         await self.channel_layer.group_add(
@@ -577,7 +583,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
         print (f"Winners : {winners}")
 
     @database_sync_to_async
-    def assign_room(self, username: str) -> int:
+    def assign_room(self) -> int:
         # Assign the player to an existing room with less than 2 players
         for room_id, self.room in game_rooms.items():
             if len(self.room.players) < 2:

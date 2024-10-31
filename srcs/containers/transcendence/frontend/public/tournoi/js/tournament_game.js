@@ -95,7 +95,7 @@ gameSocket.onopen = function () {
   console.log('Connected to the game server.');
 };
 
-export function tour_game()
+export function tour_game(self, opponent)
 {
   return new Promise((resolve, reject) => {
 
