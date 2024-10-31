@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Login, SignUp , UserView, Logout , UpdateUser , Oauth42
+from .views import Login, SignUp , UserView, Logout , UpdateUser , Oauth42, RefreshTokenView
 
 urlpatterns = [
     path('login/', Login.as_view()),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', Logout.as_view()),
     path('update/', UpdateUser.as_view()),
     path('oauth42/', Oauth42.as_view()),
+    path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired')
 ]

@@ -82,7 +82,8 @@ class Oauth42(APIView):
             'access': str(access),
             'refresh': str(refresh)
         }
-        response.set_cookie(key='jwt', value=str(access))
+        response.set_cookie(key='access', value=str(access))
+        response.set_cookie(key='refresh', value=str(refresh))
         return response
         # return redirect('http://localhost/profile')
 
@@ -100,10 +101,10 @@ class Login(APIView):
         password = request.data.get('password')
         email = request.data.get('email')
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
-        if user is None:
-            raise AuthenticationFailed('User not found')
-        if not user.check_password(password):
-            raise AuthenticationFailed('Incorrect password')
+        if user is None or not user.check_password(password):
+            return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
+        # if not user.check_password(password):
+        #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
@@ -112,15 +113,36 @@ class Login(APIView):
             'access': str(access),
             'refresh': str(refresh)
         }
-        response.set_cookie(key='jwt', value=str(access), httponly=True)
+        response.set_cookie(key='access', value=str(access), httponly=True)
+        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
         print('response.data=>', response.data)
+        return response
+    
+class RefreshTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh')
+        print('refresh_token', refresh_token)
+        if refresh_token is None:
+            raise AuthenticationFailed('No refresh token was found!')
+        
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = refresh.access_token
+        except Exception as e:
+            raise AuthenticationFailed('Invalid or expired token!')
+        
+        response = Response({
+            'message': 'Token refreshed successfully'
+        })
+        response.set_cookie(key='access', value=str(new_access_token), httponly=True)
+        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
         return response
 
 class UserView(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def get(self, request):
-        token = request.COOKIES.get('jwt')
+        token = request.COOKIES.get('access')
         # print('token==>', token)
         if not token:
             raise AuthenticationFailed('Unauthorized')

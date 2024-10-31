@@ -53,6 +53,7 @@ function registerLogin(page) {
                 <div class="log-contain">
                         <input type="text" id="username" name="username" placeholder="Username">
                         <input type="password" id="pwd" name="pwd" placeholder="Password">
+                        <div id="error" style="color: red; display: none;"></div>
                         <button type="submit" class="submit-button">Connect</button>
                         <div class="stay-sign">
                             <input type="checkbox" id="stay-sign" name="stay-sign" value="stay-signed-in">
@@ -84,6 +85,7 @@ function registerLogin(page) {
                     <input type="text_reg" id="lname" name="lname" placeholder="Last Name">
                     <input type="email_reg" id="email" name="email" placeholder="Email">
                     <input type="password" id="pwd" name="pwd" placeholder="Password">
+                    <div id="error" style="color: red; display: none;"></div>
                     <button type="submit" class="submit-button" id="submit_status">Submit</button>
                 <div class="message" style="color: #fff;">You can also create an account with</div>
                 <div class="button-logs">
@@ -193,25 +195,37 @@ function login() {
                     password: password
                 })
             })
+            const data = await response.json()
             if (response.ok) {
-                const token = await response.json();
-                console.log('access', token.access);
-                console.log('refresh', token.refresh);
-                localStorage.setItem('access', token.access);
-                localStorage.setItem('refresh', token.refresh);
+                console.log('access', data.access);
+                console.log('refresh', data.refresh);
+                localStorage.setItem('access', data.access);
+                localStorage.setItem('refresh', data.refresh);
                 // console.log('cookie', document.cookie);
-                alert('Login successful!')
                 Router.findRoute('/profile');
                 // window.location.href = '/'
             } else {
-                logout();
-                alert(`Error: ${response.message}`)
+                // logout();
+                console.log(data.error);
+                displayError(data.error)
             }
         } catch (e) {
             console.log('Error logging in');
-            alert('Error logging in');
+            displayError(e)
+            // alert('Error logging in');
         }
     })
+}
+
+function displayError(message) {
+    const errorEl = document.getElementById('error');    
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    
+    setTimeout(() => {
+        errorEl.textContent = '';
+    errorEl.style.display = 'None';
+    }, 3000);
 }
 
 customElements.define('auth-page', Auth)
