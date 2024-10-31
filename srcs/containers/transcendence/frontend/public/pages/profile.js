@@ -184,18 +184,19 @@ function getJWTFromCookie() {
     return null;
 }
 
-async function getUserData() {
-    let token = localStorage.getItem('access');
-    if (!token) {
-        token = getJWTFromCookie();
-        console.log(token);
-    }
+async function getUserData() {  
+    // let token = localStorage.getItem('access');
+    // if (!token) {
+    //     token = getJWTFromCookie();
+    //     console.log(token);
+    // }
     const response = await fetch('http://localhost:8000/api/accounts/user', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            // 'Authorization': `Bearer ${token}`
         },
+        credentials: 'include'
     })
     if (!response.ok) {
         const error = await response.text();

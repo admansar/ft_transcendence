@@ -11,6 +11,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 import requests
+from django.shortcuts import redirect
 
 
 User = get_user_model()
@@ -76,23 +77,6 @@ class Oauth42(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         
-
-        # token = jwt.encode(payload, 'secret', algorithm='HS256')
-        # print(token)
-        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # print(decode)
-        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # user_profile , created  = User.objects.get_or_create(username=user_info['username'], email=user_info['email'])
-        # print(user_profile)
-        # if created:
-        #     user_profile.save()
-        
-    # ow i save in database after decode 
-        # response = Response()
-        # response.set_cookie(key='jwt', value=token)
-        # response.data = {
-        #     'jwt': token
-        # }
         response = Response()
         response.data = {
             'access': str(access),
@@ -100,6 +84,7 @@ class Oauth42(APIView):
         }
         response.set_cookie(key='jwt', value=str(access))
         return response
+        # return redirect('http://localhost/profile')
 
 
 class SignUp(APIView):
@@ -111,7 +96,6 @@ class SignUp(APIView):
 
 class Login(APIView):
     def post(self, request):
-        print('Herre')
         username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email')
@@ -121,16 +105,6 @@ class Login(APIView):
         if not user.check_password(password):
             raise AuthenticationFailed('Incorrect password')
 
-        # payload = {
-        #     'id': user.id,
-        #     'username': user.username,
-        #     'email': user.email
-        # }
-        # token = jwt.encode(payload, 'secret', algorithm='HS256')
-        # response.set_cookie(key='jwt', value=token, httponly=True)
-        # response.data = {
-        #     'jwt': token
-        # }
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         response = Response()
@@ -138,12 +112,26 @@ class Login(APIView):
             'access': str(access),
             'refresh': str(refresh)
         }
+        response.set_cookie(key='jwt', value=str(access), httponly=True)
+        print('response.data=>', response.data)
         return response
 
 class UserView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
+        token = request.COOKIES.get('jwt')
+        # print('token==>', token)
+        if not token:
+            raise AuthenticationFailed('Unauthorized')
+        try:
+            user = JWTAuthentication().get_user(JWTAuthentication().get_validated_token(token))
+            print('User is =>', user)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=401)
+            
         # token = request.COOKIES.get('jwt')
         # if not token:
         #     raise AuthenticationFailed('Unauthenticated')
@@ -151,10 +139,6 @@ class UserView(APIView):
         #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         # except jwt.ExpiredSignatureError:
         #     raise AuthenticationFailed('Unauthenticated')
-        user = request.user
-        print('User is =>', user)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
     
 class Logout(APIView):
     def post(self, request):
