@@ -19,12 +19,12 @@ export const Router = {
 }
 
 export const routes = [
-    {
-        path: '/',
-        component: () => import('../pages/homepage.js').then(module => {
-            module.attachDOM();
-        })
-    },
+    // {
+    //     path: '/',
+    //     component: () => import('../pages/homepage.js').then(module => {
+    //         module.attachDOM();
+    //     })
+    // },
     {
         path: '404',
         component: () => import('../pages/404.js').then(module => {
