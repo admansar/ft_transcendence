@@ -53,9 +53,24 @@ gameSocket.onmessage = function (e) {
         console.log('lets continue the tournament');
         document.head.innerHTML = doc_save.head;
         document.body.innerHTML = doc_save.body;
+        for (let i = 0; i < players.length; i++)
+            players[i] = document.querySelector('.player' + (i + 1));
+        for (let i = 0; i < winners.length; i++)
+            winners[i] = document.querySelector('.winner' + (i + 1));
     })().then(() => {
         console.log('update winners');
-        gameSocket.send(JSON.stringify({ 'type': 'get_update'}));
+        if (gameSocket.readyState === WebSocket.OPEN) {
+            gameSocket.send(JSON.stringify({ 'type': 'get_update' }));
+            console.log('Sent get_update');
+        } else {
+            console.error('WebSocket is not open. ReadyState:', gameSocket.readyState);
+            gameSocket.addEventListener('open', () => {
+                gameSocket.send(JSON.stringify({ 'type': 'get_update' }));
+                console.log('Sent get_update after reopening');
+            });
+        }
+
+        // console.log ('sent get_update');
     });
     }
     else if (data.type === 'winners')

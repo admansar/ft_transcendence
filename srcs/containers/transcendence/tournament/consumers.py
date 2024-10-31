@@ -113,20 +113,27 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
             
     async def broadcast_winners(self):
+        usernames = [p.user_name for p in players]
         if len(winners) > 0:
             for player in players:
-                await player.send(text_data=json.dumps({
-                    'type': 'winners',
-                    'winners': winners,
-                    'players': players
-                }))
+                try:
+                    await player.send(text_data=json.dumps({
+                        'type': 'winners',
+                        'winners': winners,
+                        'players': usernames
+                    }))
+                except Exception as e:
+                    print(f"Error sending message to player: {e}")
         else:
             for player in players:
-                await player.send(text_data=json.dumps({
-                    'type': 'winners',
-                    'winners': [],
-                    'players': players
-                }))
+                try:
+                    await player.send(text_data=json.dumps({
+                        'type': 'winners',
+                        'winners': [],
+                       'players': usernames
+                    }))
+                except Exception as e:
+                    print(f"Error sending message to player: {e}")
 
 
 
@@ -347,8 +354,8 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             
 
             # Remove player from room
-            print (f"removing player from room : {self.room_id}")
-            self.room = game_rooms.get(self.room_id)
+            # print (f"removing player from room : {self.room_id}")
+            # self.room = game_rooms.get(self.room_id)
             if self.room:
                 self.room.players = [p for p in self.room.players if p.channel_name != self.channel_name]
                 # Notify the other player
@@ -508,6 +515,11 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
         if game_state.score1 >= MAX_SCORE or game_state.score2 >= MAX_SCORE:
             # Handle game over logic here (e.g., reset game, notify players)
             # Notify players about game over
+            # cancel game loop
+            # self.game_over = True
+            self.room.game_loop_task.cancel()
+            self.room.game_loop_task = None
+            
             asyncio.create_task(self.notify_game_over())
            # game_state.score1 = 0
            # game_state.score2 = 0
@@ -533,6 +545,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             return
         for player in self.room.players:
             print (f"player : {player.user}")
+        print (f"room : {self.room.players}")
         winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -559,7 +572,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             'time': self.room.game_state.get_elapsed_time(),
             'room_id': self.room_id
         }
-        if winner_data['winner'] == self.user_name:
+        if (winner_data['score1'] == MAX_SCORE or winner_data['score2'] == MAX_SCORE) and winner_data not in winners:
             winners.append(winner_data)
         print (f"Winners : {winners}")
 
