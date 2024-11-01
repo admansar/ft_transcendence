@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
 import requests
 from django.shortcuts import redirect
@@ -115,13 +115,11 @@ class Login(APIView):
         }
         response.set_cookie(key='access', value=str(access), httponly=True)
         response.set_cookie(key='refresh', value=str(refresh), httponly=True)
-        print('response.data=>', response.data)
         return response
     
 class RefreshTokenView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh')
-        print('refresh_token', refresh_token)
         if refresh_token is None:
             raise AuthenticationFailed('No refresh token was found!')
         
@@ -143,11 +141,12 @@ class UserView(APIView):
     # permission_classes = [IsAuthenticated]
     def get(self, request):
         token = request.COOKIES.get('access')
-        # print('token==>', token)
         if not token:
             raise AuthenticationFailed('Unauthorized')
         try:
-            user = JWTAuthentication().get_user(JWTAuthentication().get_validated_token(token))
+            print('token==>', 'validated_token')
+            validated_token = JWTAuthentication().get_validated_token(token)
+            user = JWTAuthentication().get_user(validated_token)
             print('User is =>', user)
             serializer = UserSerializer(user)
             return Response(serializer.data)
