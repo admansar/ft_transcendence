@@ -54,3 +54,61 @@ export function setupChat() {
         }
     });
 }
+
+export class Chat extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.render();
+    }
+
+    render() {
+        this.innerHTML = `
+            <div class="messanger">
+                <div class="messanger-icon">
+                    <img src="public/src/img/sms.png">
+                </div>
+                <div class="messanger-list">
+                    <div class="friend-profile" id="Ckannane">
+                        <div class="friend-profile-status"></div>
+                    </div>
+                    <div class="friend-profile" id="User1">
+                        <div class="friend-profile-status"></div>
+                    </div>
+                    <div class="friend-profile" id="User1">
+                        <div class="friend-profile-status"></div>
+                    </div>
+                    <div class="friend-profile" id="User">
+                        <div class="friend-profile-status"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="sms">
+                <span class="chat-border">
+                    <span class="chat-topic">
+                        <span class="message" id="user1"
+                            style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">User</span>
+                    </span>
+                    <span class="chat-close-btn"
+                        style="position: absolute; top: 6px; right: 10px; transform: scale(0.7);">&times;</span>
+        
+                    <!-- Container where the messages will appear -->
+                    <div class="chat-message" id="chatMessages"></div>
+        
+                    <div class="chat-under">
+                        <span class="import">
+                            <!-- Changed input type to "text" -->
+                            <input type="text" id="textInput" placeholder="type here ..." required>
+                        </span>
+                        <button class="folder"></button>
+                        <button class="send" onclick="sendMessage()"></button>
+                    </div>
+                </span>
+            </div>
+        `
+    }
+}
+
+customElements.define('app-chat', Chat)

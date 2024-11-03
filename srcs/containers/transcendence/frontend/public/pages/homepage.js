@@ -1,173 +1,27 @@
-class Homepage extends HTMLElement {
+import "../components/circleInteractions.js";
+import "../components/modal.js";
+import "../components/chat.js";
+
+export class HomePage extends HTMLElement {
     constructor() {
         super();
     }
+
     connectedCallback() {
-        this.render();
-    }
-    render() {
-        this.innerHTML = `
-            <!DOCTYPE html>
-            <html lang="en">
-            
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Pong: Practice Ping Pong with an AI or play with your friends online!</title>
-                <link rel="stylesheet" href="public/src/styles/styles.css">
-                <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
-                <script type="importmap">
-                    {
-                        "imports": {
-                            "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
-                            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
-                        }
-                    }
-                </script>
-                <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
-                <script type="module" src="public/src/js/script.js"></script>
-                <script defer type="module" src="public/src/js/router.js"></script>
-            
-            </head>
-            
-            <body>
-                <header>
-                    <!-- <div class="header-container"> -->
-                    <div class="menu-icon" id="menu-icon">&#9776;
-                        <div class="menu-content">
-                            <li>Item 1</li>
-                            <li>Item 2</li>
-                            <br>
-                            <li>Item 3</li>
-                        </div>
-                    </div>
-                    <span class="profile"></span>
-                    <div></div>
-                    <div class="logo">
-                        <img src="public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
-                    </div>
-                    <input type="search" placeholder="Search..">
-                    <!-- </div> -->
-                </header>
-                <div class="circle-container">
-                    <span class="circle" id="circle1" data-background="public/src/img/store.png">
-                        <img src="public/src/img/icons8-shop-60.png" alt="STORE Icon" class="circle-image">
-                        <span class="circle-text" style="font-size: 24px;">Store</span>
-                        <span class="circle-description">Manage your purchases, Shop some Ball or Paddle skins or buy abilities to
-                            use in match</span>
-                    </span>
-                    <span class="circle" id="circle2" data-background="public/src/img/inv.png">
-                        <img src="public/src/img/Frame 5.png" alt="INVENTORY Icon" class="circle-image">
-                        <span class="circle-text" style="font-size: 13px;">INVENTORY</span>
-                        <span class="circle-description">View your items, Set your play style and have a look on your
-                            inventory</span>
-                    </span>
-                    <span class="circle" id="circle3" data-background="public/src/img/Play image.jpeg">
-                        <img src="public/src/img/Frame 1.png" alt="PLAY Icon" class="circle-image">
-                        <span class="circle-text" style="font-size: 28px;">PLAY</span>
-                        <span class="circle-description">Enjoy playing a ping pong match with contesting either online around the
-                            world, local play, or with computer</span>
-                    </span>
-                    <span class="circle" id="circle4" data-background="public/src/img/archi.jpeg">
-                        <img src="public/src/img/Frame 3.png" alt="ACHIEVEMENTS Icon" class="circle-image">
-                        <span class="circle-text" style="font-size: 10px;">ACHIEVEMENTS</span>
-                        <span class="circle-description">Track your progress, have a look at your achievements, and play more games
-                            to unlock more</span>
-                    </span>
-                    <span class="circle" id="circle5" data-background="public/src/img/set.jpeg">
-                        <img src="public/src/img/Frame 4.png" alt="CONTROL Icon" class="circle-image">
-                        <span class="circle-text" style="font-size: 17px;">CONTROL</span>
-                        <span class="circle-description">Configure settings, edit your game style settings for a better experience
-                            in gameplay</span>
-                    </span>
-                </div>
-                <!-- <div class="background" id="back-photo">
-                    <div>
-                        <img src="/Users/ckannane/Desktop/TRANCENDENCE/public/src/img/Play image.png" class="bakc-image">
-                        <img src="/Users/ckannane/Desktop/TRANCENDENCE/public/src/img/set.png" class="bakc-image">
-                        <img src="/Users/ckannane/Desktop/TRANCENDENCE/public/src/img/archi.png" class="bakc-image">
-                        <img src="/Users/ckannane/Desktop/TRANCENDENCE/public/src/img/store.png" class="bakc-image">
-                        <img src="/Users/ckannane/Desktop/TRANCENDENCE/public/src/img/inv.png" class="bakc-image">
-                    </div>
-                </div> -->
-                <div class="modal" id="play-modal">
-                    <div class="modal-content">
-                        <span class="close-btn">&times;</span>
-                        <div class="modal-body">
-                            <div class="image-container">
-                                <img id="mode-image" src="" alt="Game Mode Image" style="display:none;">
-                            </div>
-                            <div class="buttons-container">
-                                <button class="mode-button" data-image="public/src/img/store.png" id="online-btn">Play Online</button>
-                                <button class="mode-button" data-image="public/src/img/set.jpeg" id="player-vs-computer-btn">Player vs
-                                    Computer</button>
-                                <button class="mode-button" data-image="public/src/img/inv.png" id="tournament-btn">Tournament</button>
-                                <button class="mode-button" data-image="public/src/img/Play image.jpeg" id="ping-pong-btn">3d ping pong game 
-                                    (beta)</button>
-                            </div>
-                            <div class="dimention-select">
-                                <!-- <button class="small-button" id="switch-1" data-state="on">Play in 2D</button> -->
-                                <!-- <button class="small-button" id="switch-2" data-state="off">Play in 3D</button> -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="messanger">
-                    <div class="messanger-icon">
-                        <img src="public/src/img/sms.png">
-                    </div>
-                    <div class="messanger-list">
-                        <div class="friend-profile" id="Ckannane">
-                            <div class="friend-profile-status"></div>
-                        </div>
-                        <div class="friend-profile" id="User1">
-                            <div class="friend-profile-status"></div>
-                        </div>
-                        <div class="friend-profile" id="User1">
-                            <div class="friend-profile-status"></div>
-                        </div>
-                        <div class="friend-profile" id="User">
-                            <div class="friend-profile-status"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="sms">
-                    <span class="chat-border">
-                        <span class="chat-topic">
-                            <span class="message" id="user1"
-                                style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">User</span>
-                        </span>
-                        <span class="chat-close-btn"
-                            style="position: absolute; top: 6px; right: 10px; transform: scale(0.7);">&times;</span>
-            
-                        <!-- Container where the messages will appear -->
-                        <div class="chat-message" id="chatMessages"></div>
-            
-                        <div class="chat-under">
-                            <span class="import">
-                                <!-- Changed input type to "text" -->
-                                <input type="text" id="textInput" placeholder="type here ..." required>
-                            </span>
-                            <button class="folder"></button>
-                            <button class="send" onclick="sendMessage()"></button>
-                        </div>
-                    </span>
-                </div>
-            </body>
-            
-            </html>
-        `
+        console.log('Hello Homepage');
+        const circlesComponent = document.createElement('app-circles');
+        const modalsComponent = document.createElement('app-modals');
+        const ChatComponent = document.createElement('app-chat')
+        this.appendChild(circlesComponent);
+        this.appendChild(modalsComponent);
+        this.appendChild(ChatComponent);
     }
 }
 
-export function attachDOM() {
-    setTimeout(() => {
-        document.body.innerHTML = '';
-        document.body.setAttribute('style', '');
-        document.head.innerHTML = ''
-        const page = document.createElement('home-page');
-        document.body.appendChild(page);
-    }, 100)
+export async function attachDOM() {
+    const page = document.createElement('home-page');
+    app.root.innerHTML = ''
+    app.root.appendChild(page);
 }
 
-customElements.define('home-page', Homepage);
+customElements.define('home-page', HomePage)
