@@ -1,4 +1,4 @@
-class Game_Offline  extends HTMLElement {
+class Game_Offline extends HTMLElement {
     constructor() {
         super()
     }
@@ -29,14 +29,14 @@ class Game_Offline  extends HTMLElement {
 }
 
 export function attachDOM() {
-    setTimeout(() => {
-        document.body.innerHTML = '';
-        document.body.setAttribute('style', '');
-        document.head.innerHTML = ''
-        const page = document.createElement('game-page');
-        document.body.appendChild(page);
-        import('../game/js/game_offline.js').then(module => { module.game_2d_offline(); })
-    }, 100)
+    document.body.innerHTML = '';
+    document.body.setAttribute('style', '');
+    document.head.innerHTML = ''
+    const page = document.createElement('game-page');
+    document.body.appendChild(page);
+    import('../game/js/game_offline.js').then(module => { module.game_2d_offline(); })
+    console.log('Gamee');
+    
 }
 customElements.define('game-page', Game_Offline);
 

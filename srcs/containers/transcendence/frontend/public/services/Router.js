@@ -7,7 +7,7 @@ export const Router = {
             }
         }
         if (route !== '/')
-            Router.goto(routes[0])
+            Router.goto(routes.find((el => el.path === '404')))
     },
     goto: async (route, addHistory = true) => {
         console.log(`Going to ${route.path}`);

@@ -12,29 +12,6 @@ app.router = Router;
 app.root = document.getElementById('app');
 
 document.addEventListener('DOMContentLoaded', () => {
-    let path = window.location.pathname;
+    let path = window.location.pathname;   
     app.router.findRoute(path);
-
-
-    
-    // const circlesComponent = document.createElement('app-circles');
-    // const modalsComponent = document.createElement('app-modals');
-    // const ChatComponent = document.createElement('app-chat')
-    // app.root.appendChild(circlesComponent);
-    // app.root.appendChild(modalsComponent);
-    // app.root.appendChild(ChatComponent);
 });
-
-// const online = document.getElementById('online-btn');
-// online.addEventListener('click', () => Router.findRoute('/online_game'));
-
-// const offline2D = document.getElementById('player-vs-computer-btn');
-// offline2D.addEventListener('click', () => Router.findRoute('/offline_game'));
-
-// const offline3D = document.getElementById('ping-pong-btn');
-// offline3D.addEventListener('click', () => Router.findRoute('/game_3d'));
-
-// const tournament = document.getElementById('tournament-btn');
-// tournament.addEventListener('click', () => Router.findRoute('/tournament'));
-
-// const profile 
