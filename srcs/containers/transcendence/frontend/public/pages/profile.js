@@ -1,4 +1,5 @@
 import { Router } from '../services/Router.js'
+
 class Profile extends HTMLElement {
     constructor() {
         super();
@@ -171,6 +172,7 @@ export function attachDOM() {
         document.head.innerHTML = ''
         const page = document.createElement('profile-page');
         document.body.appendChild(page);
+        //display: flex; justify-content: center;/
         // await getUserData()
     }, 100);
 }

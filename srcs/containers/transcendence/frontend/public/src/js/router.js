@@ -251,8 +251,12 @@ let BodyTournament = `
                 </div>
             </div>
         </div>
-
-        <div class="register-btn" id="register-id">waiting for players</div>
+        <div class="display_waiting">
+            <div class="register-btn" id="register-id">
+                <div class="Annancement">Waiting Player...</div>
+                <div class="player_in_queue"></div>
+            </div>
+        </div>
     </div>
 
     <script src="tournoi/js/tournament.js"></script>
