@@ -36,12 +36,25 @@ let gameState = {
 };
 
 // WebSocket connection
-let token = localStorage.getItem('access');
-if (!token)
-{
-  token = document.cookie;
-  token = token.slice(token.indexOf('=') + 1, token.indexOf(';'));
+let token = null;
+
+let response = await fetch('http://localhost:8000/api/accounts/me',
+  {
+    method: 'POST',
+    headers: 
+    {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  }
+)
+
+if (response.ok) {
+  let data = await response.json();
+  // console.log ('full data: ', data)
+  token = data.access;
 }
+
 
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);

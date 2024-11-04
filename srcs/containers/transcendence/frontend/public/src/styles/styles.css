@@ -12,6 +12,20 @@ body {
     overflow: hidden;
 }
 
+profile-page {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #252525;
+    background-size: cover;
+    background-position: center;
+    /* background: radial-gradient(circle, green, rgba(0, 0, 0, 1)); */
+    transition: background-image 5s;
+    overflow: hidden;
+}
+
 body::before {
     content: '';
     position: absolute;
