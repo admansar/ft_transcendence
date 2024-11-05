@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let path = window.location.pathname;   
     app.router.findRoute(path);
 });
-<<<<<<< HEAD
 
 const online = document.getElementById('online-btn');
 online.addEventListener('click', () => Router.findRoute('/online_game'));
@@ -30,5 +29,3 @@ const tournament = document.getElementById('tournament-btn');
 tournament.addEventListener('click', () => Router.findRoute('/tournament'));
 
 // const profil_style = document.querySelector('.element');
-=======
->>>>>>> 4887bc03381a1736f9e4e11bf4286d979727a217

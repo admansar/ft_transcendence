@@ -864,6 +864,8 @@ input[type=text-chat]{
 }
 
 .profile{
+    display: flex;
+    position: relative;
     height: 50px;
     width: 50px;
     background-color: #bebebe;

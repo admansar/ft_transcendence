@@ -12,7 +12,7 @@ const winners = [
     document.querySelector('.winner2'),
 ]
 
-let register = document.getElementById('register-id');
+let register = document.querySelector('.Annancement');
 let data = null;
 let room_name = "tour_room";
 let token = localStorage.getItem('access');
@@ -39,7 +39,7 @@ gameSocket.onmessage = function (e) {
                 players[i].innerHTML = data.usernames[i];
             else
                 players[i].innerHTML = '...';
-        register.innerHTML = `waiting for ${data.player_num - data.usernames.length} players`;
+        register.innerHTML = `Waiting for ${data.player_num - data.usernames.length} players`;
     }
     else if (data.type === 'start_game') {
     console.log ('data received: ', data);

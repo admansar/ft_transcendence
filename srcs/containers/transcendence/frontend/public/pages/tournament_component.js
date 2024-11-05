@@ -177,7 +177,7 @@ class TournamentComponent extends HTMLElement {
 
                 <div class="display_waiting">
                     <div class="register-btn" id="register-id">
-                        <div class="Annancement">Waiting Player...</div>
+                        <div class="Annancement"></div>
                         <div class="player_in_queue"></div>
                         <div class="cancel_waiting">Cancel</div>
                     </div>

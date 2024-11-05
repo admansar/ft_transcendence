@@ -19,19 +19,16 @@ export const Router = {
 }
 
 export const routes = [
-<<<<<<< HEAD
     // {
     //     path: '/',
     //     component: () => import('../pages/homepage.js').then(module => {
     //         module.attachDOM();
     //     })
     // },
-=======
     {
         path: '/',
         component: () => import('../pages/homepage.js').then(module => module.attachDOM())
     },
->>>>>>> 4887bc03381a1736f9e4e11bf4286d979727a217
     {
         path: '404',
         component: () => import('../pages/404.js').then(module => {
