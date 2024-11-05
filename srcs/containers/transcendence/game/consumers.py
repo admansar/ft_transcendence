@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 
 # Constants
 CANVAS_WIDTH: int = 1000
-CANVAS_HEIGHT: int = 800
+CANVAS_HEIGHT: int = 800 
 BALL_RADIUS: int = 15
 RACKET_WIDTH: float = 20
 RACKET_HEIGHT: float = 140
@@ -96,18 +96,17 @@ class GameConsumer(AsyncWebsocketConsumer):
     room: GameRoom = None
     user: User | dict = None
     user_name: str = None
-
+    breaker = False
     # def get
             
 
     async def connect(self) -> None:
-        print (f"Scope : {self.scope}")
+        # print (f"Scope : {self.scope}")
         try:
             self.user_name = await self.get_username_from_db() 
         except Exception as e:
             print (f"Error in connect : {e}")
             await self.close()
-            r
         self.room_id = await self.assign_room(self.user_name)
         self.room_group_name = f'room_{self.room_id}'
         print (f"creating room : {self.room_group_name}")
@@ -130,7 +129,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def get_username_from_db(self):
         if "=" in self.scope['query_string'].decode():
             self.token = self.scope['query_string'].decode().split('=')[1]
-            print (f"Token : {self.token}")
+            # print (f"Token : {self.token}")
             if self.token == 'null': # means i got token=null from the frontend
                 print ('--------so its an intra-------')
                 self.token = self.scope['cookies'].get('jwt')
@@ -192,6 +191,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, keycode) -> None:
         try:
+            self.breaker = True
+            if self.room.game_loop_task:
+                self.room.game_loop_task.cancel()
+                self.room.game_loop_task = None
             # Leave the room group
             await self.channel_layer.group_discard(
                 self.room_group_name,
@@ -222,16 +225,26 @@ class GameConsumer(AsyncWebsocketConsumer):
             pass
 
     async def receive(self, text_data: Any) -> None:
-        data = json.loads(text_data)
-        message_type = data.get('type')
+        try:
+            data = json.loads(text_data)
+            message_type = data.get('type')
 
-        if message_type == 'player_move':
-            await self.update_paddles_position(data)
-            tmp = data.get('player_id')
-            if tmp == 1:
-                self.room.game_state.racket1_pos = data.get('racket1_pos') 
-            else:
-                self.room.game_state.racket2_pos = data.get('racket2_pos')
+            if message_type == 'player_move':
+                await self.update_paddles_position(data)
+                tmp = data.get('player_id')
+                if tmp == 1:
+                    self.room.game_state.racket1_pos = data.get('racket1_pos') 
+                else:
+                    self.room.game_state.racket2_pos = data.get('racket2_pos')
+            elif message_type == 'game_over':
+                print("the game is over my bro")
+                await self.disconnect(1000)
+        except Exception as e:
+            print(f"Error in receive: {e}")
+            print ('disconnecting ...')
+            await self.disconnect(1000)
+            print ("closing websocket ...")
+            await self.close()
 
     async def update_paddles_position(self, data: dict[str, Any]) -> None:
         await self.channel_layer.group_send(
@@ -303,6 +316,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         try:
             while True:
                 await asyncio.sleep(1 / GAME_TICK_RATE)
+                if self.breaker:
+                    break
                 self.update_game_state(self.room.game_state)
                 elapsed_time = self.room.game_state.get_elapsed_time()
                 await self.channel_layer.group_send(

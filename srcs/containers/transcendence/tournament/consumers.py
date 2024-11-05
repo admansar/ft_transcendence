@@ -60,6 +60,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         elif len(players) > self.player_num:
             # wait for the next round
+            print ('waiting for the next round')
             pass  # Handle overflow later
         
         
@@ -116,6 +117,10 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             await self.handle_match_result(data['winner'])
         if data['type'] == 'get_update':
             await self.broadcast_winners()
+        if data['type'] == 'start_championship':
+            print ('data received', data)
+            await self.start_match(players[0], players[1])
+            pass
 
             
     async def broadcast_winners(self):
@@ -142,35 +147,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                     print(f"Error sending message to player: {e}")
 
 
-
-    async def handle_match_result(self, winner):
-        # Store the winner
-        winners.append(winner)
-
-        # Remove the room from the active game rooms
-        for room_id, room in game_rooms.items():
-            if self in room.players:
-                del game_rooms[room_id]
-
-        # Check if it's time to start the next round
-        if len(winners) == len(players) // 2:
-            await self.start_next_round()
-
-        elif len(winners) == 1 and len(players) == 2:  # Final match
-            await self.declare_winner(winners[0])
-
-    async def start_next_round(self):
-        global players
-        players = []  # Reset the players list for the next round
-
-        # Re-assign players for the next round
-        for winner in winners:
-            self.user = winner
-            await self.connect()  # Re-add winners for the next round
-
-        # Reset winners for the next round
-        winners.clear()
-
     async def declare_winner(self, champion):
         # Send a final message to all players with the winner
         for player in players:
@@ -181,15 +157,20 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Handle disconnect
-        print (f'{self.user_name} disconnected')
+        try:
+            print (f'{self.user_name} disconnected')
+            print ('closing the websocket...')
+            await self.close()
 #        if close_code == 1000:
 #            await self.send(text_data=json.dumps({'type': 'error', 'message': self.user['username'] + ' is already connected'}))
 
         # Notify all players about the updated usernames
-        for player in players:
-            await player.broadcast_usernames()
-        if self in players:
-            players.remove(self)
+            for player in players:
+                await player.broadcast_usernames()
+            if self in players:
+                players.remove(self)
+        except Exception as e:
+            print (f"Error while disconnect : {e}")
 
 
     async def broadcast_usernames(self):
@@ -378,22 +359,32 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             for room_id, room in game_rooms.items():
                 if len(room.players) == 0:
                     del game_rooms[room_id]
+        finally:
+            print ("closing the websocket anyway...")
+            self.close()
                     
 
 
     async def receive(self, text_data: Any) -> None:
-        data = json.loads(text_data)
-        message_type = data.get('type')
+        try:
+            data = json.loads(text_data)
+            message_type = data.get('type')
 
-        if message_type == 'player_move':
-            await self.update_paddles_position(data)
-            tmp = data.get('player_id')
-            if tmp == 1:
-                self.room.game_state.racket1_pos = data.get('racket1_pos') 
-            else:
-                self.room.game_state.racket2_pos = data.get('racket2_pos')
-        if message_type == 'match_end':
-            pass
+            if message_type == 'player_move':
+                await self.update_paddles_position(data)
+                tmp = data.get('player_id')
+                if tmp == 1:
+                    self.room.game_state.racket1_pos = data.get('racket1_pos') 
+                else:
+                    self.room.game_state.racket2_pos = data.get('racket2_pos')
+            if message_type == 'match_end':
+                pass
+        except Exception as e:
+            print ("error while receiving data: ", e)
+            print ("disconnecting user ...")
+            self.disconnect(10000)
+            print ("closing websocket ...")
+            self.close
 
     async def update_paddles_position(self, data: dict[str, Any]) -> None:
         await self.channel_layer.group_send(

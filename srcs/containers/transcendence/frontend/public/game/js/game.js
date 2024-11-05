@@ -16,6 +16,10 @@ const score2Element = document.getElementById('score2');
 canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
+
+let current_state = {'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
+let last_state = {'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
+
 let playerId = null;
 let roomId = null;
 let opponentName = '...';
@@ -54,6 +58,7 @@ if (response.ok) {
   // console.log ('full data: ', data)
   token = data.access;
 }
+let breaker = false;
 
 
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
@@ -83,6 +88,11 @@ gameSocket.onmessage = function (e) {
     gameState.direction = data.game_state.direction;
     gameContainer.style.width = data.game_state.canvas_width + 'px';
     gameContainer.style.height = data.game_state.canvas_height + 'px';
+    current_state.player = playerName;
+    current_state.opponent = opponentName;
+    current_state.score1 = gameState.score1;
+    current_state.score2 = gameState.score2;
+    current_state.timer = '0:00';
     resizeCanvas();
     // renderGame();
   }
@@ -96,7 +106,9 @@ gameSocket.onmessage = function (e) {
     updateCountdown(dict[data.countdown]);
 
   }
-  else if (data.type === 'game_state') {
+  else if (data.type === 'game_state')
+{
+    // console.log ('data received: ', data)
     gameState = data.state;
     gameState.ball_speed = data.ball_speed;
     gameState.direction = data.direction;
@@ -105,6 +117,18 @@ gameSocket.onmessage = function (e) {
     const minutes = Math.floor(elapsedTime / 60);
     const seconds = elapsedTime % 60;
     const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    // current state update
+    current_state.score1 = gameState.score1
+    current_state.score2 = gameState.score2
+    current_state.player = playerName;
+    current_state.opponent = opponentName;
+    current_state.timer = formattedTime;
+    console.log ('current state: ', current_state)
+    // salim send current state here
+    // please wait until the oppenent is ready or you will get ... in his name
+    // also the current state are in update every time so you can send it when it changes if you want to
+    // just an if statement to check if the state is changed ok ?
+    // better then while (1)
     document.getElementById('timer-value').innerText = formattedTime;
   }
   else if (data.type === 'player_info') {
@@ -116,14 +140,34 @@ gameSocket.onmessage = function (e) {
     if (data.message.indexOf ('has disconnected.') != -1)
     {
       setTimeout (function () {}, 1000)
+      // last state update
+      last_state = current_state;
+      if (data.winner === playerName)
+        last_state.score1 = 5;
+      else
+        last_state.score2 = 5;
+      console.log ('last states: ', last_state)
+      // salim send last data here
       // send here data to db
+      breaker = true;
+      gameSocket.close()
       Router.findRoute('404');
     }
   }
-  else if (data.type === 'game_over') {
+  else if (data.type === 'game_over')
+  {
     show_notification(`${data.winner} wins the game!`);
     setTimeout (function () {}, 1000)
-    // send here data to db
+    // last state update
+    last_state = current_state;
+    if (data.winner === playerName)
+      last_state.score1 = 5;
+    else
+      last_state.score2 = 5;
+    console.log ('last states: ', last_state)
+      // salim send last data here
+    breaker = true
+    gameSocket.close()
     Router.findRoute('404');
   }
   else if (data.type === 'broadcast_game_state')
@@ -348,6 +392,8 @@ function updateBallPosition()
 // Game loop
 function game_loop()
 {
+  if (breaker)
+    return ;
   if (isMovingDown || isMovingUp)
   {
     updatePaddlePosition();
@@ -368,7 +414,10 @@ export function game_2d()
 {
   if (!token) {
     show_notification('You must login first!');
+    gameSocket.close()
     Router.findRoute('/login');
+    breaker = true
   }
   game_loop();
+  // console.log ('last states: ', last_state)
 }

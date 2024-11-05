@@ -169,6 +169,7 @@ export function tour_game(self, opponent)
       show_notification(data.message);
       if (data.message.indexOf('has disconnected.') != -1)
         setTimeout(function () { }, 1000)
+      gameSocket.close();
       // navigate('/')
     }
     else if (data.type === 'game_over')

@@ -15,11 +15,23 @@ const winners = [
 let register = document.querySelector('.Annancement');
 let data = null;
 let room_name = "tour_room";
-let token = localStorage.getItem('access');
-if (!token)
-{
-  token = document.cookie;
-  token = token.slice(token.indexOf('=') + 1, token.indexOf(';'));
+let token = null;
+
+let response = await fetch('http://localhost:8000/api/accounts/me',
+  {
+    method: 'POST',
+    headers: 
+    {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  }
+)
+
+if (response.ok) {
+  let data = await response.json();
+  // console.log ('full data: ', data)
+  token = data.access;
 }
 
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/?token=${token}`);
@@ -87,6 +99,16 @@ gameSocket.onmessage = function (e) {
                 players[i].innerHTML = data.players[i];
             else
                 players[i].innerHTML = '...';
+        
+        if (data.winners.length === 2)
+        {
+            gameSocket.send(JSON.stringify(
+                {
+                    'type': 'start_championship',
+                    'self': data.winners[0].winner,
+                    'opponent': data.winners[1].winner
+                }));
+        }
     }
 }
 
