@@ -17,8 +17,8 @@ canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
 
-let current_state = {'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
-let last_state = {'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
+let current_state = {'self_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
+let last_state = {'self_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
 
 let playerId = null;
 let roomId = null;
@@ -92,6 +92,10 @@ gameSocket.onmessage = function (e) {
     current_state.opponent = opponentName;
     current_state.score1 = gameState.score1;
     current_state.score2 = gameState.score2;
+    if (playerId === 1)
+      current_state.self_name = playerName;
+    else if (playerId === 2)
+      current_state.self_name = opponentName;
     current_state.timer = '0:00';
     resizeCanvas();
     // renderGame();
@@ -118,11 +122,20 @@ gameSocket.onmessage = function (e) {
     const seconds = elapsedTime % 60;
     const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     // current state update
+    console.log ('player id : ', playerId)
+    if (playerId === 1)
+      console.log ('player Name: ', playerName)
+    else if (playerId === 2)
+      console.log ('player Name: ', opponentName)
     current_state.score1 = gameState.score1
     current_state.score2 = gameState.score2
     current_state.player = playerName;
     current_state.opponent = opponentName;
     current_state.timer = formattedTime;
+    if (playerId === 1)
+      current_state.self_name = playerName;
+    else if (playerId === 2)
+      current_state.self_name = opponentName;
     console.log ('current state: ', current_state)
     // salim send current state here
     // please wait until the oppenent is ready or you will get ... in his name
@@ -146,6 +159,10 @@ gameSocket.onmessage = function (e) {
         last_state.score1 = 5;
       else
         last_state.score2 = 5;
+      if (playerId === 1)
+        last_state.self_name = playerName;
+      else if (playerId === 2)
+        last_state.self_name = opponentName;
       console.log ('last states: ', last_state)
       // salim send last data here
       // send here data to db
@@ -164,6 +181,10 @@ gameSocket.onmessage = function (e) {
       last_state.score1 = 5;
     else
       last_state.score2 = 5;
+    if (playerId === 1)
+      last_state.self_name = playerName;
+    else if (playerId === 2)
+      last_state.self_name = opponentName;
     console.log ('last states: ', last_state)
       // salim send last data here
     breaker = true
@@ -419,5 +440,4 @@ export function game_2d()
     breaker = true
   }
   game_loop();
-  // console.log ('last states: ', last_state)
 }
