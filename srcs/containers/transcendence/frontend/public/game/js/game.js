@@ -17,8 +17,8 @@ canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
 
-let current_state = {'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
-let last_state = {'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00'};
+let current_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+let last_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
 
 let playerId = null;
 let roomId = null;
@@ -30,13 +30,13 @@ let server_fps = 30;
 
 // Game state received from server
 let gameState = {
-	ball_pos: {x: 400, y: 300},
-	racket1_pos: {x: 100, y: 230},
-	racket2_pos: {x: 700, y: 230},
+	ball_pos: { x: 400, y: 300 },
+	racket1_pos: { x: 100, y: 230 },
+	racket2_pos: { x: 700, y: 230 },
 	score1: 0,
 	score2: 0,
 	ball_speed: 20,
-	direction: {x: 1, y: 0},
+	direction: { x: 1, y: 0 },
 };
 
 // WebSocket connection
@@ -45,7 +45,7 @@ let token = null;
 let response = await fetch('http://localhost:8000/api/accounts/me',
 	{
 		method: 'POST',
-		headers: 
+		headers:
 		{
 			'Content-Type': 'application/json',
 		},
@@ -69,11 +69,15 @@ gameSocket.onopen = function () {
 	console.log('Connected to the game server.');
 };
 
-gameSocket.onmessage = function (e) {
+let test = 0;
+let initGame = null;
+let game_id = null;
+
+gameSocket.onmessage = async function (e) {
 	const data = JSON.parse(e.data);
+
 	// console.log ('data type : ', data.type)
-	if (data.type === 'init_state')
-	{
+	if (data.type === 'init_state') {
 		playerId = data.game_state.player_id;
 		roomId = data.game_state.room_id;
 		roomName = data.game_state.room_name;
@@ -92,13 +96,11 @@ gameSocket.onmessage = function (e) {
 		current_state.opponent = opponentName;
 		current_state.score1 = gameState.score1;
 		current_state.score2 = gameState.score2;
-		if (playerId === 1)
-		{
+		if (playerId === 1) {
 			current_state.self_name = playerName;
 			current_state.other_name = opponentName;
 		}
-		else if (playerId === 2)
-		{
+		else if (playerId === 2) {
 			current_state.self_name = opponentName;
 			current_state.other_name = playerName;
 		}
@@ -114,10 +116,8 @@ gameSocket.onmessage = function (e) {
 			'1': 'Go!',
 		};
 		updateCountdown(dict[data.countdown]);
-
 	}
-	else if (data.type === 'game_state')
-	{
+	else if (data.type === 'game_state') {
 		// console.log ('data received: ', data)
 		gameState = data.state;
 		gameState.ball_speed = data.ball_speed;
@@ -129,22 +129,46 @@ gameSocket.onmessage = function (e) {
 		const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 		// current state update
 		//console.log ('player id : ', playerId)
-		current_state.score1 = gameState.score1
-		current_state.score2 = gameState.score2
-		current_state.player = playerName;
-		current_state.opponent = opponentName;
-		current_state.timer = formattedTime;
-		if (playerId === 1)
-		{
+		// console.log ('current state: ', current_state.score1, gameState.score1)
+
+		if (current_state.score1 !== gameState.score1) {
+			current_state.score1 = gameState.score1
+			current_state.score2 = gameState.score2
+			current_state.player = playerName;
+			current_state.opponent = opponentName;
+			current_state.timer = formattedTime;
+			await fetch('http://localhost:8000/api/game/update-score', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(current_state)
+			})
+		}
+
+
+		if (playerId === 1) {
 			current_state.self_name = playerName;
 			current_state.other_name = opponentName;
 		}
-		else if (playerId === 2)
-		{
+		else if (playerId === 2) {
 			current_state.self_name = opponentName;
 			current_state.other_name = playerName;
 		}
-		console.log ('current state: ', current_state)
+
+		if (test === 0) {
+			test++;
+			initGame = await fetch('http://localhost:8000/api/game/init-game', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(current_state)
+			})
+			game_id = await initGame.json();
+			console.log('game_id from front', game_id);
+		}
+
 		// salim send current state here
 		// please wait until the oppenent is ready or you will get ... in his name
 		// also the current state are in update every time so you can send it when it changes if you want to
@@ -158,26 +182,23 @@ gameSocket.onmessage = function (e) {
 	}
 	else if (data.type === 'notification') {
 		show_notification(data.message);
-		if (data.message.indexOf ('has disconnected.') != -1)
-		{
-			setTimeout (function () {}, 1000)
+		if (data.message.indexOf('has disconnected.') != -1) {
+			setTimeout(function () { }, 1000)
 			// last state update
 			last_state = current_state;
 			if (data.winner === playerName)
 				last_state.score1 = 5;
 			else
 				last_state.score2 = 5;
-			if (playerId === 1)
-			{
+			if (playerId === 1) {
 				last_state.self_name = playerName;
 				last_state.other_name = opponentName;
 			}
-			else if (playerId === 2)
-			{
+			else if (playerId === 2) {
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
-			console.log ('last states: ', last_state)
+			console.log('last states: ', last_state)
 			// salim send last data here
 			// send here data to db
 			breaker = true;
@@ -185,40 +206,38 @@ gameSocket.onmessage = function (e) {
 			Router.findRoute('404');
 		}
 	}
-	else if (data.type === 'game_over')
-	{
+	else if (data.type === 'game_over') {
 		show_notification(`${data.winner} wins the game!`);
-		setTimeout (function () {}, 1000)
+		setTimeout(function () { }, 1000)
 		// last state update
 		last_state = current_state;
 		if (data.winner === playerName)
 			last_state.score1 = 5;
 		else
 			last_state.score2 = 5;
-		if (playerId === 1)
-		{
+		if (playerId === 1) {
 			last_state.self_name = playerName;
 			last_state.other_name = opponentName;
 		}
-		else if (playerId === 2)
-		{
+		else if (playerId === 2) {
 			last_state.self_name = opponentName;
 			last_state.other_name = playerName
 		}
-		console.log ('last states: ', last_state)
+		console.log('last states: ', last_state)
 		// salim send last data here
+		await finishGame(last_state);
+
 		breaker = true
 		gameSocket.close()
 		Router.findRoute('404');
+		
 	}
-	else if (data.type === 'broadcast_game_state')
-	{
+	else if (data.type === 'broadcast_game_state') {
 		gameState.ball_speed = data.game_state.ball_speed;
 		gameState.direction = data.game_state.direction;
 		server_fps = data.fps_ratio;
 	}
-	else if (data.type === 'moves')
-	{
+	else if (data.type === 'moves') {
 		if (playerId === 1)
 			gameState.racket2_pos = data.racket2_pos;
 		else if (playerId === 2)
@@ -226,13 +245,25 @@ gameSocket.onmessage = function (e) {
 	}
 };
 
+async function finishGame(last_state) {
+
+	// Mark the game as finished/Completed
+	await fetch('http://localhost:8000/api/game/complete-game', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(game_id)
+	})
+}
+
 gameSocket.onclose = function () {
 	console.log('Disconnected from the game server.');
 };
 
 // Sending player moves to the server
 function sendPlayerMove(direction) {
-	console.log ('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
+	console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
 	if (gameSocket.readyState === WebSocket.OPEN) {
 		gameSocket.send(JSON.stringify({
 			'type': 'player_move',
@@ -252,11 +283,11 @@ function show_notification(message) {
 	modalMessage.textContent = message;
 	modal.style.display = 'block';
 
-	modalClose.onclick = function() {
+	modalClose.onclick = function () {
 		modal.style.display = 'none';
 	};
 
-	window.onclick = function(event) {
+	window.onclick = function (event) {
 		if (event.target == modal) {
 			modal.style.display = 'none';
 		}
@@ -272,7 +303,7 @@ let isMovingUp = false;
 let isMovingDown = false;
 const MOVE_SPEED = 10; // Adjust paddle speed here
 
-window.addEventListener('keydown', function(e) {
+window.addEventListener('keydown', function (e) {
 	if (e.keyCode === KEY_UP) {
 		isMovingUp = true;
 		// sendPlayerMove('up');
@@ -283,7 +314,7 @@ window.addEventListener('keydown', function(e) {
 	}
 });
 
-window.addEventListener('keyup', function(e) {
+window.addEventListener('keyup', function (e) {
 	if (e.keyCode === KEY_UP) {
 		isMovingUp = false;
 	}
@@ -294,7 +325,7 @@ window.addEventListener('keyup', function(e) {
 
 // Start the game loop
 function resizeCanvas() {
-	canvas.width = gameContainer.clientWidth; 
+	canvas.width = gameContainer.clientWidth;
 	canvas.height = gameContainer.clientHeight;
 	renderGame();
 }
@@ -371,14 +402,12 @@ let lastTime = performance.now();
 let frameCount = 0;
 let fps = 0;
 
-function fps_calculator()
-{
+function fps_calculator() {
 	const now = performance.now();
 	frameCount++;
 
 	const elapsedTime = now - lastTime;
-	if (elapsedTime >= 1000)
-	{
+	if (elapsedTime >= 1000) {
 		fps = frameCount;
 		frameCount = 0;
 		lastTime = now;
@@ -388,8 +417,7 @@ function fps_calculator()
 
 
 
-function updatePaddlePosition()
-{
+function updatePaddlePosition() {
 	if (playerId === 1) { // Player 1 controls racket1
 		if (isMovingUp) {
 			gameState.racket1_pos.y -= MOVE_SPEED;
@@ -414,12 +442,11 @@ function updatePaddlePosition()
 
 		sendPlayerMove(isMovingDown ? 'down' : 'up');
 
-		console.log ("r1: ", gameState.racket1_pos,", r2: " , gameState.racket2_pos)
+		console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
 	}
 }
 
-function updateBallPosition()
-{
+function updateBallPosition() {
 	let current_fps = fps_calculator();
 	fps_ratio = current_fps / server_fps;
 	gameState.ball_pos.x += (gameState.ball_speed / fps_ratio) * gameState.direction.x;
@@ -431,12 +458,10 @@ function updateBallPosition()
 
 
 // Game loop
-function game_loop()
-{
+function game_loop() {
 	if (breaker)
-		return ;
-	if (isMovingDown || isMovingUp)
-	{
+		return;
+	if (isMovingDown || isMovingUp) {
 		updatePaddlePosition();
 	}
 	updateBallPosition();
@@ -451,8 +476,7 @@ function updateCountdown(txt = '') {
 	countdownElement.style.animation = null;
 }
 
-export function game_2d()
-{
+export function game_2d() {
 	if (!token) {
 		show_notification('You must login first!');
 		gameSocket.close()

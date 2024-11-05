@@ -8,7 +8,7 @@ from accounts.views import RefreshTokenView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/accounts/", include("accounts.urls")),  # new
+    path("api/accounts/", include("accounts.urls")),
     path("api/game/", include("game.urls")),
     path('tournament/', include("tournament.urls")),
     # path('', views.index, name='index'),

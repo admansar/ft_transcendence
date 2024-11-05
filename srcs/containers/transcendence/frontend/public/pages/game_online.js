@@ -1,14 +1,14 @@
-class Game_online  extends HTMLElement {
+class Game_online extends HTMLElement {
   constructor() {
-      super()
+    super()
   }
 
   connectedCallback() {
-      this.render();
+    this.render();
   }
 
   render() {
-      this.innerHTML = `
+    this.innerHTML = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -54,14 +54,12 @@ class Game_online  extends HTMLElement {
 }
 
 export function attachDOM() {
-  setTimeout(() => {
-      document.body.innerHTML = '';
-      document.body.setAttribute('style', '');
-      document.head.innerHTML = ''
-      const page = document.createElement('game-page');
-      document.body.appendChild(page);
-      import('../game/js/game.js').then(module => { module.game_2d(); })
-  }, 100)
+  document.body.innerHTML = '';
+  document.body.setAttribute('style', '');
+  document.head.innerHTML = ''
+  const page = document.createElement('game-page');
+  document.body.appendChild(page);
+  import('../game/js/game.js').then(module => { module.game_2d(); })
 }
 customElements.define('game-page', Game_online);
 

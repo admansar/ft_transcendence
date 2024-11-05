@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseNotFound
-
+from rest_framework.views import APIView
 
 def login_page(request):
     if request.user.is_authenticated:
