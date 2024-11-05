@@ -1,4 +1,5 @@
 // import { navigate } from "../../js/router.js";
+import { Router } from '../../services/Router.js'
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -35,12 +36,25 @@ let gameState = {
 };
 
 // WebSocket connection
-let token = localStorage.getItem('access');
-if (token == null)
-{
-  token = document.cookie;
-  token = token.slice(token.indexOf('=') + 1, token.indexOf(';'));
+let token = null;
+
+let response = await fetch('http://localhost:8000/api/accounts/me',
+  {
+    method: 'POST',
+    headers: 
+    {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  }
+)
+
+if (response.ok) {
+  let data = await response.json();
+  // console.log ('full data: ', data)
+  token = data.access;
 }
+
 
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
@@ -100,13 +114,17 @@ gameSocket.onmessage = function (e) {
   else if (data.type === 'notification') {
     show_notification(data.message);
     if (data.message.indexOf ('has disconnected.') != -1)
+    {
       setTimeout (function () {}, 1000)
-      navigate('/')
+      // send here data to db
+      Router.findRoute('404');
+    }
   }
   else if (data.type === 'game_over') {
     show_notification(`${data.winner} wins the game!`);
     setTimeout (function () {}, 1000)
-    navigate('/')
+    // send here data to db
+    Router.findRoute('404');
   }
   else if (data.type === 'broadcast_game_state')
   {
@@ -348,9 +366,9 @@ function updateCountdown(txt = '') {
 
 export function game_2d()
 {
-  //if (token === null) {
-  //  show_notification('You must login first!');
-  //  navigate('/login');
-  //}
+  if (!token) {
+    show_notification('You must login first!');
+    Router.findRoute('/login');
+  }
   game_loop();
 }

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong: Practice Ping Pong with an AI or play with your friends online!</title>
-    <link rel="stylesheet" href="./public/src/styles/styles.css">
+    <link rel="stylesheet" href="public/src/styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
     <script type="importmap">
         {
@@ -16,12 +16,13 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
+    <script type="module" src="public/src/js/script.js"></script>
+    <script defer type="module" src="public/src/js/router.js"></script>
+
 </head>
 
 <body>
-<<<<<<< HEAD
     <header>
-        <!-- <div class="header-container"> -->
         <div class="menu-icon" id="menu-icon">&#9776;
             <div class="menu-content">
                 <li>Item 1</li>
@@ -35,7 +36,7 @@
         <div class="logo">
             <img src="public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
         </div>
-        <input type="search" placeholder="ADD friends...">
+        <input type="search" placeholder="Search..">
         <!-- </div> -->
     </header>
     <div class="circle-container">
@@ -100,25 +101,37 @@
             <div class="friend-profile" id="Ckannane">
                 <div class="friend-profile-status"></div>
             </div>
-            <div class="friend-profile" id="Adnan">
+            <div class="friend-profile" id="User1">
                 <div class="friend-profile-status"></div>
             </div>
-            <div class="friend-profile" id="Ayoub">
+            <div class="friend-profile" id="User1">
                 <div class="friend-profile-status"></div>
             </div>
-            <div class="friend-profile" id="Salim">
-                <div class="friend-profile-status"></div>
-            </div>
-            <div class="friend-profile" id="Yassine">
+            <div class="friend-profile" id="User">
                 <div class="friend-profile-status"></div>
             </div>
         </div>
     </div>
-    <div class="sms" id="chat"></div>
-=======
-    <div id="app"></div>
-    <script type="module" src="./public/src/js/script.js"></script>
->>>>>>> 4887bc03381a1736f9e4e11bf4286d979727a217
+    <div class="sms">
+        <span class="chat-border">
+            <span class="chat-topic">
+                <span class="message" id="user1"
+                    style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">User</span>
+            </span>
+            <span class="chat-close-btn"
+                style="position: absolute; top: 6px; right: 10px; transform: scale(0.7);">&times;</span>
+
+            <div class="chat-message" id="chatMessages"></div>
+
+            <div class="chat-under">
+                <span class="import">
+                    <input type="text" id="textInput" placeholder="type here ..." required>
+                </span>
+                <button class="folder"></button>
+                <button class="send" onclick="sendMessage()"></button>
+            </div>
+        </span>
+    </div>
 </body>
 
 </html>

@@ -10,7 +10,9 @@ from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import HttpResponseRedirect
 import requests
+from django.shortcuts import redirect
 
 
 User = get_user_model()
@@ -76,30 +78,14 @@ class Oauth42(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         
-
-        # token = jwt.encode(payload, 'secret', algorithm='HS256')
-        # print(token)
-        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # print(decode)
-        # decode = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # user_profile , created  = User.objects.get_or_create(username=user_info['username'], email=user_info['email'])
-        # print(user_profile)
-        # if created:
-        #     user_profile.save()
-        
-    # ow i save in database after decode 
-        # response = Response()
-        # response.set_cookie(key='jwt', value=token)
-        # response.data = {
-        #     'jwt': token
-        # }
-        response = Response()
+        response = HttpResponseRedirect("http://localhost/")
         response.data = {
             'access': str(access),
             'refresh': str(refresh)
         }
-        response.set_cookie(key='jwt', value=str(access))
-        return response
+        response.set_cookie(key='access', value=str(access))
+        response.set_cookie(key='refresh', value=str(refresh))
+        return response 
 
 
 class SignUp(APIView):
@@ -111,26 +97,15 @@ class SignUp(APIView):
 
 class Login(APIView):
     def post(self, request):
-        print('Herre')
         username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email')
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
-        if user is None:
-            raise AuthenticationFailed('User not found')
-        if not user.check_password(password):
-            raise AuthenticationFailed('Incorrect password')
+        if user is None or not user.check_password(password):
+            return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
+        # if not user.check_password(password):
+        #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        # payload = {
-        #     'id': user.id,
-        #     'username': user.username,
-        #     'email': user.email
-        # }
-        # token = jwt.encode(payload, 'secret', algorithm='HS256')
-        # response.set_cookie(key='jwt', value=token, httponly=True)
-        # response.data = {
-        #     'jwt': token
-        # }
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         response = Response()
@@ -138,24 +113,54 @@ class Login(APIView):
             'access': str(access),
             'refresh': str(refresh)
         }
+        response.set_cookie(key='access', value=str(access), httponly=True)
+        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
+        return response
+    
+class RefreshTokenView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh')
+        if refresh_token is None:
+            raise AuthenticationFailed('No refresh token was found!')
+        
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = refresh.access_token
+        except Exception as e:
+            raise AuthenticationFailed('Invalid or expired token!')
+        
+        response = Response({
+            'message': 'Token refreshed successfully'
+        })
+        response.set_cookie(key='access', value=str(new_access_token), httponly=True)
+        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
         return response
 
 class UserView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
-        # token = request.COOKIES.get('jwt')
-        # if not token:
-        #     raise AuthenticationFailed('Unauthenticated')
-        # try:
-        #     payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        # except jwt.ExpiredSignatureError:
-        #     raise AuthenticationFailed('Unauthenticated')
-        user = request.user
-        print('User is =>', user)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-    
+        token = request.COOKIES.get('access')
+        if not token:
+            raise AuthenticationFailed('Unauthorized')
+        try:
+            print('token==>', 'validated_token')
+            validated_token = JWTAuthentication().get_validated_token(token)
+            user = JWTAuthentication().get_user(validated_token)
+            print('User is =>', user)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=401)
+
+class Me(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('access')
+        if not token:
+            raise AuthenticationFailed('Unauthorized')
+        
+        return Response({'access': token})
+
 class Logout(APIView):
     def post(self, request):
         response = Response()

@@ -7,7 +7,7 @@ export const Router = {
             }
         }
         if (route !== '/')
-            Router.goto(routes[0])
+            Router.goto(routes.find((el => el.path === '404')))
     },
     goto: async (route, addHistory = true) => {
         console.log(`Going to ${route.path}`);
@@ -19,12 +19,19 @@ export const Router = {
 }
 
 export const routes = [
+<<<<<<< HEAD
     // {
     //     path: '/',
     //     component: () => import('../pages/homepage.js').then(module => {
     //         module.attachDOM();
     //     })
     // },
+=======
+    {
+        path: '/',
+        component: () => import('../pages/homepage.js').then(module => module.attachDOM())
+    },
+>>>>>>> 4887bc03381a1736f9e4e11bf4286d979727a217
     {
         path: '404',
         component: () => import('../pages/404.js').then(module => {
@@ -72,5 +79,16 @@ export const routes = [
         component: () => import('../pages/tournament_component.js').then(module => {
             module.attachDOM();
         })
-    }
+    },
 ]
+
+
+
+
+function handleBackNavigation() {
+    let path = window.location.pathname;
+    console.log ('path', path);
+    app.router.findRoute(path);
+};
+
+window.addEventListener('popstate', handleBackNavigation);
