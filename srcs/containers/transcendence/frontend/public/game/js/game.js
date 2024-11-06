@@ -20,6 +20,15 @@ canvas.height = gameContainer.clientHeight;
 let current_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
 let last_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
 
+
+
+let self_user_data = {
+	'username': '...',
+	'score': 0
+}
+
+
+
 let playerId = null;
 let roomId = null;
 let opponentName = '...';
@@ -97,10 +106,12 @@ gameSocket.onmessage = async function (e) {
 		current_state.score1 = gameState.score1;
 		current_state.score2 = gameState.score2;
 		if (playerId === 1) {
+			self_user_data.username = playerName;
 			current_state.self_name = playerName;
 			current_state.other_name = opponentName;
 		}
 		else if (playerId === 2) {
+			self_user_data.username = opponentName;
 			current_state.self_name = opponentName;
 			current_state.other_name = playerName;
 		}
@@ -131,7 +142,7 @@ gameSocket.onmessage = async function (e) {
 		//console.log ('player id : ', playerId)
 		// console.log ('current state: ', current_state.score1, gameState.score1)
 
-		if (current_state.score1 !== gameState.score1) {
+		if (current_state.score1 !== gameState.score1 && opponentName !== 'waiting...') {
 			current_state.score1 = gameState.score1
 			current_state.score2 = gameState.score2
 			current_state.player = playerName;
@@ -191,10 +202,12 @@ gameSocket.onmessage = async function (e) {
 			else
 				last_state.score2 = 5;
 			if (playerId === 1) {
+				self_user_data.score = last_state.score1;
 				last_state.self_name = playerName;
 				last_state.other_name = opponentName;
 			}
 			else if (playerId === 2) {
+				self_user_data.score = last_state.score2;
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}

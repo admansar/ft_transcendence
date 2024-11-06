@@ -596,7 +596,7 @@ function createText(text, font, position, rotation)
     return textMesh;
 }
 
-let font_json = './fonts/League_Spartan_Regular.json';
+let font_json = '/public/game/js/fonts/League_Spartan_Regular.json';
 
 let textMesh_collector = [null, null]
 

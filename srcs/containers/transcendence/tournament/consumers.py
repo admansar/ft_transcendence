@@ -57,6 +57,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 print (f"player: {player.user_name}, opponent: {player.opponent.user_name} idx : {idx}")
             print (f"starting match {self.user_name} : {self.opponent.user_name}")
             await self.start_match(self, self.opponent)
+            # creating a loop to check for the winners
 
         elif len(players) > self.player_num:
             # wait for the next round
