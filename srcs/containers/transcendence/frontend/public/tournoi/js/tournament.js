@@ -16,6 +16,7 @@ let register = document.querySelector('.Annancement');
 let data = null;
 let room_name = "tour_room";
 let token = null;
+let locker = false;
 
 let response = await fetch('http://localhost:8000/api/accounts/me',
   {
@@ -52,8 +53,14 @@ gameSocket.onmessage = function (e) {
             else
                 players[i].innerHTML = '...';
         register.innerHTML = `Waiting for ${data.player_num - data.usernames.length} players`;
+        // if (data.usernames.length === data.player_num)
+        // {
+        // try {document.getElementById("waiter").remove();}catch (e){console.log('No waiter');}
+        // }
     }
     else if (data.type === 'start_game') {
+        // sleep 1s in here
+    
     console.log ('data received: ', data);
     (async () => {
         let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
@@ -66,6 +73,7 @@ gameSocket.onmessage = function (e) {
         console.log('lets continue the tournament');
         document.head.innerHTML = doc_save.head;
         document.body.innerHTML = doc_save.body;
+        try {document.getElementById("waiter").remove();}catch (e){console.log('No waiter');}
         for (let i = 0; i < players.length; i++)
             players[i] = document.querySelector('.player' + (i + 1));
         for (let i = 0; i < winners.length; i++)
@@ -88,7 +96,7 @@ gameSocket.onmessage = function (e) {
     }
     else if (data.type === 'winners')
     {
-        console.log (data)
+        // console.log (data)
         for (let i = 0; i < data.winners.length; i++)
             if (i < winners.length)
                 winners[i].innerHTML = data.winners[i].winner;
@@ -100,8 +108,9 @@ gameSocket.onmessage = function (e) {
             else
                 players[i].innerHTML = '...';
         
-        if (data.winners.length === 2)
+        if (data.winners.length === 2 && !locker)
         {
+            locker = true;
             gameSocket.send(JSON.stringify(
                 {
                     'type': 'start_championship',

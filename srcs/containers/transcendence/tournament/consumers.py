@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 players = []
 game_rooms = {}
 winners = []  # List to store winners for the next round
+winners_classes = []
 authentication_classes = [JWTAuthentication]
 permission_classes = [IsAuthenticated]
 
@@ -119,9 +120,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         if data['type'] == 'get_update':
             await self.broadcast_winners()
         if data['type'] == 'start_championship':
-            print ('data received', data)
-            await self.start_match(players[0], players[1])
-            pass
+            print (f"winner players : {[el.user_name for el in winners_classes]}")
+            await self.start_match(winners_classes[0], winners_classes[1])
 
             
     async def broadcast_winners(self):
@@ -571,6 +571,11 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             'room_id': self.room_id
         }
         if (winner_data['score1'] == MAX_SCORE or winner_data['score2'] == MAX_SCORE) and winner_data not in winners:
+            for player in players:
+                print (f"player user_name : {player.user_name}")
+                if player.user_name == winner:
+                    winners_classes.append(self) 
+                    break 
             winners.append(winner_data)
         print (f"Winners : {winners}")
 

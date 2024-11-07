@@ -22,7 +22,7 @@ let last_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'op
 
 
 
-let self_user_data = {
+let user_data = {
 	'username': '...',
 	'score': 0
 }
@@ -106,12 +106,12 @@ gameSocket.onmessage = async function (e) {
 		current_state.score1 = gameState.score1;
 		current_state.score2 = gameState.score2;
 		if (playerId === 1) {
-			self_user_data.username = playerName;
+			user_data.username = playerName;
 			current_state.self_name = playerName;
 			current_state.other_name = opponentName;
 		}
 		else if (playerId === 2) {
-			self_user_data.username = opponentName;
+			user_data.username = opponentName;
 			current_state.self_name = opponentName;
 			current_state.other_name = playerName;
 		}
@@ -202,12 +202,12 @@ gameSocket.onmessage = async function (e) {
 			else
 				last_state.score2 = 5;
 			if (playerId === 1) {
-				self_user_data.score = last_state.score1;
+				user_data.score = last_state.score1;
 				last_state.self_name = playerName;
 				last_state.other_name = opponentName;
 			}
 			else if (playerId === 2) {
-				self_user_data.score = last_state.score2;
+				user_data.score = last_state.score2;
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
