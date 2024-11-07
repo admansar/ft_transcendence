@@ -20,6 +20,7 @@ export class Modals extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        setupModal()
     }
 
     render() {

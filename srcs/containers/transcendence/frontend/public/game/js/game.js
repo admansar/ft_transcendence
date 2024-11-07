@@ -142,19 +142,24 @@ gameSocket.onmessage = async function (e) {
 		//console.log ('player id : ', playerId)
 		// console.log ('current state: ', current_state.score1, gameState.score1)
 
-		if (current_state.score1 !== gameState.score1 && opponentName !== 'waiting...') {
+		if ((current_state.score1 !== gameState.score1 ||
+			current_state.score2 !== gameState.score2
+		) && opponentName !== 'waiting...') {
 			current_state.score1 = gameState.score1
 			current_state.score2 = gameState.score2
 			current_state.player = playerName;
 			current_state.opponent = opponentName;
 			current_state.timer = formattedTime;
-			await fetch('http://localhost:8000/api/game/update-score', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(current_state)
-			})
+			
+			self_user_data.game_id = game_id.game_id;
+
+			if (playerId === 1)
+				self_user_data.score = current_state.score1;
+			else
+				self_user_data.score = current_state.score2
+
+
+			await updateScore(self_user_data);
 		}
 
 
@@ -175,6 +180,7 @@ gameSocket.onmessage = async function (e) {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(current_state)
+				// body: JSON.stringify(self_user_data)
 			})
 			game_id = await initGame.json();
 			console.log('game_id from front', game_id);
@@ -197,10 +203,6 @@ gameSocket.onmessage = async function (e) {
 			setTimeout(function () { }, 1000)
 			// last state update
 			last_state = current_state;
-			if (data.winner === playerName)
-				last_state.score1 = 5;
-			else
-				last_state.score2 = 5;
 			if (playerId === 1) {
 				user_data.score = last_state.score1;
 				last_state.self_name = playerName;
@@ -211,7 +213,10 @@ gameSocket.onmessage = async function (e) {
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
-			console.log('last states: ', last_state)
+			console.log('last states: ', self_user_data);
+
+			await updateScore(self_user_data);
+			await finishGame(self_user_data);
 			// salim send last data here
 			// send here data to db
 			breaker = true;
@@ -231,19 +236,22 @@ gameSocket.onmessage = async function (e) {
 		if (playerId === 1) {
 			last_state.self_name = playerName;
 			last_state.other_name = opponentName;
+			self_user_data.score = last_state.score1
 		}
 		else if (playerId === 2) {
 			last_state.self_name = opponentName;
 			last_state.other_name = playerName
+			self_user_data.score = last_state.score2
 		}
-		console.log('last states: ', last_state)
+		console.log('last states: ', self_user_data);
 		// salim send last data here
-		await finishGame(last_state);
+		await updateScore(self_user_data)
+		await finishGame(self_user_data);
 
 		breaker = true
 		gameSocket.close()
 		Router.findRoute('404');
-		
+
 	}
 	else if (data.type === 'broadcast_game_state') {
 		gameState.ball_speed = data.game_state.ball_speed;
@@ -258,7 +266,18 @@ gameSocket.onmessage = async function (e) {
 	}
 };
 
-async function finishGame(last_state) {
+async function updateScore(self_user_data) {
+	await fetch('http://localhost:8000/api/game/update-score', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		// body: JSON.stringify(current_state)
+		body: JSON.stringify(self_user_data)
+	})
+}
+
+async function finishGame(self_user_data) {
 
 	// Mark the game as finished/Completed
 	await fetch('http://localhost:8000/api/game/complete-game', {
@@ -266,7 +285,7 @@ async function finishGame(last_state) {
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify(game_id)
+		body: JSON.stringify(self_user_data)
 	})
 }
 
