@@ -22,7 +22,11 @@ class Profile extends HTMLElement {
                 color: 'brown'
             }
         }
-
+        if (!data.games) {
+            return this.innerHTML = `
+                <h1>No games found</h1>
+            `
+        }
         for (let i = 0; i < data.games.length; i++) {
             let score_a = data.games[i].score_a
             let score_b = data.games[i].score_b

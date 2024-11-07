@@ -69,12 +69,15 @@ class GetGame(APIView):
         ).order_by('-date')[:3]
         print('games', games)
         games = games.values()
-        
-        player_a = get_object_or_404(User, username=games[0]['player_a'])
-        player_b = get_object_or_404(User, username=games[0]['player_b'])
-        
-        avatar_a = player_a.avatar
-        avatar_b = player_b.avatar
+        try:
+            player_a = get_object_or_404(User, username=games[0]['player_a'])
+            player_b = get_object_or_404(User, username=games[0]['player_b'])
+            
+            avatar_a = player_a.avatar
+            avatar_b = player_b.avatar
+        except Exception as e:
+            print('No games found')
+            return Response({'message': 'No games found'})
         
         for game in games:
             game['avatar_a'] = avatar_a
