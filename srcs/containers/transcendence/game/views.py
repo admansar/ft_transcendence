@@ -8,10 +8,11 @@ from rest_framework.views import APIView
 from accounts.models import User
 from django.shortcuts import get_object_or_404
 from game.models import GameScore
+from django.db.models import Q
 
 class CompleteGame(APIView):
     def post(self, request):
-        print('COMPLETEEE')
+        print('COMPLETEEE', request.data)
         game = get_object_or_404(GameScore, id=request.data.get('game_id'))
         game.status = 'Completed'
         game.save()
@@ -55,9 +56,31 @@ class initGame(APIView):
     
 class UpdateScore(APIView):
     def post(self, request):
-        print('updateScore', request.data)
+        print('Score UPPPDATe', request.data)
         return Response({'updateScore': request.data})
 
+class GetGame(APIView):
+    def post(self, request):
+        print('gamesssss', request.data)
+        username = request.data.get('username')
+        games = GameScore.objects.filter(
+            Q(player_a=username) | Q(player_b=username),
+            status='Completed'
+        ).order_by('-date')[:3]
+        print('games', games)
+        games = games.values()
+        
+        player_a = get_object_or_404(User, username=games[0]['player_a'])
+        player_b = get_object_or_404(User, username=games[0]['player_b'])
+        
+        avatar_a = player_a.avatar
+        avatar_b = player_b.avatar
+        
+        for game in games:
+            game['avatar_a'] = avatar_a
+            game['avatar_b'] = avatar_b
+        
+        return Response({'message': 'Games fetched successfully', 'games': games})
 
 # @login_required
 # def game_2d(request):
