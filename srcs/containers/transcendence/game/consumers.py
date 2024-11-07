@@ -218,6 +218,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                     self.room.game_loop_task.cancel()
                     self.room.game_loop_task = None
                 # If no players left, delete the room
+                await self.close ()
                 if not self.room.players:
                     del game_rooms[self.room_id]
         except Exception as e:
@@ -318,7 +319,7 @@ class GameConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(1 / GAME_TICK_RATE)
                 if self.breaker:
                     break
-                self.update_game_state(self.room.game_state)
+                await self.update_game_state(self.room.game_state)
                 elapsed_time = self.room.game_state.get_elapsed_time()
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -340,7 +341,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
 
-    def update_game_state(self, game_state: GameState) -> None:
+    async def update_game_state(self, game_state: GameState) -> None:
         # Update ball position
         game_state.ball_pos['x'] += game_state.ball_dir['x'] * game_state.ball_speed
         game_state.ball_pos['y'] += game_state.ball_dir['y'] * game_state.ball_speed
@@ -359,6 +360,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         # Check for collisions with rackets
         game_state.check_collision_with_racket()
+        # Check for game over
+        if game_state.score1 >= MAX_SCORE or game_state.score2 >= MAX_SCORE:
+            # Handle game over logic here (e.g., reset game, notify players)
+            await asyncio.create_task(self.notify_game_over())
+            # Notify players about game over
+            # i want to make it sleep for 1 second and then notify the players
+            # await asyncio.sleep(1)
+            
+            print ('closing websocket ...')
+            print ('disconnecting ...')
+
 
         # Check for scoring
         if game_state.ball_pos['x'] - BALL_RADIUS <= 0:
@@ -367,16 +379,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         elif game_state.ball_pos['x'] + BALL_RADIUS >= CANVAS_WIDTH:
             game_state.score1 += 1
             game_state.reset_ball(direction='right')
-
-        # Check for game over
-        if game_state.score1 >= MAX_SCORE or game_state.score2 >= MAX_SCORE:
-            # Handle game over logic here (e.g., reset game, notify players)
-            game_state.reset_ball()
-            game_state.score1 = 0
-            game_state.score2 = 0
-            # Notify players about game over
-            asyncio.create_task(self.notify_game_over())
-            self.close()
 
     def serialize_game_state(self, game_state: GameState) -> dict:
         return {
@@ -409,10 +411,15 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def game_over(self, event: Any) -> None:
         winner = event['winner']
-        await self.send(text_data=json.dumps({
-            'type': 'game_over',
-            'winner': winner
-        }))
+        try:
+            await self.send(text_data=json.dumps({
+                'type': 'game_over',
+                'winner': winner
+            }))
+        except Exception as e:
+            print (f"Error in game_over : {e}")
+        finally:
+            await self.disconnect(1000)
 
     @database_sync_to_async
     def assign_room(self, username: str) -> int:

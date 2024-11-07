@@ -17,10 +17,11 @@ canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
 
-let current_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
-let last_state = { 'self_name': '...', 'other_name': '...', 'player': '...', 'opponent': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+let current_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+let last_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
 
 
+let game_end_locker = false;
 
 let user_data = {
 	'username': '...',
@@ -101,8 +102,8 @@ gameSocket.onmessage = async function (e) {
 		gameState.direction = data.game_state.direction;
 		gameContainer.style.width = data.game_state.canvas_width + 'px';
 		gameContainer.style.height = data.game_state.canvas_height + 'px';
-		current_state.player = playerName;
-		current_state.opponent = opponentName;
+		current_state.player1 = playerName;
+		current_state.player2 = opponentName;
 		current_state.score1 = gameState.score1;
 		current_state.score2 = gameState.score2;
 		if (playerId === 1) {
@@ -144,22 +145,23 @@ gameSocket.onmessage = async function (e) {
 
 		if ((current_state.score1 !== gameState.score1 ||
 			current_state.score2 !== gameState.score2
-		) && opponentName !== 'waiting...') {
+		) && opponentName !== 'waiting...' && !game_end_locker) {
 			current_state.score1 = gameState.score1
 			current_state.score2 = gameState.score2
-			current_state.player = playerName;
-			current_state.opponent = opponentName;
+			current_state.player1 = playerName;
+			current_state.player2 = opponentName;
 			current_state.timer = formattedTime;
-			
-			self_user_data.game_id = game_id.game_id;
+
+			user_data.game_id = game_id.game_id;
 
 			if (playerId === 1)
-				self_user_data.score = current_state.score1;
+				user_data.score = current_state.score1;
 			else
-				self_user_data.score = current_state.score2
+				user_data.score = current_state.score2
 
+			console.log ('current state1: ', current_state)
 
-			await updateScore(self_user_data);
+			await updateScore(user_data);
 		}
 
 
@@ -180,7 +182,7 @@ gameSocket.onmessage = async function (e) {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify(current_state)
-				// body: JSON.stringify(self_user_data)
+				// body: JSON.stringify(user_data)
 			})
 			game_id = await initGame.json();
 			console.log('game_id from front', game_id);
@@ -197,11 +199,12 @@ gameSocket.onmessage = async function (e) {
 		opponentName = data.opponent;
 		console.log(`Opponent: ${opponentName}`);
 	}
-	else if (data.type === 'notification') {
+	else if (data.type === 'notification' && !game_end_locker) {
+		game_end_locker = true;
 		show_notification(data.message);
 		if (data.message.indexOf('has disconnected.') != -1) {
-			setTimeout(function () { }, 1000)
 			// last state update
+			console.log ('current state: ', current_state)
 			last_state = current_state;
 			if (playerId === 1) {
 				user_data.score = last_state.score1;
@@ -213,42 +216,42 @@ gameSocket.onmessage = async function (e) {
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
-			console.log('last states: ', self_user_data);
-
-			await updateScore(self_user_data);
-			await finishGame(self_user_data);
+			console.log('last states: ', user_data);
+			
+			await updateScore(user_data);
+			await finishGame(user_data);
 			// salim send last data here
 			// send here data to db
 			breaker = true;
+			setTimeout(function () { }, 1000)
 			gameSocket.close()
 			Router.findRoute('404');
 		}
 	}
-	else if (data.type === 'game_over') {
+	else if (data.type === 'game_over' && !game_end_locker) {
+		game_end_locker = true;
 		show_notification(`${data.winner} wins the game!`);
-		setTimeout(function () { }, 1000)
 		// last state update
 		last_state = current_state;
-		if (data.winner === playerName)
-			last_state.score1 = 5;
-		else
-			last_state.score2 = 5;
+		console.log ('winner: ', data.winner)
 		if (playerId === 1) {
 			last_state.self_name = playerName;
 			last_state.other_name = opponentName;
-			self_user_data.score = last_state.score1
+			user_data.score = last_state.score1
 		}
 		else if (playerId === 2) {
 			last_state.self_name = opponentName;
 			last_state.other_name = playerName
-			self_user_data.score = last_state.score2
+			user_data.score = last_state.score2
 		}
-		console.log('last states: ', self_user_data);
+		console.log('last states: ', user_data);
+		console.log('full data: ', last_state)
 		// salim send last data here
-		await updateScore(self_user_data)
-		await finishGame(self_user_data);
+		await updateScore(user_data)
+		await finishGame(user_data);
 
 		breaker = true
+		setTimeout(function () { }, 1000)
 		gameSocket.close()
 		Router.findRoute('404');
 
@@ -266,18 +269,18 @@ gameSocket.onmessage = async function (e) {
 	}
 };
 
-async function updateScore(self_user_data) {
+async function updateScore(user_data) {
 	await fetch('http://localhost:8000/api/game/update-score', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		// body: JSON.stringify(current_state)
-		body: JSON.stringify(self_user_data)
+		body: JSON.stringify(user_data)
 	})
 }
 
-async function finishGame(self_user_data) {
+async function finishGame(user_data) {
 
 	// Mark the game as finished/Completed
 	await fetch('http://localhost:8000/api/game/complete-game', {
@@ -285,7 +288,7 @@ async function finishGame(self_user_data) {
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify(self_user_data)
+		body: JSON.stringify(user_data)
 	})
 }
 
@@ -295,7 +298,7 @@ gameSocket.onclose = function () {
 
 // Sending player moves to the server
 function sendPlayerMove(direction) {
-	console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
+	// console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
 	if (gameSocket.readyState === WebSocket.OPEN) {
 		gameSocket.send(JSON.stringify({
 			'type': 'player_move',
@@ -474,7 +477,7 @@ function updatePaddlePosition() {
 
 		sendPlayerMove(isMovingDown ? 'down' : 'up');
 
-		console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
+		// console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
 	}
 }
 
