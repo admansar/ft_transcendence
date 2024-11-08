@@ -24,7 +24,7 @@ class Profile extends HTMLElement {
         }
         if (!data.games) {
             return this.innerHTML = `
-                <h1>No games found</h1>
+                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
             `
         }
         for (let i = 0; i < data.games.length; i++) {
@@ -76,6 +76,11 @@ class Profile extends HTMLElement {
                                     <div class="grid-item ">1</div>
                                 </div>
                             </div>
+                            <div class="tools_profile">
+                            <span class="request_list pending_list" id="pending_list"></span>
+                            <span class="request_list block_list" id="block_list"></span>
+                            <span class="request_list share_profile" id="share_profil"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="left-side-dashbord">
@@ -90,12 +95,90 @@ class Profile extends HTMLElement {
                             ${await this.renderScore(userData)}
                         </div>
                     </div>
+                    <div class="pending_friends_modal" id="pendingModal">
+                        <div class="modal_content">
+                            <span class="close_modal">&times;</span>
+                            <div class="fr_request_list" id="User">
+                                <span class="fr_id">
+                                    <span class="fr_avatar"></span>
+                                    <span class="fr_name">USER</span>
+                                </span>
+                                <span class="requesting">
+                                    <span class="accept_fr">Accept</span>
+                                    <span class="reject_fr">Reject</span>
+                                </span>
+                            </div>
+                            <div class="fr_request_list" id="User">
+                            <span class="fr_id">
+                                <span class="fr_avatar"></span>
+                                <span class="fr_name">USER</span>
+                            </span>
+                            <span class="requesting">
+                                <span class="accept_fr">Accept</span>
+                                <span class="reject_fr">Reject</span>
+                            </span>
+                        </div>
+                        </div>
+                    </div>
+                        
+                        
+                    <div class="Block_modal" id="blockModal">
+                        <div class="block_modal_content">
+                            <span class="close_modal">&times;</span>
+                            <div class="block_list_display" id="User">
+                                <span class="fr_id">
+                                    <span class="fr_avatar"></span>
+                                    <span class="fr_name">USER</span>
+                                </span>
+                                <span class="requesting">
+                                    <span class="unblock_fr">UnBlock</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `
             const avatar = document.querySelector('.profile-photo');
             const avatarMenu = document.querySelector('.profile');
             avatar.style.backgroundImage = `url(${userData.avatar})`;
             avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
+
+            const pendingListButton = document.getElementById('pending_list');
+            const blockListButton = document.getElementById('block_list');
+            const shareProfileButton = document.getElementById('share_profil');
+            const pendingModal = document.getElementById('pendingModal');
+            const blockModal = document.getElementById('blockModal');
+            const closeModalButtons = document.querySelectorAll('.close_modal');
+
+
+            pendingListButton.addEventListener('click', function() {
+                pendingModal.style.display = 'flex';
+            });
+
+            blockListButton.addEventListener('click', function() {
+                blockModal.style.display = 'flex';
+            });
+
+            closeModalButtons.forEach(closeButton => {
+                closeButton.addEventListener('click', function() {
+                    pendingModal.style.display = 'none';
+                    blockModal.style.display = 'none';
+                });
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === pendingModal) {
+                    pendingModal.style.display = 'none';
+                }
+                if (event.target === blockModal) {
+                    blockModal.style.display = 'none';
+                }
+            });
+
+            shareProfileButton.addEventListener('click', function() {
+                console.log('Share profile clicked');
+            });
+
         } catch (e) {
             console.log(e);
             Router.findRoute('/login');

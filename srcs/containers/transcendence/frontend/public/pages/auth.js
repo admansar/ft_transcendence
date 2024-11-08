@@ -92,6 +92,8 @@ function login() {
     btn.addEventListener('click', async () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('pwd').value;
+        const logContainElement = document.querySelector('.log-contain'); // Get the log container
+        
         try {
             let response = await fetch('http://localhost:8000/api/accounts/login/', {
                 method: 'POST',
@@ -105,23 +107,38 @@ function login() {
                 })
             })
             const data = await response.json()
+
             if (response.ok) {
                 console.log('access', data.access);
                 console.log('refresh', data.refresh);
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                // console.log('cookie', document.cookie);
                 Router.findRoute('/profile');
                 // window.location.href = '/'
             } else {
-                // logout();
+                // login failed
                 console.log(data.error);
-                displayError(data.error)
+                displayError(data.error);
+
+                // Add error class to change border color to red
+                logContainElement.classList.add('error'); // This triggers the red border
+
+                // After 2 seconds, fade back to yellow
+                setTimeout(() => {
+                    logContainElement.classList.remove('error'); // Remove error class to reset border color
+                }, 2000);
             }
         } catch (e) {
             console.log('Error logging in');
-            displayError(e)
-            // alert('Error logging in');
+            displayError(e);
+            
+            // Add error class to change border color to red
+            logContainElement.classList.add('error'); // This triggers the red border
+
+            // After 2 seconds, fade back to yellow
+            setTimeout(() => {
+                logContainElement.classList.remove('error'); // Remove error class to reset border color
+            }, 2000); 
         }
     })
 }
@@ -136,5 +153,18 @@ function displayError(message) {
         errorEl.style.display = 'None';
     }, 3000);
 }
+
+// Custom CSS for error handling (will change the border color)
+const style = document.createElement('style');
+style.innerHTML = `
+.log-contain {
+    transition: all 1s ease; /* Smooth transition for border-color */
+}
+.log-contain.error {
+    border-color: red !important; /* Change border color to red on error */
+    box-shadow: 0px 0px 10px red;
+}
+`;
+document.head.appendChild(style);
 
 customElements.define('auth-page', Auth)
