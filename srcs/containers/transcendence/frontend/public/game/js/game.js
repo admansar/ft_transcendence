@@ -68,6 +68,11 @@ if (response.ok) {
 	// console.log ('full data: ', data)
 	token = data.access;
 }
+else
+{
+  data = null;
+  console.log('Error fetching user data');
+}
 let breaker = false;
 
 
@@ -199,10 +204,10 @@ gameSocket.onmessage = async function (e) {
 		opponentName = data.opponent;
 		console.log(`Opponent: ${opponentName}`);
 	}
-	else if (data.type === 'notification' && !game_end_locker) {
-		game_end_locker = true;
+	else if (data.type === 'notification') {
 		show_notification(data.message);
-		if (data.message.indexOf('has disconnected.') != -1) {
+		if (data.message.indexOf('has disconnected.') != -1 && !game_end_locker) {
+			game_end_locker = true;
 			// last state update
 			console.log ('current state: ', current_state)
 			last_state = current_state;

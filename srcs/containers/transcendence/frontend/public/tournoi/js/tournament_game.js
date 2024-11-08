@@ -62,6 +62,20 @@ export let winner = null;
 canvas.width = gameContainer.clientWidth;
 canvas.height = gameContainer.clientHeight;
 
+
+let current_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+let last_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+
+
+let game_end_locker = false;
+
+let user_data = {
+	'username': '...',
+	'score': 0
+}
+
+
+
 let playerId = null;
 let roomId = null;
 let opponentName = '...';
@@ -100,8 +114,13 @@ if (response.ok) {
   // console.log ('full data: ', data)
   token = data.access;
 }
+else
+{
+  data = null;
+  console.log('Error fetching user data');
+}
 
-let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
+let roomName = 'group_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament_game/${roomName}/?token=${token}`);
 
 // WebSocket event handlers
@@ -133,6 +152,22 @@ export function tour_game(self, opponent)
       gameState.direction = data.game_state.direction;
       gameContainer.style.width = data.game_state.canvas_width + 'px';
       gameContainer.style.height = data.game_state.canvas_height + 'px';
+      current_state.player1 = playerName;
+      current_state.player2 = opponentName;
+      current_state.score1 = gameState.score1;
+      current_state.score2 = gameState.score2;
+      if (playerId === 1)
+      {
+        user_data.username = playerName;
+        current_state.self_name = playerName;
+        current_state.other_name = opponentName;
+      }
+      else if (playerId === 2)
+      {
+        user_data.username = opponentName;
+        current_state.self_name = opponentName;
+        current_state.other_name = playerName;
+      }
       resizeCanvas();
       // renderGame();
     }
@@ -157,6 +192,53 @@ export function tour_game(self, opponent)
       const minutes = Math.floor(elapsedTime / 60);
       const seconds = elapsedTime % 60;
       const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      if ((current_state.score1 !== gameState.score1 ||
+        current_state.score2 !== gameState.score2
+      ) && opponentName !== 'waiting...' && !game_end_locker) {
+        current_state.score1 = gameState.score1
+        current_state.score2 = gameState.score2
+        current_state.player1 = playerName;
+        current_state.player2 = opponentName;
+        current_state.timer = formattedTime;
+  
+        user_data.game_id = game_id.game_id;
+  
+        if (playerId === 1)
+          user_data.score = current_state.score1;
+        else
+          user_data.score = current_state.score2
+  
+        console.log ('current state1: ', current_state)
+  
+        // await updateScore(user_data);
+      }
+  
+  
+      if (playerId === 1) {
+        current_state.self_name = playerName;
+        current_state.other_name = opponentName;
+      }
+      else if (playerId === 2) {
+        current_state.self_name = opponentName;
+        current_state.other_name = playerName;
+      }
+  
+      // if (test === 0) {
+      //   test++;
+      //   // initGame = await fetch('http://localhost:8000/api/game/init-game', {
+      //   //   method: 'POST',
+      //   //   headers: {
+      //   //     'Content-Type': 'application/json'
+      //   //   },
+      //   //   body: JSON.stringify(current_state)
+      //   //   // body: JSON.stringify(user_data)
+      //   // })
+      //   // game_id = await initGame.json();
+      //   // console.log('game_id from front', game_id);
+      // }
+  
+
+
       document.getElementById('timer-value').innerText = formattedTime;
     }
     else if (data.type === 'player_info')
@@ -167,16 +249,51 @@ export function tour_game(self, opponent)
     else if (data.type === 'notification')
     {
       show_notification(data.message);
-      if (data.message.indexOf('has disconnected.') != -1)
-        setTimeout(function () { }, 1000)
-      gameSocket.close();
+      if (data.message.indexOf('has disconnected.') != -1 && !game_end_locker)
+      {
+        game_end_locker = true;
+			console.log ('current state: ', current_state)
+			last_state = current_state;
+			if (playerId === 1) {
+				user_data.score = last_state.score1;
+				last_state.self_name = playerName;
+				last_state.other_name = opponentName;
+			}
+			else if (playerId === 2) {
+				user_data.score = last_state.score2;
+				last_state.self_name = opponentName;
+				last_state.other_name = playerName
+			}
+			console.log('last states: ', user_data);
+			
+			breaker = true;
+			setTimeout(function () { }, 1000)
+			gameSocket.close()
+	
+      }
       // navigate('/')
     }
-    else if (data.type === 'game_over')
+    else if (data.type === 'game_over' && !game_end_locker)
     {
-      show_notification(`${data.winner} wins the game!`);
-      // winner = data.winner;
-      breaker = 1;
+      game_end_locker = true;
+        show_notification(`${data.winner} wins the game!`);
+        last_state = current_state;
+        console.log('winner: ', data.winner)
+        if (playerId === 1) {
+          last_state.self_name = playerName;
+          last_state.other_name = opponentName;
+          user_data.score = last_state.score1
+        }
+        else if (playerId === 2) {
+          last_state.self_name = opponentName;
+          last_state.other_name = playerName
+          user_data.score = last_state.score2
+        }
+        console.log('last states: ', user_data);
+        console.log('full data: ', last_state)
+        // winner = data.winner;
+        breaker = 1;
+		setTimeout(function () { }, 1000)
       gameSocket.close();
     }
     else if (data.type === 'broadcast_game_state')
@@ -422,7 +539,7 @@ export function tour_game(self, opponent)
   // Game loop
   function game_loop()
   {
-    if (breaker === 1)
+    if (breaker)
     {
       resolve(winner);
       return;

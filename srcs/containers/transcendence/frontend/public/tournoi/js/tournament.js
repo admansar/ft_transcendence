@@ -58,18 +58,18 @@ gameSocket.onmessage = function (e) {
         // try {document.getElementById("waiter").remove();}catch (e){console.log('No waiter');}
         // }
     }
-    else if (data.type === 'start_game') {
-        // sleep 1s in here
-    
-    console.log ('data received: ', data);
+    else if (data.type === 'start_game')
+    {
+        console.log('lets start the game');
+        console.log('data received: ', data);
     (async () => {
         let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
         console.log('game started');
-    
-        const module = await import('./tournament_game.js');
+
+        const module = await import(`./tournament_game.js?t=${Date.now()}`);
         await module.tour_game(data.self, data.opponent);
-    
-        // console.log('Winner:', winner);
+        
+        // await new Promise((resolve) => {setTimeout(resolve, 5000);});
         console.log('lets continue the tournament');
         document.head.innerHTML = doc_save.head;
         document.body.innerHTML = doc_save.body;
@@ -99,7 +99,8 @@ gameSocket.onmessage = function (e) {
         // console.log (data)
         for (let i = 0; i < data.winners.length; i++)
             if (i < winners.length)
-                winners[i].innerHTML = data.winners[i].winner;
+                if (data.winners[i].winner)
+                    winners[i].innerHTML = data.winners[i].winner;
             else
                 winners[i].innerHTML = '...';
         for (let i = 0; i < data.players.length; i++)
@@ -111,6 +112,7 @@ gameSocket.onmessage = function (e) {
         if (data.winners.length === 2 && !locker)
         {
             locker = true;
+            // console.log('lets start the championship');
             gameSocket.send(JSON.stringify(
                 {
                     'type': 'start_championship',
@@ -118,6 +120,10 @@ gameSocket.onmessage = function (e) {
                     'opponent': data.winners[1].winner
                 }));
         }
+    }
+    else if (data.type === 'winner_winner_chicken_dinner')
+    {
+        console.log ('data received: ', data);
     }
 }
 
