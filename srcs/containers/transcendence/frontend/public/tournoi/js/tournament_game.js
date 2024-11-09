@@ -71,7 +71,7 @@ let game_end_locker = false;
 
 let user_data = {
 	'username': '...',
-	'score': 0
+	'score': 0,
 }
 
 
@@ -201,7 +201,6 @@ export function tour_game(self, opponent)
         current_state.player2 = opponentName;
         current_state.timer = formattedTime;
   
-        user_data.game_id = game_id.game_id;
   
         if (playerId === 1)
           user_data.score = current_state.score1;
@@ -308,6 +307,15 @@ export function tour_game(self, opponent)
         gameState.racket2_pos = data.racket2_pos;
       else if (playerId === 2)
         gameState.racket1_pos = data.racket1_pos;
+    }
+    else if (data.type === 'winner_winner_chicken_dinner')
+    {
+      // show_notification(`${data.winner} wins the game!`);
+      win = getElementById('champion');
+      win.innerHTML = data.champion;
+      // winner = data.winner;
+      // breaker = 1;
+      // gameSocket.close();
     }
   };
 

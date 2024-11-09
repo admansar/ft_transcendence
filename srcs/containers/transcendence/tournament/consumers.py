@@ -66,6 +66,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         elif len(players) > self.player_num:
             # wait for the next round
             print ('waiting for the next round')
+            self.close()
             pass  # Handle overflow later
         
         
@@ -107,6 +108,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         
 
     async def start_championship(self):
+        await asyncio.sleep(1)
         await self.send(text_data=json.dumps({
             'type': 'start_game',
         }))
@@ -115,6 +117,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     async def start_match(self, player1, player2):
         # Notify players about the match
         print (f"Starting match between {player1.user_name} and {player2.user_name}")
+        await asyncio.sleep(1)
         for player in players:
             await player.send(text_data=json.dumps({
                 'type': 'start_game',
@@ -449,6 +452,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
 
     async def game_loop(self) -> None:
         try:
+            await asyncio.sleep(0.5)
             while True:
                 await asyncio.sleep(1 / GAME_TICK_RATE)
                 if self.breaker:
@@ -499,8 +503,6 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             # Handle game over logic here (e.g., reset game, notify players)
             await asyncio.create_task(self.notify_game_over())
             # Notify players about game over
-            # i want to make it sleep for 1 second and then notify the players
-            # await asyncio.sleep(1)
             
             print (f'closing websocket for {self.user_name}')
             print ('disconnecting ...')
@@ -509,9 +511,11 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
         # Check for scoring
         if game_state.ball_pos['x'] - BALL_RADIUS <= 0:
             game_state.score2 += 1
+            await asyncio.sleep(0.5)
             game_state.reset_ball(direction='left')
         elif game_state.ball_pos['x'] + BALL_RADIUS >= CANVAS_WIDTH:
             game_state.score1 += 1
+            await asyncio.sleep(0.5)
             game_state.reset_ball(direction='right')
 
     def serialize_game_state(self, game_state: GameState) -> dict:
@@ -558,16 +562,19 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 'player1': self.room.players[0].user_name,
                 'player2': self.room.players[1].user_name
             }
+            # global counter
+            # counter += 1
             if winner_data not in winners and len(winners) < 2:
                 winners.append(winner_data)
                 print (f"winners : {winners}")
-            if len(winners) == 2:
+            elif len(winners) == 2 and winner == self.user_name:
                 champion = winner
                 print (f"champion : {champion}")
-                await self.send(text_data=json.dumps({
-                    'type': 'winner_winner_chicken_dinner',
-                    'champion': champion
-                }))
+                for player in players:
+                    await player.send(text_data=json.dumps({
+                        'type': 'winner_winner_chicken_dinner',
+                        'champion': champion
+                    }))
             if winner_data["winner"] == self.user_name and not champion:
                 winners_classes.append(self)
         except Exception as e:

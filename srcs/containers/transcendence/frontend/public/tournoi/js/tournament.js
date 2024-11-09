@@ -121,10 +121,6 @@ gameSocket.onmessage = function (e) {
                 }));
         }
     }
-    else if (data.type === 'winner_winner_chicken_dinner')
-    {
-        console.log ('data received: ', data);
-    }
 }
 
 gameSocket.onclose = function (e) {

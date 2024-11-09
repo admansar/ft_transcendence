@@ -170,7 +170,7 @@ class TournamentComponent extends HTMLElement {
 
                     <div class="round">
                         <div class="match">
-                            <div class="winner_winner_chicken_dinner">Champion</div>
+                            <div class="winner_winner_chicken_dinner" id="champion" >Champion</div>
                         </div>
                     </div>
                 </div>

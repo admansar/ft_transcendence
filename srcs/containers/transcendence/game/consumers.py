@@ -380,9 +380,11 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Check for scoring
         if game_state.ball_pos['x'] - BALL_RADIUS <= 0:
             game_state.score2 += 1
+            await asyncio.sleep(0.5)
             game_state.reset_ball(direction='left')
         elif game_state.ball_pos['x'] + BALL_RADIUS >= CANVAS_WIDTH:
             game_state.score1 += 1
+            await asyncio.sleep(0.5)
             game_state.reset_ball(direction='right')
 
     def serialize_game_state(self, game_state: GameState) -> dict:
