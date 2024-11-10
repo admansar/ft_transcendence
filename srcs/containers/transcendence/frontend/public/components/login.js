@@ -10,7 +10,6 @@ export class Login extends HTMLElement {
     render() {
         this.innerHTML = `
             <div class="login">
-                <img src="public/src/img/pingpong-logo.png" class="logo-log">
                 <div class="log-contain">
                         <input type="text" id="username" name="username" placeholder="Username">
                         <input type="password" id="pwd" name="pwd" placeholder="Password">

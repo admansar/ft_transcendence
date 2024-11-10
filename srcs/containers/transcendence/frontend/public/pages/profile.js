@@ -187,6 +187,7 @@ class Profile extends HTMLElement {
 }
 
 export function attachDOM() {
+    document.body.innerHTML = '';
     const page = document.createElement('profile-page');
     document.body.appendChild(page);
 }

@@ -17,4 +17,4 @@ urlpatterns = [
     path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired')
 ]
 
-handler404 = views.not_found_view
+# handler404 = views.not_found_view

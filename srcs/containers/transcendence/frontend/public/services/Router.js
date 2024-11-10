@@ -1,5 +1,13 @@
 export const Router = {
+    normalizeRoute(route) {
+        if (route.endsWith('/') && route.length > 1) {
+            route = route.slice(0, -1);
+            return this.normalizeRoute(route);
+        }
+        return route;
+    },
     findRoute: (route) => {
+        route = Router.normalizeRoute(route); 
         for (let i = 0; i < routes.length; i++) {
             if (route === routes[i].path) {
                 Router.goto(routes[i]);

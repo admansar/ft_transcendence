@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong: Practice Ping Pong with an AI or play with your friends online!</title>
-    <link rel="stylesheet" href="./public/src/styles/styles.css">
+    <link rel="stylesheet" href="/public/src/styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
     <script type="importmap">
         {
@@ -32,35 +32,13 @@
         <span class="profile"></span>
         <div></div>
         <div class="logo">
-            <img src="public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
+            <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
         </div>
         <input type="search" placeholder="ADD friends...">
-        <!-- </div> -->
     </header>
-    <div class="modal" id="play-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div class="modal-body">
-                <div class="image-container">
-                    <img id="mode-image" src="" alt="Game Mode Image" style="display:none;">
-                </div>
-                <div class="buttons-container">
-                    <button class="mode-button" data-image="public/src/img/store.png" id="online-btn">Play Online</button>
-                    <button class="mode-button" data-image="public/src/img/set.jpeg" id="player-vs-computer-btn">Player vs
-                        Computer</button>
-                    <button class="mode-button" data-image="public/src/img/inv.png" id="tournament-btn">Tournament</button>
-                    <button class="mode-button" data-image="public/src/img/Play image.jpeg" id="ping-pong-btn">3d ping pong game 
-                        (beta)</button>
-                </div>
-                <div class="dimention-select">
-                    <!-- <button class="small-button" id="switch-1" data-state="on">Play in 2D</button> -->
-                    <!-- <button class="small-button" id="switch-2" data-state="off">Play in 3D</button> -->
-                </div>
-            </div>
-        </div>
     </div>
     <div id="app"></div>
-    <script type="module" src="./public/src/js/script.js"></script>
+    <script type="module" src="/public/src/js/script.js"></script>
 </body>
 
 </html>
