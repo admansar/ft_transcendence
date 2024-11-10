@@ -70,7 +70,7 @@ class GetGame(APIView):
         games = GameScore.objects.filter(
             Q(player_a=username) | Q(player_b=username),
             status='Completed'
-        ).order_by('-date')[:3]
+        ).order_by('-date')[:9]
         games = games.values()
         print('games', games)
         try:
@@ -88,6 +88,8 @@ class GetGame(APIView):
         for game in games:
             game['avatar_a'] = avatar_a
             game['avatar_b'] = avatar_b
+            game['player_a'] = player_a.first_name
+            game['player_b'] = player_b.first_name
         
         return Response({'message': 'Games fetched successfully', 'games': games})
 

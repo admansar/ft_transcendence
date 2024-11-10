@@ -6,33 +6,55 @@ export const Router = {
         }
         return route;
     },
+    matchRoute(route, routePattern) {
+        let routeSegments = route.split('/').filter(el => el !== '');
+        let patternSegments = routePattern.split('/').filter(el => el !== '');
+
+        if (routeSegments.length !== patternSegments.length) {
+            return null;
+        }
+
+        const params = {};
+        for (let i = 0; i < patternSegments.length; i++) {
+            // params['path'] = routeSegments[0];
+            if (patternSegments[i].startsWith(':')) {
+                const paramName = patternSegments[i].slice(1);
+                params[paramName] = routeSegments[i];
+            } else if (patternSegments[i] !== routeSegments[i]) {
+                return null;
+            }
+        }
+        console.log('params', params);
+        return params;
+    },
     findRoute: (route) => {
-        route = Router.normalizeRoute(route); 
+        route = Router.normalizeRoute(route);
         for (let i = 0; i < routes.length; i++) {
-            if (route === routes[i].path) {
-                Router.goto(routes[i]);
+            const params = Router.matchRoute(route, routes[i].path);
+            if (params) {
+                Router.goto(routes[i], true, params);
                 return;
             }
         }
         if (route !== '/')
             Router.goto(routes.find((el => el.path === '404')))
     },
-    goto: async (route, addHistory = true) => {
-        console.log(`Going to ${route.path}`);
-        if (addHistory) {         
-            history.pushState(null, null, route.path);
+    goto: async (route, addHistory = true, params = {}) => {
+        let path = route.path;
+        if (Object.keys(params).length > 0) {
+            for (let key in params) {
+                path = path.replace(`:${key}`, params[key]);
+            }
         }
-        await route.component();
+        console.log(`Navigating to ${path}`, params);
+        if (addHistory) {
+            history.pushState(null, null, path);
+        }
+        await route.component(params);
     }
 }
 
 export const routes = [
-    // {
-    //     path: '/',
-    //     component: () => import('../pages/homepage.js').then(module => {
-    //         module.attachDOM();
-    //     })
-    // },
     {
         path: '/',
         component: () => import('../pages/homepage.js').then(module => module.attachDOM())
@@ -56,9 +78,10 @@ export const routes = [
         })
     },
     {
-        path: '/profile',
-        component: () => import('../pages/profile.js').then(module => {
-            module.attachDOM();
+        path: '/profile/:username',
+        // path: '/profile',
+        component: async ({username}) => import('../pages/profile.js').then(module => {
+            module.attachDOM({ username });
         })
     },
     {
@@ -92,7 +115,7 @@ export const routes = [
 
 function handleBackNavigation() {
     let path = window.location.pathname;
-    console.log ('path', path);
+    console.log('path', path);
     app.router.findRoute(path);
 };
 

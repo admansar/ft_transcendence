@@ -6,15 +6,52 @@ class Profile extends HTMLElement {
     }
 
     connectedCallback() {
-        this.render();
+        const username = this.getAttribute('username');
+        this.render(username);
     }
 
     async renderScore(data) {
+        if (!data.games) {
+            return this.innerHTML = `
+                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
+            `
+        }
+        function displayMatchHistory(username, currentGame) {
+            let matchResult;
+            if (username === currentGame.player_a) {
+                matchResult = winOrLose(currentGame.score_a, currentGame.score_b);
+                console.log(matchResult);
+                return {
+                    'avatar': currentGame.avatar_a,
+                    'score': currentGame.score_a,
+                    'opponent': currentGame.player_b,
+                    'opponent_avatar': currentGame.avatar_b,
+                    'opponent_score': currentGame.score_b,
+                    'status': matchResult.status,
+                    'color': matchResult.color
+                }
+            }
+            matchResult = winOrLose(currentGame.score_b, currentGame.score_a);
+            return {
+                'avatar': currentGame.avatar_b,
+                'score': currentGame.score_b,
+                'opponent': currentGame.player_a,
+                'opponent_avatar': currentGame.avatar_a,
+                'opponent_score': currentGame.score_a,
+                'status': matchResult.status,
+                'color': matchResult.color
+            }
+        }
         function winOrLose(score_a, score_b) {
             if (score_a > score_b) {
                 return {
                     status: 'WIN',
                     color: 'green'
+                }
+            } else if (score_a === score_b) {
+                return {
+                    status: 'DRAW',
+                    color: 'orange'
                 }
             }
             return {
@@ -22,41 +59,49 @@ class Profile extends HTMLElement {
                 color: 'brown'
             }
         }
-        if (!data.games) {
-            return this.innerHTML = `
-                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
-            `
-        }
         for (let i = 0; i < data.games.length; i++) {
-            let score_a = data.games[i].score_a
-            let score_b = data.games[i].score_b
-            let avatar_a = data.games[i].avatar_a
-            let avatar_b = data.games[i].avatar_b
-            let matchResult = winOrLose(score_a, score_b);
+            let gameStatus = displayMatchHistory(data.username, data.games[i]);
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${avatar_a}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
-                    <span class="score_bar" style="background-color: ${matchResult.color};">
-                        <span class="score_main">${score_a}</span>
-                        <span class="status">${matchResult.status}</span>
-                        <span class="score_guest">${score_b}</span>
+                    <span class="score_bar" style="background-color: ${gameStatus.color};">
+                        <span class="score_main">${gameStatus.score}</span>
+                        <span class="status">${gameStatus.status}</span>
+                        <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${avatar_b}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
                 </div>
             `
-
         }
         return this.innerHTML;
+    }
+
+    async getUserStats(userData) {
+        if (userData.username === userData.games[0].player_a) {
+            return {
+                'wins': userData.games.filter(game => game.score_a > game.score_b).length,
+                'loses': userData.games.filter(game => game.score_a < game.score_b).length,
+                'draws': userData.games.filter(game => game.score_a === game.score_b).length,
+                'score': userData.games.reduce((acc, game) => acc + game.score_a, 0),
+            }
+        }
+        return {
+            'wins': userData.games.filter(game => game.score_b > game.score_a).length,
+            'loses': userData.games.filter(game => game.score_b < game.score_a).length,
+            'draws': userData.games.filter(game => game.score_b === game.score_a).length,
+            'score': userData.games.reduce((acc, game) => acc + game.score_b, 0),
+        }
     }
 
     async render() {
         try {
             let userData = await getUserData();
             console.log(userData);
+            let userStats = await this.getUserStats(userData);
             this.innerHTML = `
                 <div class="dashbord-main">
                     <div class="right-side-dashbord">
@@ -67,13 +112,13 @@ class Profile extends HTMLElement {
                             <div class="profile-status">
                                 <div class="gird_status">
                                     <div class="grid-item " style="font-size:25px; color: #ffc800;">Wins</div>
-                                    <div class="grid-item ">1</div>
+                                    <div class="grid-item ">${userStats.wins}</div>
                                     <div class="grid-item " style="font-size:25px; color: #ffc800;">Lose</div>
-                                    <div class="grid-item ">1</div>
+                                    <div class="grid-item ">${userStats.loses}</div>
+                                    <div class="grid-item " style="font-size:25px; color: #ffc800;">Draws</div>
+                                    <div class="grid-item ">${userStats.draws}</div>
                                     <div class="grid-item " style="font-size:25px; color: #ffc800;">Score</div>
-                                    <div class="grid-item ">1</div>
-                                    <div class="grid-item " style="font-size:25px; color: #ffc800;">Block</div>
-                                    <div class="grid-item ">1</div>
+                                    <div class="grid-item ">${userStats.score}</div>
                                 </div>
                             </div>
                             <div class="tools_profile">
@@ -139,9 +184,9 @@ class Profile extends HTMLElement {
                 </div>
             `
             const avatar = document.querySelector('.profile-photo');
-            const avatarMenu = document.querySelector('.profile');
+            // const avatarMenu = document.querySelector('.profile');
             avatar.style.backgroundImage = `url(${userData.avatar})`;
-            avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
+            // avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
 
             const pendingListButton = document.getElementById('pending_list');
             const blockListButton = document.getElementById('block_list');
@@ -151,22 +196,22 @@ class Profile extends HTMLElement {
             const closeModalButtons = document.querySelectorAll('.close_modal');
 
 
-            pendingListButton.addEventListener('click', function() {
+            pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
             });
 
-            blockListButton.addEventListener('click', function() {
+            blockListButton.addEventListener('click', function () {
                 blockModal.style.display = 'flex';
             });
 
             closeModalButtons.forEach(closeButton => {
-                closeButton.addEventListener('click', function() {
+                closeButton.addEventListener('click', function () {
                     pendingModal.style.display = 'none';
                     blockModal.style.display = 'none';
                 });
             });
 
-            window.addEventListener('click', function(event) {
+            window.addEventListener('click', function (event) {
                 if (event.target === pendingModal) {
                     pendingModal.style.display = 'none';
                 }
@@ -175,7 +220,7 @@ class Profile extends HTMLElement {
                 }
             });
 
-            shareProfileButton.addEventListener('click', function() {
+            shareProfileButton.addEventListener('click', function () {
                 console.log('Share profile clicked');
             });
 
@@ -186,9 +231,11 @@ class Profile extends HTMLElement {
     }
 }
 
-export function attachDOM() {
+export function attachDOM({ username }) {
+    console.log('username from profile.js', username);
     document.body.innerHTML = '';
     const page = document.createElement('profile-page');
+    page.setAttribute('username', username);
     document.body.appendChild(page);
 }
 
