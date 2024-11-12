@@ -13,9 +13,33 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
 import requests
 from django.shortcuts import redirect
+import pyotp
 
 
 User = get_user_model()
+
+class GenerateOTPView(APIView):
+    def get(self, request):
+        """
+        Génère un OTP et le renvoie.
+        """
+        SECRET_KEY = "JBSWY3DPEHPK3PXP"  # Exemple de clé secrète
+        totp = pyotp.TOTP(SECRET_KEY)
+        otp = totp.now()  # Génère un OTP valide
+        return Response({"otp": otp, "message": "OTP généré avec succès"}, status=status.HTTP_200_OK)
+
+class VerifyOTPView(APIView):
+    def post(self, request):
+        """
+        Vérifie le OTP envoyé par l'utilisateur.
+        """
+        SECRET_KEY = "JBSWY3DPEHPK3PXP"  # Clé secrète utilisée pour vérifier le OTP
+        user_otp = request.data.get("otp")  # Récupérer le OTP envoyé
+        totp = pyotp.TOTP(SECRET_KEY)
+        
+        if totp.verify(user_otp):  # Vérifier si le OTP est valide
+            return Response({"message": "OTP validé avec succès"}, status=status.HTTP_200_OK)
+        return Response({"message": "OTP invalide ou expiré"}, status=status.HTTP_400_BAD_REQUEST)
 
 class Oauth42(APIView):
     def get(self, request):
