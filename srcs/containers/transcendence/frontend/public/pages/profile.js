@@ -20,7 +20,7 @@ class Profile extends HTMLElement {
             let matchResult;
             if (username === currentGame.player_a) {
                 matchResult = winOrLose(currentGame.score_a, currentGame.score_b);
-                console.log(matchResult);
+                // console.log(matchResult);
                 return {
                     'avatar': currentGame.avatar_a,
                     'score': currentGame.score_a,
@@ -81,6 +81,11 @@ class Profile extends HTMLElement {
     }
 
     async getUserStats(userData) {
+        if (!userData.games) {
+            return `
+                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
+            `
+        }
         if (userData.username === userData.games[0].player_a) {
             return {
                 'wins': userData.games.filter(game => game.score_a > game.score_b).length,
