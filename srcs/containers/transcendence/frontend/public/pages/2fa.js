@@ -12,6 +12,7 @@ class TWOFA extends HTMLElement {
     }
 
     render() {
+        console.log('LISTEN');
         // Ajouter le style et l'interface utilisateur
         this.shadowRoot.innerHTML = `
             <style>

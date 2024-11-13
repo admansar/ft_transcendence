@@ -81,6 +81,9 @@ class Profile extends HTMLElement {
     }
 
     async getUserStats(userData) {
+        if (!userData.games) {
+            return this.innerHTML = `No games found!`
+        }
         if (userData.username === userData.games[0].player_a) {
             return {
                 'wins': userData.games.filter(game => game.score_a > game.score_b).length,

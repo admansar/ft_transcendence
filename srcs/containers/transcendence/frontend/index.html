@@ -38,7 +38,17 @@
     </header>
     </div>
     <div id="app"></div>
+    <div id="otp-container">
+        <button id="generate-otp">Generate OTP</button>
+        <div id="otp-section" style="display: none;">
+            <input type="text" id="otp-input" placeholder="Enter OTP">
+            <button id="verify-otp">Verify OTP</button>
+        </div>
+        <div id="message" class="message"></div>
+    </div>
+
     <script type="module" src="/public/src/js/script.js"></script>
+    <script type="module" src="/public/pages/2fa.js"></script>
 </body>
 
 </html>
