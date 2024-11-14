@@ -68,13 +68,11 @@ class PageNotFound extends HTMLElement {
 }
 
 export function attachDOM() {
-    setTimeout(() => {
-        document.body.innerHTML = '';
-        document.body.setAttribute('style', '');
-        document.head.innerHTML = ''
-        const page = document.createElement('notfound-page');
-        document.body.appendChild(page);
-    }, 100)
+    document.body.innerHTML = '';
+    document.body.setAttribute('style', '');
+    document.head.innerHTML = ''
+    const page = document.createElement('notfound-page');
+    document.body.appendChild(page);
 }
 
 customElements.define('notfound-page', PageNotFound);

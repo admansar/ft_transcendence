@@ -12,8 +12,8 @@ class Profile extends HTMLElement {
 
     async renderScore(data) {
         if (!data.games) {
-            return this.innerHTML = `
-                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
+            return `
+                <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
             `
         }
         function displayMatchHistory(username, currentGame) {
@@ -81,30 +81,32 @@ class Profile extends HTMLElement {
     }
 
     async getUserStats(userData) {
-        if (!userData.games) {
-            return `
-                <span class="message" style="font-size: 20px;">No Games found, Go PLAY</span>
-            `
-        }
-        if (userData.username === userData.games[0].player_a) {
+        if (userData.games && userData.username === userData.games[0].player_a) {
             return {
                 'wins': userData.games.filter(game => game.score_a > game.score_b).length,
                 'loses': userData.games.filter(game => game.score_a < game.score_b).length,
                 'draws': userData.games.filter(game => game.score_a === game.score_b).length,
                 'score': userData.games.reduce((acc, game) => acc + game.score_a, 0),
             }
+        } else if (userData.games && userData.username === userData.games[0].player_b) {
+            return {
+                'wins': userData.games.filter(game => game.score_b > game.score_a).length,
+                'loses': userData.games.filter(game => game.score_b < game.score_a).length,
+                'draws': userData.games.filter(game => game.score_b === game.score_a).length,
+                'score': userData.games.reduce((acc, game) => acc + game.score_b, 0),
+            }
         }
         return {
-            'wins': userData.games.filter(game => game.score_b > game.score_a).length,
-            'loses': userData.games.filter(game => game.score_b < game.score_a).length,
-            'draws': userData.games.filter(game => game.score_b === game.score_a).length,
-            'score': userData.games.reduce((acc, game) => acc + game.score_b, 0),
+            'wins': 0,
+            'loses': 0,
+            'draws': 0,
+            'score': 0,
         }
     }
 
-    async render() {
+    async render(username) {
         try {
-            let userData = await getUserData();
+            let userData = await getUserData(username);
             console.log(userData);
             let userStats = await this.getUserStats(userData);
             this.innerHTML = `
@@ -227,11 +229,13 @@ class Profile extends HTMLElement {
 
             shareProfileButton.addEventListener('click', function () {
                 console.log('Share profile clicked');
+                let profileUrl = `http://localhost/profile/${username}`;
+                navigator.clipboard.writeText(profileUrl);
             });
 
         } catch (e) {
             console.log(e);
-            Router.findRoute('/login');
+            Router.findRoute('404');
         }
     }
 }
@@ -244,13 +248,15 @@ export function attachDOM({ username }) {
     document.body.appendChild(page);
 }
 
-async function getUserData() {
+async function getUserData(username) {
+    console.log('username from getUserData', username);
     let options = {
-        method: 'GET',
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        credentials: 'include'
+        credentials: 'include',
+        body: JSON.stringify({ username: username })
     }
     let response = await makeAuthRequest('http://localhost:8000/api/accounts/user/', options)
 

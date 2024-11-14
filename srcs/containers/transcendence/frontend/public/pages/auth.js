@@ -23,7 +23,6 @@ class Auth extends HTMLElement {
         }
         else {
             this.appendChild(loginPage)
-            
             login();
         }
         
@@ -76,7 +75,6 @@ function register() {
             if (response.ok) {
                 alert('Registration successful!')
                 Router.findRoute('/login');
-                // window.location.href = '/login'
             } else {
                 alert(`Error: ${response.message}`)
             }
@@ -113,8 +111,7 @@ function login() {
                 console.log('refresh', data.refresh);
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                Router.findRoute('/profile');
-                // window.location.href = '/'
+                Router.findRoute(`/profile/${username}`);
             } else {
                 // login failed
                 console.log(data.error);

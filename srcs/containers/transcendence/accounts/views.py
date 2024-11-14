@@ -14,6 +14,7 @@ from django.http import HttpResponseRedirect
 import requests
 from django.shortcuts import redirect
 import pyotp
+from django.shortcuts import get_object_or_404
 
 
 User = get_user_model()
@@ -161,16 +162,10 @@ class RefreshTokenView(APIView):
         return response
 
 class UserView(APIView):
-    # authentication_classes = [JWTAuthentication]
-    # permission_classes = [IsAuthenticated]
-    def get(self, request):
-        token = request.COOKIES.get('access')
-        if not token:
-            raise AuthenticationFailed('Unauthorized')
+    def post(self, request):
         try:
-            print('token==>', 'validated_token')
-            validated_token = JWTAuthentication().get_validated_token(token)
-            user = JWTAuthentication().get_user(validated_token)
+            username = request.data.get('username')
+            user = get_object_or_404(User, username=username)
             print('User is =>', user)
             serializer = UserSerializer(user)
             return Response(serializer.data)

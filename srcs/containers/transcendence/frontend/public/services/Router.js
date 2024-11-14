@@ -46,6 +46,11 @@ export const Router = {
                 path = path.replace(`:${key}`, params[key]);
             }
         }
+
+        if (path === '404') {
+            path = '/404';
+        }
+
         console.log(`Navigating to ${path}`, params);
         if (addHistory) {
             history.pushState(null, null, path);
