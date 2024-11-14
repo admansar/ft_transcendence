@@ -111,7 +111,7 @@ function login() {
                 console.log('refresh', data.refresh);
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                Router.findRoute(`/profile/${username}`);
+                Router.findRoute(`/`);
             } else {
                 // login failed
                 console.log(data.error);

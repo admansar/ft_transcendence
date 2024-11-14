@@ -1,7 +1,21 @@
+import { Router } from '../services/Router.js';
+
 export function setupModal() {
+    console.log('Setting up modal');
     const playModal = document.getElementById('play-modal');
     const closeModalBtn = document.querySelector('.close-btn');
+    
+    const online = document.getElementById('online-btn');
+    online.addEventListener('click', () => Router.findRoute('/online_game'));
 
+    const offline2D = document.getElementById('player-vs-computer-btn');
+    offline2D.addEventListener('click', () => Router.findRoute('/offline_game'));
+
+    const offline3D = document.getElementById('ping-pong-btn');
+    offline3D.addEventListener('click', () => Router.findRoute('/game_3d'));
+
+    const tournament = document.getElementById('tournament-btn');
+    tournament.addEventListener('click', () => Router.findRoute('/tournament'));
     closeModalBtn.addEventListener('click', () => {
         playModal.style.display = 'none';
     });
