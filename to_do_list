@@ -5,3 +5,5 @@ tournoi
 
 
 close socket after ending in the tournament 
+Link 2fa with Front-end api to generate Otp = http://localhost/api/accounts/generate-otp/
+to verify OTP http://localhost/api/accounts/verify-otp

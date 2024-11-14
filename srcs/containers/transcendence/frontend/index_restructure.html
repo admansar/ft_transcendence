@@ -20,7 +20,6 @@
 
 <body>
     <header>
-        <!-- <div class="header-container"> -->
         <div class="menu-icon" id="menu-icon">&#9776;
             <div class="menu-content">
                 <li>Item 1</li>
@@ -30,14 +29,16 @@
             </div>
         </div>
         <span class="profile"></span>
-        <div></div>
         <div class="logo">
             <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
         </div>
         <input type="search" placeholder="ADD friends...">
     </header>
-    </div>
+
+    <!-- Ton app principale -->
     <div id="app"></div>
+
+    <!-- Interface 2FA -->
     <div id="otp-container">
         <button id="generate-otp">Generate OTP</button>
         <div id="otp-section" style="display: none;">
@@ -48,7 +49,7 @@
     </div>
 
     <script type="module" src="/public/src/js/script.js"></script>
-    <script type="module" src="/public/pages/2fa.js"></script>
+    <script type="module" src="public/pages/2fa.js"></script>
 </body>
 
 </html>
