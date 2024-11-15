@@ -9,7 +9,7 @@ document.head.innerHTML = `
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ping Pong Game</title>
-  <link rel="stylesheet" href="public/tournoi/css/tournament.css"></link>
+  <link rel="stylesheet" href="../public/tournoi/css/tournament.css"></link>
   `
 
 document.body.innerHTML = `
@@ -39,7 +39,7 @@ document.body.innerHTML = `
   </div>
   <div class="countdown"></div>
 
-  <script type="module" src="public/tournoi/js/game.js"></script>
+  <script type="module" src="../public/tournoi/js/game.js"></script>
 ` 
 
 

@@ -16,7 +16,7 @@ class Game_online extends HTMLElement {
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Ping Pong Game</title>
-        <link rel="stylesheet" href="public/game/css/style.css">
+        <link rel="stylesheet" href="../public/game/css/style.css">
         <link rel="icon" type="image/x-icon" href="public/game/images/140412.png">
       </head>
       <body>

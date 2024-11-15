@@ -15,10 +15,6 @@ export class Login extends HTMLElement {
                         <input type="password" id="pwd" name="pwd" placeholder="Password">
                         <div id="error" style="color: red; display: none;"></div>
                         <button type="submit" class="submit-button">Connect</button>
-                        <div class="stay-sign">
-                            <input type="checkbox" id="stay-sign" name="stay-sign" value="stay-signed-in">
-                            <label for="stay-sign"> Stay Signed-in</label>
-                        </div>
                         <div class="line"></div>
                     <div class="Sign-in">
                         <div class="message">Not registered yet?</div>

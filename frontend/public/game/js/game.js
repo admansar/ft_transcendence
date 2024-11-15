@@ -73,7 +73,7 @@ let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
 
 if (response.ok) {
 	let data = await response.json();
-	// console.log ('full data: ', data)
+	console.log ('full data: ', data)
 	token = data.access;
 }
 else

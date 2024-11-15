@@ -1,3 +1,5 @@
+import { isAuth } from '../services/utils.js';
+
 export const Router = {
     normalizeRoute(route) {
         if (route.endsWith('/') && route.length > 1) {
@@ -51,6 +53,18 @@ export const Router = {
             path = '/404';
         }
 
+        if (route.isAuth !== undefined && route.isAuth === false) {
+            const isUserAuth = await isAuth();
+            console.log('isUserAuth', isUserAuth);
+            if (isUserAuth && (path === '/login' || path === '/register')) {
+                route = routes.find((el => el.path === '/'));
+                path = '/';
+            } else if (!isUserAuth && path !== '/login' && path !== '/register') {
+                route = routes.find((el => el.path === '/login'));
+                path = '/login';
+            }
+        }
+
         console.log(`Navigating to ${path}`, params);
         if (addHistory) {
             history.pushState(null, null, path);
@@ -62,6 +76,7 @@ export const Router = {
 export const routes = [
     {
         path: '/',
+        isAuth: false,
         component: () => import('../pages/homepage.js').then(module => module.attachDOM())
     },
     {
@@ -72,12 +87,14 @@ export const routes = [
     },
     {
         path: '/register',
+        isAuth: false,
         component: () => import('../pages/auth.js').then(module => {
             module.attachDOM('register')
         })
     },
     {
         path: '/login',
+        isAuth: false,
         component: () => import('../pages/auth.js').then(module => {
             module.attachDOM('login')
         })
@@ -91,24 +108,28 @@ export const routes = [
     },
     {
         path: '/game/offline',
+        isAuth: false,
         component: () => import('../pages/game_offline.js').then(module => {
             module.attachDOM();
         })
     },
     {
         path: '/game/online',
+        isAuth: false,
         component: () => import('../pages/game_online.js').then(module => {
             module.attachDOM();
         })
     },
     {
         path: '/game/3d',
+        isAuth: false,
         component: () => import('../pages/3d_ping_pong.js').then(module => {
             module.attachDOM();
         })
     },
     {
         path: '/game/tournament',
+        isAuth: false,
         component: () => import('../pages/tournament_component.js').then(module => {
             module.attachDOM();
         })

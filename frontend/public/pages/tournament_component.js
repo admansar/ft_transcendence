@@ -143,7 +143,7 @@ class TournamentComponent extends HTMLElement {
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Ping Pong Tournament - 4 Players</title>
-            <link rel="stylesheet" href="public/tournoi/css/tournament.css">
+            <link rel="stylesheet" href="/public/tournoi/css/tournament.css">
         </head>
         <body>
             <div class="tournament-frame">

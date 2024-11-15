@@ -175,6 +175,8 @@ class UserView(APIView):
 class Me(APIView):
     def post(self, request):
         token = request.COOKIES.get('access')
+        # v = JWTAuthentication().get_validated_token(token)
+        # print('valid token', v)
         if not token:
             raise AuthenticationFailed('Unauthorized')
         

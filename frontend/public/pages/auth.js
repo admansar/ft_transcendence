@@ -31,12 +31,14 @@ class Auth extends HTMLElement {
             if (event.target && event.target.id === 'open-register') {
                 this.innerHTML = ''
                 this.appendChild(registerPage)
+                history.pushState(null, null, '/register');
                 register();
             }
-
+            
             if (event.target && event.target.id === 'close-register') {
                 this.innerHTML = ''
                 this.appendChild(loginPage)
+                history.pushState(null, null, '/login');
                 login();
             }
         });
