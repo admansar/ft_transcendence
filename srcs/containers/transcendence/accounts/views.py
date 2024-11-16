@@ -15,33 +15,104 @@ import requests
 from django.shortcuts import redirect
 import pyotp
 from django.shortcuts import get_object_or_404
+import random
+import random
+import secrets
+import string
+from django.core.mail import send_mail
+from email.message import EmailMessage
+from django.core.mail import send_mail
+from django.conf import settings
+import secrets
+import string
 
 
 User = get_user_model()
 
-class GenerateOTPView(APIView):
-    def get(self, request):
-        """
-        Génère un OTP et le renvoie.
-        """
-        SECRET_KEY = "JBSWY3DPEHPK3PXP"  # Exemple de clé secrète
-        totp = pyotp.TOTP(SECRET_KEY)
-        otp = totp.now()  # Génère un OTP valide
-        return Response({"otp": otp, "message": "OTP généré avec succès"}, status=status.HTTP_200_OK)
 
+class OTP:
+    def __init__(self):
+        self.otp = ""
+
+    def generate_otp(self):
+        self.otp = ''.join(secrets.choice(string.digits) for _ in range(6))
+        return self.otp
+
+    def verify_otp(self, user_otp):
+        return self.otp == user_otp
+
+class GenerateOTPView(APIView):
+    def post(self, request):
+        to_email = request.data.get('email')
+        
+        if not to_email:
+            return Response(
+                {"error": "Email is required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            otp_handler = OTP()
+            otp = otp_handler.generate_otp()
+
+            subject = "Unlock Your Adventure! Here's Your OTP"
+            message = f'Your OTP is: {otp}'
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [to_email]
+            
+            send_mail(
+                subject,
+                message,
+                from_email,
+                recipient_list,
+                fail_silently=False,
+            )
+            request.session['otp'] = otp
+            request.session['otp_email'] = to_email
+            
+            return Response(
+                {"message": "OTP sent successfully"}, 
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while sending the email. Please try again."}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 class VerifyOTPView(APIView):
     def post(self, request):
-        """
-        Vérifie le OTP envoyé par l'utilisateur.
-        """
-        SECRET_KEY = "JBSWY3DPEHPK3PXP"  # Clé secrète utilisée pour vérifier le OTP
-        user_otp = request.data.get("otp")  # Récupérer le OTP envoyé
-        totp = pyotp.TOTP(SECRET_KEY)
+        user_otp = request.data.get('otp')
+        user_email = request.data.get('email')
         
-        if totp.verify(user_otp):  # Vérifier si le OTP est valide
-            return Response({"message": "OTP validé avec succès"}, status=status.HTTP_200_OK)
-        return Response({"message": "OTP invalide ou expiré"}, status=status.HTTP_400_BAD_REQUEST)
-
+        stored_otp = request.session.get('otp')
+        stored_email = request.session.get('otp_email')
+        
+        if not user_otp or not user_email:
+            return Response(
+                {"error": "OTP and email are required"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        if user_email != stored_email:
+            return Response(
+                {"error": "Email does not match"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        if user_otp != stored_otp:
+            return Response(
+                {"error": "Invalid OTP"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Clear the OTP from session after successful verification
+        del request.session['otp']
+        del request.session['otp_email']
+        
+        return Response(
+            {"message": "OTP verified successfully"}, 
+            status=status.HTTP_200_OK
+        )
 class Oauth42(APIView):
     def get(self, request):
         code = request.GET.get('code')
@@ -128,8 +199,6 @@ class Login(APIView):
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
         if user is None or not user.check_password(password):
             return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
-        # if not user.check_password(password):
-        #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token

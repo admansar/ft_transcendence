@@ -12,6 +12,6 @@ urlpatterns = [
     path('oauth42/', Oauth42.as_view()),
     path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired'),
     path('generate-otp/', GenerateOTPView.as_view(), name='generate-otp'),
-     path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
+    path('verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
     
 ]
