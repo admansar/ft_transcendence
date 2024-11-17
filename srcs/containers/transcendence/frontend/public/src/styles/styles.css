@@ -794,11 +794,17 @@ input[type=text-chat]{
     height: 100%;
 }
 
-.folder{
+.playWith{
+    background-image: url(../../src/img/Frame\ 1.png);
     height: 30px;
     width: 30px;
     border-radius: 50%;
     background-color: #2ea453;
+    background-size: cover;
+    background-size: 70% 70%;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
     border: 0px;
 }
 
@@ -1787,4 +1793,260 @@ input[type=text-chat]{
 .unblock_fr:hover{
     color: #fff;
     background-color: #626262;
+}
+
+/*---------------------------Settings-------------*/
+
+.modal_settings{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+}
+
+.settings_window{
+    width: 50%;
+    height: 80%;
+    min-width: 700px;
+    min-height: 700px;
+    max-width: 1000px;
+    max-height: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #e0991f;
+    border-radius: 50px;
+    border: 3px solid #fabc13;
+}
+.switch_panel{
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    height: 90%;
+    gap :2px;
+}
+.edit_panel{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    width: 60%;
+    height: 90%;
+    border: 3px solid #fabc13;
+    background-color: #2f2f2f;
+    border-radius: 15px;
+}
+
+.setting_bnt{
+    border-radius: 15px;
+    width: 100%;
+    height: 10%;
+    background-color: #fabc1393;
+    color: #fff;
+    font-size: 26px;
+    display: flex;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.setting_bnt:hover{
+    color: #000000;
+    background-color: #ffbb00;
+    box-shadow: inset 0px 0px 50px #fad337;
+}
+
+.edit_panel input[type="setting"]
+{
+    outline: none;
+    margin: 10px;
+    width: 80%;
+    height: 30px;
+    text-align: center;
+    border-radius: 20px;
+    color:#fade6d;
+    background-color: #181818;
+    border: 1px solid #ffc800;
+}
+
+.Confirmed_change{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 30px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 12px;
+    background-color: green;
+    color: #ffffff;
+    border-radius: 15px;
+    margin-top: auto; 
+    margin-bottom: 20px; 
+    transition: all 0.3s ease-in-out;
+}
+
+.Confirmed_change:hover{
+    font-size: 13px;
+    color: #000000;
+    background-color: #49ff3c;
+    box-shadow: 0px 0px 10px #49ff3c;
+}
+.edit_panel {
+    display: none; /* Hide all panels initially */
+    flex-direction: column;
+}
+
+.edit_panel.active {
+    display: flex; /* Show only the active panel */
+}
+
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+
+.checkbox-container input[type="checkbox"] {
+    display: none;
+}
+
+
+.checkbox-container label {
+    position: relative;
+    padding-left: 30px; /* Space for the custom checkbox */
+    cursor: pointer;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    color: #ffffff;
+}
+
+
+.checkbox-container label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #77ff00; /* Custom border color */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #fff; /* Background color */
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+
+.checkbox-container input[type="checkbox"]:checked + label::before {
+    background-color: #77ff00; /* Change background when checked */
+    border-color: #77ff00; /* Match border with background */
+}
+
+
+.checkbox-container input[type="checkbox"]:checked + label::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 8px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+
+.checkbox-container label:hover::before {
+    border-color: #77ff00; /* Change border color on hover */
+}
+
+/*---------------------------chat play notification-------------*/
+
+.play-with-moba{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+}
+
+.play-with-moba-bar{
+    width: 600px;
+    height: 300px;
+    border-radius: 25px;
+    border:5px solid #ffc400;
+    background-color: #252525;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.message-notif{
+    color: #fff;
+    font-size: 25px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-pic-play-with{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #454545;
+    background-image: url(../../src/img/profile.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.requeat-play-with{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    gap: 50px;
+}
+.request{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 50px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+}
+
+.request.accepted{
+    border: 2px solid rgb(50, 220, 20);
+    color: rgb(50, 220, 20);
+}
+
+.request.accepted:hover{
+    background-color: rgb(50, 220, 20);
+    color: #454545;
+}
+
+.request.rejected{
+    border: 2px solid rgb(220, 20, 20);
+    color:  rgb(220, 20, 20);
+}
+
+.request.rejected:hover{
+    background-color:  rgb(220, 20, 20);
+    color: #454545;
 }
