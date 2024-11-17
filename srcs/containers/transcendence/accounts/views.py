@@ -25,10 +25,30 @@ from django.core.mail import send_mail
 from django.conf import settings
 import secrets
 import string
-
+from .utils import TwoFactorAuth
+from .serializers import UserSerializer
+from .models import Enable2FASerializer
+from django.contrib.auth import authenticate
+import pyotp
+import qrcode
+import base64
+from io import BytesIO
+from django.core.mail import send_mail
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import TwoFactorAuth  # Assurez-vous que cette classe est définie
+import logging
+logger = logging.getLogger(__name__)
+from django.core.mail import send_mail
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.conf import settings
 
 User = get_user_model()
-
 
 class OTP:
     def __init__(self):
@@ -40,7 +60,6 @@ class OTP:
 
     def verify_otp(self, user_otp):
         return self.otp == user_otp
-
 class GenerateOTPView(APIView):
     def post(self, request):
         to_email = request.data.get('email')
@@ -79,6 +98,26 @@ class GenerateOTPView(APIView):
                 {"error": "An error occurred while sending the email. Please try again."}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class Login(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        email = request.data.get('email')
+        user = User.objects.filter(Q(username=username) | Q(email=email)).first()
+        if user is None or not user.check_password(password):
+            return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
+
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        response = Response()
+        response.data = {
+            'access': str(access),
+            'refresh': str(refresh)
+        }
+        response.set_cookie(key='access', value=str(access), httponly=True)
+        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
+        return response
 class VerifyOTPView(APIView):
     def post(self, request):
         user_otp = request.data.get('otp')
@@ -185,32 +224,74 @@ class Oauth42(APIView):
 
 
 class SignUp(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+   def post(self, request):
+        data = request.data
 
-class Login(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        email = request.data.get('email')
-        user = User.objects.filter(Q(username=username) | Q(email=email)).first()
-        if user is None or not user.check_password(password):
-            return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
+        # Fournir des valeurs par défaut pour les champs problématiques
+        data['us_2fa_enabled'] = data.get('us_2fa_enabled', False)
+        data['us_2fa_secret'] = data.get('us_2fa_secret', None)
 
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-        response = Response()
-        response.data = {
-            'access': str(access),
-            'refresh': str(refresh)
-        }
-        response.set_cookie(key='access', value=str(access), httponly=True)
-        response.set_cookie(key='refresh', value=str(refresh), httponly=True)
-        return response
+        serializer = UserSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class Verify2FAView(APIView):
+#     permission_classes = [IsAuthenticated]
     
+#     def post(self, request):
+#         """Verify 2FA Code"""
+#         code = request.data.get('code')
+#         user = request.user
+        
+#         if not user.us_2fa_enabled or not user.us_2fa_secret:
+#             return Response({
+#                 'error': '2FA is not enabled for this user'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+        
+#         # Verify the code
+#         if TwoFactorAuth.verify_2fa_code(user.us_2fa_secret, code):
+#             # Generate new tokens
+#             refresh = RefreshToken.for_user(user)
+#             return Response({
+#                 'refresh': str(refresh),
+#                 'access': str(refresh.access_token),
+#             })
+        
+#         return Response({
+#             'error': 'Invalid 2FA code'
+#         }, status=status.HTTP_401_UNAUTHORIZED)
+
+# class SendOTPView(APIView):
+#     """Send OTP to user's email"""
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request):
+#         user = request.user
+        
+#         if not user.us_2fa_enabled:
+#             return Response({
+#                 'error': '2FA is not enabled for this user'
+#             }, status=status.HTTP_400_BAD_REQUEST)
+
+#         # Generate a new OTP code
+#         otp_code = TwoFactorAuth.generate_otp_code(user.us_2fa_secret)
+        
+#         # Send the OTP via email
+#         send_mail(
+#             subject="Your OTP Code",
+#             message=f"Your OTP code is: {otp_code}",
+#             from_email="noreply@example.com",  # Remplacez par votre email
+#             recipient_list=[user.email],
+#             fail_silently=False,
+#         )
+        
+#         return Response({
+#             'message': 'OTP sent to your email address'
+#         }, status=status.HTTP_200_OK)
+
 class RefreshTokenView(APIView):
     def post(self, request):
         refresh_token = request.COOKIES.get('refresh')
@@ -273,3 +354,14 @@ class UpdateUser(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+    
+class TwoFactorAuth:
+    @staticmethod
+    def generate_otp_code(secret):
+        totp = pyotp.TOTP(secret)
+        return totp.now()
+
+    @staticmethod
+    def verify_2fa_code(secret, code):
+        totp = pyotp.TOTP(secret)
+        return totp.verify(code)
