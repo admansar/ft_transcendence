@@ -6,10 +6,9 @@ from channels.db import database_sync_to_async
 import asyncio
 import time
 from typing import Any
-import jwt
-from accounts.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from .services import get_user_from_api
 
 # Constants
 CANVAS_WIDTH: int = 1000
@@ -94,7 +93,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     room_group_name: str = "room_01" # default room
     room_id: int = 1 # default room
     room: GameRoom = None
-    user: User | dict = None
+    user: dict = None
     user_name: str = None
     breaker = False
     # def get
@@ -151,7 +150,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def authenticate_user(self, token: str) -> User | None :
+    def authenticate_user(self, token: str) -> None :
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method

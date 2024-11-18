@@ -30,6 +30,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '0.0.0.0',
+    'backend',
+    'auth',
     # get_ip(), # changes with post
 ]
 
@@ -186,6 +188,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost",
     "http://localhost:80",
     "http://localhost:8000",
+    "http://localhost:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True

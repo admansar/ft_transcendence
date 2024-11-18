@@ -2,13 +2,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.views import APIView
-from accounts.models import User
+# from accounts.models import User
 from django.shortcuts import get_object_or_404
-from game.models import GameScore
+from .models import GameScore
 from django.db.models import Q
+from .services import get_user_from_api
 
 class CompleteGame(APIView):
     def post(self, request):
@@ -20,8 +20,11 @@ class CompleteGame(APIView):
 
 class initGame(APIView):
     def post(self, request):       
-        player = get_object_or_404(User, username=request.data.get('self_name'))
-        opponent = get_object_or_404(User, username=request.data.get('other_name'))
+        # player = get_object_or_404(User, username=request.data.get('self_name'))
+        # opponent = get_object_or_404(User, username=request.data.get('other_name'))
+
+        player = get_user_from_api(request.data.get('self_name'))
+        opponent = get_user_from_api(request.data.get('other_name'))
                 
         if player.username > opponent.username:
             player, opponent = opponent, player
@@ -66,17 +69,23 @@ class UpdateScore(APIView):
 class GetGame(APIView):
     def post(self, request):
         print('gamesssss', request.data)
-        username = get_object_or_404(User, username=request.data.get('username'))
+        # username = get_object_or_404(User, username=request.data.get('username'))
+        print('request.data.get(username)', request.data.get('username'))
+        username = get_user_from_api(request.data.get('username'))
+        print('username ===>', username)
         games = GameScore.objects.filter(
-            Q(player_a=username) | Q(player_b=username),
+            # Q(player_a=username) | Q(player_b=username),
+            Q(player_a_id=username['id']) | Q(player_b_id=username['id']),
             status='Completed'
         ).order_by('-date')[:9]
         games = games.values()
         print('games', games)
         try:
-            player_a = get_object_or_404(User, id=games[0]['player_a_id'])
+            # player_a = get_object_or_404(User, id=games[0]['player_a_id'])
+            player_a = get_user_from_api(games[0]['player_a_id'])
             print('player_a.first_name', player_a.first_name)
-            player_b = get_object_or_404(User, id=games[0]['player_b_id'])
+            # player_b = get_object_or_404(User, id=games[0]['player_b_id'])
+            player_b = get_user_from_api(games[0]['player_b_id'])
             
             
             avatar_a = player_a.avatar

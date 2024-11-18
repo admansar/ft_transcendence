@@ -16,23 +16,6 @@ services:
       - ft_transcendence_network
     restart: always
 
-  game:
-    build:
-      context: ./game_service
-      dockerfile: Dockerfile
-    container_name: game
-    ports:
-      - "3001:3001"
-    env_file:
-      - ./game_service/.env
-    depends_on:
-      - redis
-    volumes:
-      - "./game_service:/app"
-    networks:
-      - ft_transcendence_network
-    restart: always
-
   postgres:
     build:
       context: ./backend/postgres
