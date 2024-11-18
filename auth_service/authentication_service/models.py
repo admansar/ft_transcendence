@@ -19,13 +19,13 @@ class User(AbstractUser):
     s_2fa_enabled = models.BooleanField(default=False)
     us_2fa_secret = models.CharField(max_length=255, blank=True, null=True)
 
-from .models import User
+# from .models import User
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'email', 'username', 'password', 'us_2fa_enabled')
-        extra_kwargs = {'password': {'write_only': True}}
+# class UserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ('id', 'email', 'username', 'password', 'us_2fa_enabled')
+#         extra_kwargs = {'password': {'write_only': True}}
 
 class Enable2FASerializer(serializers.Serializer):
     otp_code = serializers.CharField(max_length=6)
