@@ -259,7 +259,7 @@ async function getUserData(username) {
         credentials: 'include',
         body: JSON.stringify({ username: username })
     }
-    let response = await makeAuthRequest('http://localhost:8000/api/accounts/user/', options)
+    let response = await makeAuthRequest('/api/auth/user/', options)
 
     if (!response.ok) {
         const error = await response.text();
@@ -271,7 +271,7 @@ async function getUserData(username) {
 
     options.method = 'POST';
     options.body = JSON.stringify({ username: data.username });
-    response = await makeAuthRequest('http://localhost:8000/api/game/get-games', options)
+    response = await makeAuthRequest('/api/game/get-games', options)
     let games = await response.json();
     // console.log(games);
     data.games = games.games

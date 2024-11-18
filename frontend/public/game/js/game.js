@@ -53,17 +53,8 @@ let gameState = {
 // WebSocket connection
 let token = null;
 
-// let response = await fetch('http://localhost:8000/api/accounts/me',
-// 	{
-// 		method: 'POST',
-// 		headers:
-// 		{
-// 			'Content-Type': 'application/json',
-// 		},
-// 		credentials: 'include',
-// 	}
-// )
-let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
+let data = null;
+let response = await makeAuthRequest('/api/auth/me', {
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
@@ -72,13 +63,12 @@ let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
 });
 
 if (response.ok) {
-	let data = await response.json();
+	data = await response.json();
 	console.log ('full data: ', data)
 	token = data.access;
 }
 else
 {
-  data = null;
   console.log('Error fetching user data');
 }
 let breaker = false;
@@ -189,7 +179,7 @@ gameSocket.onmessage = async function (e) {
 
 		if (test === 0) {
 			test++;
-			// initGame = await fetch('http://localhost:8000/api/game/init-game', {
+			// initGame = await fetch('/api/game/init-game', {
 			// 	method: 'POST',
 			// 	headers: {
 			// 		'Content-Type': 'application/json'
@@ -197,7 +187,7 @@ gameSocket.onmessage = async function (e) {
 			// 	body: JSON.stringify(current_state)
 			// 	// body: JSON.stringify(user_data)
 			// })
-			initGame = await makeAuthRequest('http://localhost:8000/api/game/init-game', {
+			initGame = await makeAuthRequest('/api/game/init-game', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -290,7 +280,7 @@ gameSocket.onmessage = async function (e) {
 };
 
 async function updateScore(user_data) {
-	await fetch('http://localhost:8000/api/game/update-score', {
+	await fetch('/api/game/update-score', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
@@ -303,7 +293,7 @@ async function updateScore(user_data) {
 async function finishGame(user_data) {
 
 	// Mark the game as finished/Completed
-	await fetch('http://localhost:8000/api/game/complete-game', {
+	await fetch('/api/game/complete-game', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'

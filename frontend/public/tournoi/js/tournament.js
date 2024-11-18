@@ -29,7 +29,8 @@ let locker = false;
 //     credentials: 'include',
 //   }
 // )
-let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
+// let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
+let response = await makeAuthRequest('api/auth/me', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',

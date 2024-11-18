@@ -68,7 +68,8 @@ class TWOFA extends HTMLElement {
         const otpInput = this.shadowRoot.querySelector("#otp-input");
         const messageDiv = this.shadowRoot.querySelector("#message");
 
-        const API_BASE_URL = "http://localhost:8000/api/accounts";
+        // const API_BASE_URL = "http://localhost:8000/api/accounts";
+        const API_BASE_URL = "http://localhost:3000/api/accounts";
 
         // Gestionnaire pour générer un OTP
         generateOtpBtn.addEventListener("click", async () => {

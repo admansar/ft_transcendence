@@ -107,7 +107,8 @@ let token = null;
 //     credentials: 'include',
 //   }
 // )
-let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
+// let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
+let response = await makeAuthRequest('api/auth/me', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -230,7 +231,7 @@ export function tour_game(self, opponent)
   
       // if (test === 0) {
       //   test++;
-      //   // initGame = await fetch('http://localhost:8000/api/game/init-game', {
+      //   // initGame = await fetch('/api/game/init-game', {
       //   //   method: 'POST',
       //   //   headers: {
       //   //     'Content-Type': 'application/json'

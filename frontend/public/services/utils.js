@@ -1,5 +1,6 @@
 async function verifyToken(token) {
-    const response = await fetch('http://localhost:8000/api/token/verify/', {
+    // const response = await fetch('http://localhost:8000/api/token/verify/', {
+    const response = await fetch('/api/auth/token/verify/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -13,14 +14,12 @@ async function verifyToken(token) {
 export async function makeAuthRequest(url, options = {}) {
     options.credentials = 'include';
 
-    let response = await fetch(url, options);
-    // console.log(await response.json());
-    let data = await response.json();
-    let token = data.access;
+    let token = await getToken();
     console.log('token', token);
-    response = await verifyToken(token);
+    let response = await verifyToken(token);
     if (!response) {
-        const refreshRes = await fetch('http://localhost:8000/api/auth/refresh/', {
+        // const refreshRes = await fetch('http://localhost:8000/api/auth/refresh/', {
+        const refreshRes = await fetch('/api/auth/refresh/', {
             method: 'POST',
             credentials: 'include'
         })
@@ -35,8 +34,21 @@ export async function makeAuthRequest(url, options = {}) {
     return response
 }
 
+async function getToken() {
+    const response = await fetch('/api/auth/me', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+    });
+    const data = await response.json();
+    return data.access;
+}
+
 export async function isAuth() {
-    const response = await fetch('http://localhost:8000/api/accounts/me', {
+    // const response = await fetch('http://localhost:8000/api/accounts/me', {
+    const response = await fetch('/api/auth/me', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

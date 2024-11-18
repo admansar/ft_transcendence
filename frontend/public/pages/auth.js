@@ -62,7 +62,8 @@ function register() {
         const password = document.getElementById('pwd').value;
 
         try {
-            let response = await fetch('http://localhost:8000/api/accounts/register/', {
+            // let response = await fetch('http://localhost:8000/api/accounts/register/', {
+            let response = await fetch('api/auth/register/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,11 +97,14 @@ function login() {
         const logContainElement = document.querySelector('.log-contain'); // Get the log container
         
         try {
-            let response = await makeAuthRequest('http://localhost:8000/api/accounts/login/', {
+            // let response = await makeAuthRequest('http://localhost:8000/api/accounts/login/', {
+            let response = await fetch('api/auth/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
+                
                 body: JSON.stringify({
                     username: username,
                     password: password

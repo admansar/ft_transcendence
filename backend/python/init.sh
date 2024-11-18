@@ -1,7 +1,7 @@
 python3 helpers.py
 
-python3 manage.py makemigrations
-python3 manage.py migrate
+# python3 manage.py makemigrations
+# python3 manage.py migrate
 
 python manage.py populate_users
 

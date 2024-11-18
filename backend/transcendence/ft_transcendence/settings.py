@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
-    'accounts',
     'game',
     'tournament',
     'corsheaders',
@@ -200,4 +199,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # django_project/settings.py
 # settings.py
 
-AUTH_USER_MODEL = 'accounts.User'
+# AUTH_USER_MODEL = 'accounts.User'
