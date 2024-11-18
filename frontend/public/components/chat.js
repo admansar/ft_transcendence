@@ -1,3 +1,5 @@
+
+
 export function setupChat() {
 
     const profile_messanger = document.querySelector('.friend-profile');
@@ -30,9 +32,20 @@ export function setupChat() {
                         <span class="import">
                             <input type="text" id="textInput-${UserDATA.id}" placeholder="type here ..." required>
                         </span>
+                        <span class="playWith" id="play-with-${UserDATA.id}"></span>
                         <button class="send" id="send-${UserDATA.id}" ></button>
                     </div>
                 </span>
+                <div class="play-with-moba" id="play-with-${UserDATA.id}-window">
+                    <div class="play-with-moba-bar">
+                        <div class="message-notif">You are invited to Play with ${UserDATA.id}</div>
+                        <div class="profile-pic-play-with"></div>
+                        <div class="requeat-play-with">
+                            <span class="request accepted" id="${UserDATA.id}-acp">ACCEPT</span>
+                            <span class="request rejected" id="${UserDATA.id}-rjt">REJECT</span>
+                        </div>
+                    </div>
+                </div>
             `;
     
                 div.innerHTML = chatform;
@@ -40,12 +53,11 @@ export function setupChat() {
                 const chat_messanger_user = document.querySelector(`#${UserDATA.id}-chat`);
                 const chat_messanger_user_close_btn = document.querySelector(`#${UserDATA.id}-btn`);
     
-    
                 chat_messanger_user_close_btn.addEventListener('click', function () {
                     chat_messanger_user.classList.remove('active');
                     chat_messanger_user.style.display = 'none';
                 });
-    
+
                 document.querySelector(`#${UserDATA.id}-topic`).addEventListener('click', e => {
                     chat_messanger_user.classList.toggle('active');
                 });
@@ -71,6 +83,18 @@ export function setupChat() {
                         sendMessage();
                     }
                 });
+                const playWithWindow = document.getElementById(`play-with-${UserDATA.id}-window`);
+                document.getElementById(`play-with-${UserDATA.id}`).addEventListener('click', function () {
+                    console.log("Invite triggered");
+
+                    playWithWindow.style.display = 'flex';
+                });
+
+
+                document.getElementById(`${UserDATA.id}-rjt`).addEventListener('click', function () {
+                    playWithWindow.style.display = 'none';
+                });
+
                 document.getElementById(`send-${UserDATA.id}`).addEventListener('click', function (event) {
                     sendMessage();
                 });

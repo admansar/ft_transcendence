@@ -139,13 +139,22 @@ class Profile extends HTMLElement {
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
                             <div class="username-profile-dashbord">${userData.username}</div>
-                            <div class="lvl-profile-dashbord">lvl 100</div>
                             <div class="expbar-profile-dashbord">
-                                <div class="user_exp"></div>
+                                <span class="user_exp">
+                                    <span class="level">lvl 100</span>
+                                    <span class="Experience">80%</span>
+                                </span>
                             </div>
                         </div>
                         <div class="match-history-bar">
-                            ${await this.renderScore(userData)}
+                            <div class="btn_static">
+                                <span class="btn_static_click" id="history_bar">HISTORY</span>
+                                <span class="btn_static_click" id="achivements_bar">ACHIVEMENTS</span>
+                                <span class="btn_static_click" id="rank_bar">RANK</span>
+                            </div>
+                            <div class="HISTORYdata">
+                                ${await this.renderScore(userData)}
+                            </div>
                         </div>
                     </div>
                     <div class="pending_friends_modal" id="pendingModal">
@@ -203,7 +212,21 @@ class Profile extends HTMLElement {
             const blockModal = document.getElementById('blockModal');
             const closeModalButtons = document.querySelectorAll('.close_modal');
 
+            const cata = document.querySelectorAll('.btn_static_click');
+            const hist = document.getElementById('history_bar');
+            const arch = document.getElementById('achivements_bar');
+            const rank = document.getElementById('rank_bar');
 
+            cata.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove the 'active' class from all cata
+                    cata.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add the 'active' class to the clicked button
+                    button.classList.add('active');
+                });
+            });
+            
             pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
             });

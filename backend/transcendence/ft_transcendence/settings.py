@@ -34,9 +34,31 @@ ALLOWED_HOSTS = [
     'auth',
     # get_ip(), # changes with post
 ]
+AUTHENTICATION_BACKENDS = [
+    'your_app_name.authentication.EmailBackend',  # Backend par email
+    'django.contrib.auth.backends.ModelBackend',  # Backend par défaut
+]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Authentifie par défaut avec `username`
+]
 
-# Application definition
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_HTTPONLY = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mrberrim@gmail.com'
+EMAIL_HOST_PASSWORD = 'mdri nanb whnz eqkn'  # App password si vous utilisez Gmail
+
 
 INSTALLED_APPS = [
     'daphne',
@@ -76,7 +98,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
-
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

@@ -72,6 +72,7 @@ export class Circles extends HTMLElement {
         const circles = this.querySelectorAll('.circle');
         const container = this.querySelector('.circle-container');
         const playModal = document.getElementById('play-modal'); // Ensure this element exists
+        const setModal = document.querySelector('.modal_settings');
 
         // Reset scale for all circles
         circles.forEach(c => {
@@ -90,7 +91,15 @@ export class Circles extends HTMLElement {
                 playModal.style.display = 'block'; // Show modal
             });
         }
-        
+
+        if (circle.id === 'circle5') {
+            const setText = circle.querySelector('.circle-text');
+            console.log("im here in setting");
+            
+            setText.addEventListener('click', () => {
+                setModal.style.display = 'flex'; // Show modal
+            });
+        }
         // Background image change with fading effect
         const backgroundImage = circle.getAttribute('data-background');
         
