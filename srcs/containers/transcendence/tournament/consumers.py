@@ -1,6 +1,6 @@
 import json
 import time
-# from accounts.models import User
+from accounts.models import User
 from typing import Any
 import asyncio
 import jwt
@@ -223,7 +223,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
     room_group_name: str = "group_01" # default room
     room_id: int = 1 # default room
     room: GameRoom = None
-    # user: User | dict = None
+    user: User | dict = None
     user_name: str = None
     breaker = False
     # def get
@@ -280,7 +280,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def authenticate_user(self, token: str) ->  None :
+    def authenticate_user(self, token: str) -> User | None :
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method

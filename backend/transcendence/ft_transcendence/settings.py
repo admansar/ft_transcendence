@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
     # get_ip(), # changes with post
 ]
 AUTHENTICATION_BACKENDS = [
-    'your_app_name.authentication.EmailBackend',  # Backend par email
+    'ft_transcendence.authentication.EmailBackend',  # Backend par email
     'django.contrib.auth.backends.ModelBackend',  # Backend par défaut
 ]
 
@@ -130,7 +130,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ft_transcendence.wsgi.application'
 
-ASGI_APPLICATION = "ft_transcendence.asgi.application"
+ASGI_APPLICATION = 'ft_transcendence.asgi.application'
 
 
 CHANNEL_LAYERS = {
@@ -208,6 +208,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:80",
     "http://localhost:8000",
     "http://localhost:3000",
+    "http://localhost:3001",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -222,3 +223,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 
 # AUTH_USER_MODEL = 'accounts.User'
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#         'channels': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }

@@ -50,9 +50,7 @@ gameSocket.onopen = function () {
 }
 
 gameSocket.onmessage = function (e) {
-    console.log('Message received');
     data = JSON.parse(e.data);
-    console.log("the type of this data is : ", data.type);
     if (data.type === 'usernames')
     {
         for (let i = 0; i < data.player_num; i++)
@@ -104,7 +102,7 @@ gameSocket.onmessage = function (e) {
     }
     else if (data.type === 'winners')
     {
-        // console.log (data)
+        console.log (data)
         for (let i = 0; i < data.winners.length; i++)
             if (i < winners.length)
                 if (data.winners[i].winner)
@@ -128,7 +126,23 @@ gameSocket.onmessage = function (e) {
                     'opponent': data.winners[1].winner
                 }));
         }
+        else if (data.winners.length === 3)
+        {
+            console.log ('the champion chep is : ', data.winners)
+            let win = document.getElementById('champion');
+            win.innerHTML = data.winners[2].winner;
+        }
     }
+    // else if (data.type === 'winner_winner_chicken_dinner')
+    // {
+    //   // show_notification(`${data.winner} wins the game!`);
+    //   console.log ('the champion chep is : ', data.champion)
+    //   win = document.getElementById('champion');
+    //   win.innerHTML = data.champion;
+    //   // winner = data.winner;
+    //   // breaker = 1;
+    //   // gameSocket.close();
+    // }
 }
 
 gameSocket.onclose = function (e) {

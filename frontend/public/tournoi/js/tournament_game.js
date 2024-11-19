@@ -318,6 +318,7 @@ export function tour_game(self, opponent)
     else if (data.type === 'winner_winner_chicken_dinner')
     {
       // show_notification(`${data.winner} wins the game!`);
+      console.log ('the champion chep is : ', data.champion)
       win = getElementById('champion');
       win.innerHTML = data.champion;
       // winner = data.winner;
