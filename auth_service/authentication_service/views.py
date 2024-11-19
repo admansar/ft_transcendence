@@ -243,6 +243,12 @@ class UserView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=401)
+        
+class GetAllUsers(APIView):
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
 
 class Me(APIView):
     def post(self, request):
