@@ -132,7 +132,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             if self.token == 'null': # means i got token=null from the frontend
                 print ('--------so its an intra-------')
                 self.token = self.scope['cookies'].get('jwt')
+            print (f"Token : {self.token}")
             user = await self.authenticate_user(self.token)
+            print (f"User : {user}")
             self.user_name = user.username
             print (f"User : {user.username}")
             if user is not None:
@@ -157,6 +159,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             user = jwt_auth.get_user(validated_token)  # This is also a sync method
             return user
         except Exception as e:
+            print (f"Error in authenticate_user : {e}")
             return None
 
 
