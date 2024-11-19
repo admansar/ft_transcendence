@@ -10,6 +10,7 @@ from .views import (
     Me,
     GenerateOTPView,
     VerifyOTPView,
+    GetAllUsers,
 )
 
 from rest_framework_simplejwt.views import (
@@ -35,4 +36,5 @@ urlpatterns = [
     path('api/auth/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/user/<str:username>/', UserView.as_view(), name='user_detail'),
     path('api/auth/user/id/<int:id>/', UserView.as_view(), name='user_detail'),
+    path('api/auth/users/', GetAllUsers.as_view(), name='get_all_users'),
 ]

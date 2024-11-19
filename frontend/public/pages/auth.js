@@ -2,6 +2,7 @@ import { Router } from '../services/Router.js'
 import '../components/register.js'
 import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
+import notifications from '../components/notifications.js'
 
 class Auth extends HTMLElement {
     constructor() {
@@ -62,7 +63,6 @@ function register() {
         const password = document.getElementById('pwd').value;
 
         try {
-            // let response = await fetch('http://localhost:8000/api/accounts/register/', {
             let response = await fetch('/api/auth/register/', {
                 method: 'POST',
                 headers: {
@@ -76,15 +76,22 @@ function register() {
                     password: password
                 })
             })
+            let data = await response.json()
             if (response.ok) {
-                alert('Registration successful!')
-                Router.findRoute('/login');
+                notifications.notify('Registration successful!', 'success');
+                setTimeout(() => {
+                    Router.findRoute('/login');
+                }, 1000);
             } else {
-                alert(`Error: ${response.message}`)
+                Object.keys(data).forEach((field) => {
+                    data[field].forEach((errorMessage) => {
+                        notifications.notify(`${field}: ${errorMessage}`, 'danger');
+                    });
+                });
             }
         } catch (e) {
             console.log('Error during registration');
-            alert('Error during registration')
+            notifications.notify('Error during registration', 'danger');
         }
     })
 }
@@ -94,10 +101,8 @@ function login() {
     btn.addEventListener('click', async () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('pwd').value;
-        const logContainElement = document.querySelector('.log-contain'); // Get the log container
-        
+       
         try {
-            // let response = await makeAuthRequest('http://localhost:8000/api/accounts/login/', {
             let response = await fetch('api/auth/login/', {
                 method: 'POST',
                 headers: {
@@ -117,31 +122,18 @@ function login() {
                 console.log('refresh', data.refresh);
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
-                Router.findRoute(`/`);
+                notifications.notify('Login successful!', 'success');
+                setTimeout(() => {
+                    Router.findRoute(`/`);
+                }, 1000);
             } else {
                 // login failed
                 console.log(data.error);
-                displayError(data.error);
-
-                // Add error class to change border color to red
-                logContainElement.classList.add('error'); // This triggers the red border
-
-                // After 2 seconds, fade back to yellow
-                setTimeout(() => {
-                    logContainElement.classList.remove('error'); // Remove error class to reset border color
-                }, 2000);
+                notifications.notify(data.error, 'danger');
             }
         } catch (e) {
             console.log('Error logging in');
-            displayError(e);
-            
-            // Add error class to change border color to red
-            logContainElement.classList.add('error'); // This triggers the red border
-
-            // After 2 seconds, fade back to yellow
-            setTimeout(() => {
-                logContainElement.classList.remove('error'); // Remove error class to reset border color
-            }, 2000); 
+            notifications.notify(data.error, 'danger');
         }
     })
 }
@@ -156,18 +148,5 @@ function displayError(message) {
         errorEl.style.display = 'None';
     }, 3000);
 }
-
-// Custom CSS for error handling (will change the border color)
-const style = document.createElement('style');
-style.innerHTML = `
-.log-contain {
-    transition: all 1s ease; /* Smooth transition for border-color */
-}
-.log-contain.error {
-    border-color: red !important; /* Change border color to red on error */
-    box-shadow: 0px 0px 10px red;
-}
-`;
-document.head.appendChild(style);
 
 customElements.define('auth-page', Auth)
