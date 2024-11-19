@@ -1,8 +1,8 @@
-python3 helpers.py
+python helpers.py
 
-python3 manage.py makemigrations
-python3 manage.py migrate
+python manage.py makemigrations game
+python manage.py migrate game
 
 python manage.py populate_users
 
-exec python3 manage.py runserver '0.0.0.0:8000' # deamon mode
+exec python manage.py runserver '0.0.0.0:8000'

@@ -76,9 +76,6 @@ INSTALLED_APPS = [
     'tournament',
     'corsheaders',
     'django_otp',
-    'django_otp.plugins.otp_static',
-    'django_otp.plugins.otp_totp',
-    'two_factor',
 ]
 LOGIN_URL = 'two_factor:login'
 LOGIN_REDIRECT_URL = '/'

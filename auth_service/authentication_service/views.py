@@ -224,6 +224,16 @@ class RefreshTokenView(APIView):
         return response
 
 class UserView(APIView):
+    def get(self, request, username=None, id=None):
+        try:
+            if username:
+                user = User.objects.get(username=username)
+            else:
+                user = User.objects.get(id=id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
     def post(self, request):
         try:
             username = request.data.get('username')
