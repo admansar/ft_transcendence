@@ -1,7 +1,24 @@
 services:
+  auth:
+    build:
+      context: ./auth_service
+      dockerfile: Dockerfile
+    container_name: auth
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./auth_service/.env
+    depends_on:
+      - postgres
+    volumes:
+      - "./auth_service:/app"
+    networks:
+      - ft_transcendence_network
+    restart: always
+
   postgres:
     build:
-      context: ./srcs/containers/postgres
+      context: ./backend/postgres
       dockerfile: Dockerfile
       args:
         - POSTGRES_USER=${POSTGRES_USER}
@@ -20,7 +37,7 @@ services:
 
   backend:
     build:
-      context: ./srcs/containers/python
+      context: ./backend/python
       dockerfile: Dockerfile
       args:
         - PYTHONUNBUFFERED=1
@@ -30,34 +47,36 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./srcs/containers/transcendence:/app
+      - ./backend/transcendence:/app
     env_file:
       - .env
     depends_on:
       - postgres
+      - auth
     networks:
       - ft_transcendence_network
     restart: always
 
   nginx:
     build:
-      context: ./srcs/containers/nginx
+      context: ./frontend/nginx
       dockerfile: Dockerfile
     container_name: nginx
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - auth
     volumes:
-      - ./srcs/containers/transcendence/frontend:/usr/share/nginx/html
-      - ./srcs/containers/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend:/usr/share/nginx/html
+      - ./frontend/nginx/conf/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./auth_service/staticfiles:/app/staticfiles
     networks:
       - ft_transcendence_network
     restart: always
 
   adminer:
     build: 
-      context: ./srcs/containers/adminer
+      context: ./backend/adminer
       dockerfile: Dockerfile
     container_name: adminer
     ports:
@@ -68,7 +87,7 @@ services:
   
   redis:
     build:
-      context: ./srcs/containers/redis
+      context: ./backend/redis
       dockerfile: Dockerfile
     container_name: redis
     networks:
