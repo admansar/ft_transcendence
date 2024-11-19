@@ -140,8 +140,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             print (f"Token : {self.token}")
             user = await self.authenticate_user(self.token)
             print (f"User : {user}")
-            self.user_name = user.username
-            print (f"User : {user.username}")
+            self.user_name = user['username']
+            print (f"User : {user['username']}")
             if user is not None:
                 self.user = user
             else:
@@ -155,9 +155,6 @@ class GameConsumer(AsyncWebsocketConsumer):
                 return
         return self.user_name
 
-
-    User = get_user_model()
-    
     @database_sync_to_async
     def authenticate_user(self, token: str) -> None :
         try:
