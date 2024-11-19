@@ -16,6 +16,7 @@ from django.shortcuts import redirect
 import pyotp
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+import os
 
 
 User = get_user_model()
@@ -193,7 +194,17 @@ class Login(APIView):
         # if not user.check_password(password):
         #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        refresh = RefreshToken.for_user(user)
+        try:
+            refresh = RefreshToken.for_user(user)
+        except Exception as e:
+            print ("Error: ", e)
+            print ("lets make a migration using os.system")
+            try:
+                os.system ('python3 manage.py migrate')
+                refresh = RefreshToken.for_user(user)
+            except Exception as e:
+                print ("Error: ", e)
+                return Response({'error': 'Error while generating token'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         access = refresh.access_token
         response = Response()
         response.data = {
