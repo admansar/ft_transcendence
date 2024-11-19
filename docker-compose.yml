@@ -16,6 +16,7 @@ services:
       - ft_transcendence_network
     restart: always
 
+
   postgres:
     build:
       context: ./backend/postgres

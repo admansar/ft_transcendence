@@ -243,6 +243,17 @@ class UserView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=401)
+    # def post(self, request):
+    #     try:
+    #         username_or_email = request.data.get('username_or_email')
+    #         if not username_or_email:
+    #             return Response({"error": "Username or email is required"}, status=400)
+    #         if '@' in username_or_email:
+    #             user = User.objects.get(email=username_or_email)
+    #         else:
+    #             user = User.objects.get(username=username_or_email)
+    #         serializer = UserSerializer(user)
+
         
 class GetAllUsers(APIView):
     def get(self, request):

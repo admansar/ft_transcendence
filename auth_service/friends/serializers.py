@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Profile, friend_request
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from authentication_service.models import User
 
 class SerializerProfile(serializers.ModelSerializer):
     class Meta:

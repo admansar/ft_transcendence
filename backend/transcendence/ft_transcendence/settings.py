@@ -77,8 +77,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_otp',
 ]
-LOGIN_URL = 'two_factor:login'
-LOGIN_REDIRECT_URL = '/'
+# LOGIN_URL = 'two_factor:login'
+# LOGIN_REDIRECT_URL = '/'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',

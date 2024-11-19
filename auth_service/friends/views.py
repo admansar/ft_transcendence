@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from authentication_service.models import User
 from django.contrib.auth import authenticate, login
 from django.contrib import messages 
 from .models import Profile, friend_request
@@ -15,61 +16,62 @@ from django.db.models import Q
 import json
 
 user = User.objects.all()
-profile = Profile.objects.all()
-request_friend = friend_request.objects.all()
-def home(request):
-    return render(request, 'home.html')
+# profile = Profile.objects.all()
+# request_friend = friend_request.objects.all()
+
+# def home(request):
+#     return render(request, 'home.html')
 
 
-def register_user(request):
-    if request.method == "POST":
-        username : str = request.POST["username"]
-        email : str = request.POST["email"]
-        password : str = request.POST["password"]
-        confirm_password : str = request.POST["confirm_password"]
-        if password == confirm_password: 
-            if not User.objects.filter(username=username).exists():
-                if not User.objects.filter(email=email).exists():
-                    user = User.objects.create_user(username=username, email=email, password=password)
-                    user.save()
-                    messages.info(request, "Account created Successfully!")
-                    login(request ,user)
-                    return redirect('profile')
-                else:
-                    messages.error(request, "email alredy used")
-            else:
-                messages.error(request, "username alredy used")
-        else:
-            messages.error(request, "password are not matched")
-    return render(request, 'register.html')
+# def register_user(request):
+#     if request.method == "POST":
+#         username : str = request.POST["username"]
+#         email : str = request.POST["email"]
+#         password : str = request.POST["password"]
+#         confirm_password : str = request.POST["confirm_password"]
+#         if password == confirm_password: 
+#             if not User.objects.filter(username=username).exists():
+#                 if not User.objects.filter(email=email).exists():
+#                     user = User.objects.create_user(username=username, email=email, password=password)
+#                     user.save()
+#                     messages.info(request, "Account created Successfully!")
+#                     login(request ,user)
+#                     return redirect('profile')
+#                 else:
+#                     messages.error(request, "email alredy used")
+#             else:
+#                 messages.error(request, "username alredy used")
+#         else:
+#             messages.error(request, "password are not matched")
+#     return render(request, 'register.html')
 
 
-def log_in(request):
-    if request.method == "POST":
-        username : str = request.POST.get("username")
-        password : str = request.POST.get("password")
-        user : User = authenticate(username=username, password=password)
-        if user is not None:
-            messages.info(request, "Account login Successfully!")
-            login(request ,user)
-            return redirect('home')
-        else:
-            messages.error(request, "Invalid username or password")
-            return redirect('add_friend')
-    return render(request, 'login.html')
+# def log_in(request):
+#     if request.method == "POST":
+#         username : str = request.POST.get("username")
+#         password : str = request.POST.get("password")
+#         user : User = authenticate(username=username, password=password)
+#         if user is not None:
+#             messages.info(request, "Account login Successfully!")
+#             login(request ,user)
+#             return redirect('home')
+#         else:
+#             messages.error(request, "Invalid username or password")
+#             return redirect('add_friend')
+#     return render(request, 'login.html')
 
-@login_required
-def creatprofile(request):
-    if request.method == "POST":
-        if not Profile.objects.filter(user=request.user).exists():
-            image : str = request.FILES.get("profileImage")
-            bio : str = request.POST.get("bio")
-            Profile.objects.create(user=request.user, image=image, bio=bio)
-            return redirect('login')
-    return render(request, 'profile.html')
+# @login_required
+# def creatprofile(request):
+#     if request.method == "POST":
+#         if not Profile.objects.filter(user=request.user).exists():
+#             image : str = request.FILES.get("profileImage")
+#             bio : str = request.POST.get("bio")
+#             Profile.objects.create(user=request.user, image=image, bio=bio)
+#             return redirect('login')
+#     return render(request, 'profile.html')
 
 class Search(APIView):
-    @method_decorator(login_required)
+    # @method_decorator(login_required)
     def post(self, request):
         _username_or_email = request.data.get("user_or_email")
         if user.filter(Q (username__startswith=_username_or_email) | Q (email=_username_or_email)):

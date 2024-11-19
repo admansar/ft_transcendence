@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
     'two_factor',
+    'friends',
 ]
 
 SIMPLE_JWT = {
@@ -65,6 +66,7 @@ ALLOWED_HOSTS = [
     '0.0.0.0',
     'auth',
     'backend',
+    '*',
     # get_ip(), # changes with post
 ]
 

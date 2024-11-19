@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
     Login,
     SignUp,
@@ -37,4 +37,6 @@ urlpatterns = [
     path('api/auth/user/<str:username>/', UserView.as_view(), name='user_detail'),
     path('api/auth/user/id/<int:id>/', UserView.as_view(), name='user_detail'),
     path('api/auth/users/', GetAllUsers.as_view(), name='get_all_users'),
+
+    path('api/friends/', include('friends.urls')),
 ]

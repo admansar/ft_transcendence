@@ -3,7 +3,6 @@ images = $(shell docker images -q)
 volume = $(shell docker volume ls -q)
 network = $(shell docker network ls -q)
 
-
 all:
 	@docker compose -f ./docker-compose.yml up --build -d
 
@@ -18,7 +17,7 @@ clean:
 
 fclean: clean
 	@if [ -n "$(images)" ]; then docker rmi -f $(images); fi
-	@if [ -n "$(volume)" ]; then docker volume prune -f; fi
+	@if [ -n "$(volume)" ]; then docker volume rm -f $(volume); fi
 	@if [ -n "$(network)" ]; then docker network prune -f; fi
 	@docker system prune -af
 

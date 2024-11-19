@@ -1,5 +1,6 @@
 python helpers.py
 
+
 python manage.py makemigrations game
 python manage.py migrate game
 
