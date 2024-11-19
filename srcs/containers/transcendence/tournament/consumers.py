@@ -19,6 +19,7 @@ authentication_classes = [JWTAuthentication]
 permission_classes = [IsAuthenticated]
 game_started = False
 champion = None
+tounament_finished = False
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     player_num = 4  # Total number of players in the tournament
@@ -38,12 +39,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             return
 
         # Check if the user is already connected
-       #  for player in players:
-       #      if player.user['username'] == self.user['username']:
-       #          print (f'{self.user["username"]} is already connected')
-       #          await self.disconnect(1000)
-       #          await self.close()
-       #          return
+        for player in players:
+            if player.user_name == self.user_name:
+                print (f'{self.user_name} is already connected')
+                try:
+                    await self.disconnect(1000)
+                except Exception as e:
+                    print (f"Error in disconnect : {e}")
+                await self.close()
+                return
 
         self.room_id = await self.assign_room(self.user_name)
         await self.accept()
@@ -148,7 +152,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 await player.send(text_data=json.dumps({
                     'type': 'winners',
                     'winners': winners,
-                    'players': usernames
+                    'players': usernames,
+                    'round': "Round 1" if len(winners) == 0 else "Round 2" if len(winners) == 1 else "Round 3",
                 }))
         except Exception as e:
             print(f"Error sending message to player: {e}")
@@ -564,17 +569,23 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             }
             # global counter
             # counter += 1
-            if winner_data not in winners and len(winners) < 2:
+            if winner_data not in winners:
                 winners.append(winner_data)
                 print (f"winners : {winners}")
-            elif len(winners) == 2 and winner == self.user_name:
-                champion = winner
-                print (f"champion : {champion}")
-                for player in players:
-                    await player.send(text_data=json.dumps({
-                        'type': 'winner_winner_chicken_dinner',
-                        'champion': champion
-                    }))
+            # elif len(winners) == 3:
+            #     champion = winner
+            #     print (f"champion : {champion}")
+            #     for player in players:
+            #         try:
+            #             await player.send(text_data=json.dumps({
+            #                 'type': 'winner_winner_chicken_dinner',
+            #                 'champion': champion
+            #             }))
+            #         except Exception as e:
+            #             print (f"Error in sending champion message : {e}")
+            print ("winner len : ", len(winners))
+            print ("winner data : ", winner_data)
+            print ("winner : ", winner, " and self : ", self.user_name)
             if winner_data["winner"] == self.user_name and not champion:
                 winners_classes.append(self)
         except Exception as e:
