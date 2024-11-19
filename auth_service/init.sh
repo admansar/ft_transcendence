@@ -1,5 +1,3 @@
-python helpers.py
-
 python3 manage.py makemigrations authentication_service
 python3 manage.py migrate authentication_service
 python3 manage.py makemigrations friends

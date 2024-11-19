@@ -152,14 +152,21 @@ class GameConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def authenticate_user(self, token: str) -> None :
+    def authenticate_user(self, token: str) -> None:
         try:
-            jwt_auth = JWTAuthentication()
-            validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
-            user = jwt_auth.get_user(validated_token)  # This is also a sync method
+            # Validate the token using JWTAuthentication
+            validated_token = JWTAuthentication().get_validated_token(token)
+            user = JWTAuthentication().get_user(validated_token)
+            
+            if not user.is_authenticated:
+                print("User is not authenticated")
+                return None
+            
+            print(f"Authenticated User: {user.username}")
             return user
+    
         except Exception as e:
-            print (f"Error in authenticate_user : {e}")
+            print(f"Error in authenticate_user: {e}")
             return None
 
 
