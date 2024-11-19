@@ -164,8 +164,6 @@ class Oauth42(APIView):
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)
-        refresh['id'] = user.id
-        refresh['username'] = user.username
         access = refresh.access_token
         
         response = HttpResponseRedirect("http://localhost/")
@@ -196,16 +194,12 @@ class Login(APIView):
 
         try:
             refresh = RefreshToken.for_user(user)
-            refresh['id'] = user.id
-            refresh['username'] = user.username
         except Exception as e:
             print ("Error: ", e)
             print ("lets make a migration using os.system")
             try:
                 os.system ('python3 manage.py migrate')
                 refresh = RefreshToken.for_user(user)
-                refresh['id'] = user.id
-                refresh['username'] = user.username
             except Exception as e:
                 print ("Error: ", e)
                 return Response({'error': 'Error while generating token'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
