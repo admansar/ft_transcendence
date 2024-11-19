@@ -76,7 +76,7 @@ let breaker = false;
 
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
-console.log(`ws://${window.location.host}}/ws/game/${roomName}/?token=${token}`);
+console.log(`ws://${window.location.host}/ws/game/${roomName}/?token=${token}`);
 // WebSocket event handlers
 gameSocket.onopen = function () {
 	console.log('Connected to the game server.');

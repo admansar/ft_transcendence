@@ -3,12 +3,16 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from rest_framework_simplejwt.tokens import AccessToken
 import asyncio
 import time
 from typing import Any
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .services import get_user_from_api
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 # Constants
 CANVAS_WIDTH: int = 1000
@@ -102,6 +106,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self) -> None:
         # print (f"Scope : {self.scope}")
         try:
+            # self.user_name = 'test_while_fixing_api_username'
             self.user_name = await self.get_username_from_db() 
         except Exception as e:
             print (f"Error in connect : {e}")
@@ -151,23 +156,30 @@ class GameConsumer(AsyncWebsocketConsumer):
         return self.user_name
 
 
+    User = get_user_model()
+    
     @database_sync_to_async
     def authenticate_user(self, token: str) -> None:
         try:
-            # Validate the token using JWTAuthentication
-            validated_token = JWTAuthentication().get_validated_token(token)
-            user = JWTAuthentication().get_user(validated_token)
-            
-            if not user.is_authenticated:
-                print("User is not authenticated")
-                return None
-            
-            print(f"Authenticated User: {user.username}")
-            return user
+            # Initialize JWTAuthentication to validate the token
+            jwt_auth = JWTAuthentication()
     
+            # Validate and decode the token
+            validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
+            print ("-------User : ", validated_token)
+            print ("type : ", type(validated_token))
+            # get the validated data from the token
+            data = jwt_auth.get_user(validated_token)
+            print ("-------Data : ", data)            
+
+            # user = jwt_auth.get_user(validated_token)  # This is also a sync method
+    
+            # Return the user object
+            # return user
         except Exception as e:
             print(f"Error in authenticate_user: {e}")
             return None
+
 
 
     async def send_player_info(self, opponent: str) -> None:
