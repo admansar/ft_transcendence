@@ -9,10 +9,10 @@ import time
 from typing import Any
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .services import get_user_from_api
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from .services import (
+    get_user_from_api,
+    get_user_from_api_by_id,
+)
 
 # Constants
 CANVAS_WIDTH: int = 1000
@@ -159,25 +159,15 @@ class GameConsumer(AsyncWebsocketConsumer):
     User = get_user_model()
     
     @database_sync_to_async
-    def authenticate_user(self, token: str) -> None:
+    def authenticate_user(self, token: str) -> None :
         try:
-            # Initialize JWTAuthentication to validate the token
             jwt_auth = JWTAuthentication()
-    
-            # Validate and decode the token
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
-            print ("-------User : ", validated_token)
-            print ("type : ", type(validated_token))
-            # get the validated data from the token
-            data = jwt_auth.get_user(validated_token)
-            print ("-------Data : ", data)            
-
-            # user = jwt_auth.get_user(validated_token)  # This is also a sync method
-    
-            # Return the user object
-            # return user
+            print (f"Validated Token : {validated_token['user_id']}")
+            user = get_user_from_api_by_id(validated_token['user_id'])
+            print('User=========>', user)
+            return user
         except Exception as e:
-            print(f"Error in authenticate_user: {e}")
             return None
 
 

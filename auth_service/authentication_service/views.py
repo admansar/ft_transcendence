@@ -164,6 +164,8 @@ class Oauth42(APIView):
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)
+        refresh['id'] = user.id
+        refresh['username'] = user.username
         access = refresh.access_token
         
         response = HttpResponseRedirect("http://localhost/")
@@ -191,17 +193,19 @@ class Login(APIView):
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
         if user is None or not user.check_password(password):
             return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
-        # if not user.check_password(password):
-        #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
             refresh = RefreshToken.for_user(user)
+            refresh['id'] = user.id
+            refresh['username'] = user.username
         except Exception as e:
             print ("Error: ", e)
             print ("lets make a migration using os.system")
             try:
                 os.system ('python3 manage.py migrate')
                 refresh = RefreshToken.for_user(user)
+                refresh['id'] = user.id
+                refresh['username'] = user.username
             except Exception as e:
                 print ("Error: ", e)
                 return Response({'error': 'Error while generating token'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
