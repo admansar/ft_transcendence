@@ -16,7 +16,7 @@ class PageNotFound extends HTMLElement {
                 margin: 0;
                 padding: 0;
                 font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
+                background-color: rgb(31, 31, 31);
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -31,12 +31,13 @@ class PageNotFound extends HTMLElement {
             h1 {
                 font-size: 6em;
                 margin: 0;
-                color: #ff6b6b;
+                color: #ffc107;
             }
     
             p {
                 font-size: 1.5em;
                 margin: 20px 0;
+                  color: #fff;
             }
     
             a {
@@ -51,7 +52,7 @@ class PageNotFound extends HTMLElement {
             }
     
             a:hover {
-                background-color: #ff4c4c;
+                background-color: #ffc107;
             }
         </style>
     </head>
