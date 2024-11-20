@@ -148,7 +148,7 @@ class Profile extends HTMLElement {
                         </div>
                         <div class="match-history-bar">
                             <div class="btn_static">
-                                <span class="btn_static_click" id="history_bar">HISTORY</span>
+                                <span class="btn_static_click active" id="history_bar">HISTORY</span>
                                 <span class="btn_static_click" id="achivements_bar">ACHIVEMENTS</span>
                                 <span class="btn_static_click" id="rank_bar">RANK</span>
                             </div>
@@ -202,7 +202,7 @@ class Profile extends HTMLElement {
             `
             const avatar = document.querySelector('.profile-photo');
             // const avatarMenu = document.querySelector('.profile');
-            avatar.style.backgroundImage = `url(${userData.avatar})`;
+            app.root.profilePicture = avatar.style.backgroundImage = `url(${userData.avatar})`;
             // avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
 
             const pendingListButton = document.getElementById('pending_list');

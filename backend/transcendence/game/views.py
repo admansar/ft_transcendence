@@ -105,11 +105,6 @@ class GetGame(APIView):
         
         return Response({'message': 'Games fetched successfully', 'games': games})
 
-# @login_required
-# def game_2d(request):
-#     return render(request, 'game.html')
-
-
 @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 def select_game(request):

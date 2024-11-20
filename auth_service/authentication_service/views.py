@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -276,7 +275,8 @@ class Me(APIView):
         if not token:
             raise AuthenticationFailed('Unauthorized')
         
-        return Response({'access': token})
+        id = JWTAuthentication().get_validated_token(token).get('user_id')
+        return Response({'access': token, 'id': id})
 
 class Logout(APIView):
     def post(self, request):

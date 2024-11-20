@@ -15,8 +15,8 @@ export async function makeAuthRequest(url, options = {}) {
     options.credentials = 'include';
 
     let token = await getToken();
-    console.log('token', token);
-    let response = await verifyToken(token);
+    console.log('token', token.access);
+    let response = await verifyToken(token.access);
     if (!response) {
         // const refreshRes = await fetch('http://localhost:8000/api/auth/refresh/', {
         const refreshRes = await fetch('/api/auth/refresh/', {
@@ -34,7 +34,7 @@ export async function makeAuthRequest(url, options = {}) {
     return response
 }
 
-async function getToken() {
+export async function getToken() {
     const response = await fetch('/api/auth/me', {
         method: 'POST',
         headers: {
@@ -43,7 +43,7 @@ async function getToken() {
         credentials: 'include',
     });
     const data = await response.json();
-    return data.access;
+    return data;
 }
 
 export async function isAuth() {
@@ -59,4 +59,16 @@ export async function isAuth() {
         return true;
     }
     return false;
+}
+
+export async function getUserDataByID(id) {
+    const response = await fetch(`/api/auth/user/id/${id}/`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+    });
+    const data = await response.json();
+    return data;
 }
