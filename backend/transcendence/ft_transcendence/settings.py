@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     '0.0.0.0',
     'backend',
     'auth',
+    '*'
     # get_ip(), # changes with post
 ]
 AUTHENTICATION_BACKENDS = [
