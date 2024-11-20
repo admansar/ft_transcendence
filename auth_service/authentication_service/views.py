@@ -16,6 +16,7 @@ import pyotp
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import os
+from friends.models import Profile
 
 
 User = get_user_model()
@@ -180,6 +181,8 @@ class SignUp(APIView):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        _user = User.objects.get(id=serializer.data["id"])
+        Profile.objects.create(user=_user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class Login(APIView):
