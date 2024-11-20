@@ -30,17 +30,22 @@ let locker = false;
 //   }
 // )
 // let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
-let response = await makeAuthRequest('api/auth/me', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    }
+let response = await makeAuthRequest('/api/auth/me', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+	},
+	credentials: 'include',
 });
 
 if (response.ok) {
-  let data = await response.json();
-  // console.log ('full data: ', data)
-  token = data.access;
+	data = await response.json();
+	console.log ('full data: ', data)
+	token = data.access;
+}
+else
+{
+  console.log('Error fetching user data');
 }
 
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/?token=${token}`);

@@ -2,14 +2,20 @@ import "../components/circleInteractions.js";
 import "../components/modal.js";
 import "../components/chat.js";
 import "../components/settings.js"
+import { getUserDataByID } from "../services/utils.js";
+import { getToken } from "../services/utils.js";
 
 export class HomePage extends HTMLElement {
     constructor() {
         super();
     }
 
-    connectedCallback() {
-        console.log('Hello Homepage');
+    async connectedCallback() {
+        let profile = document.querySelector('.profile');
+        let jwt = await getToken();
+        let userData = await getUserDataByID(jwt.id);
+        profile.style.backgroundImage = `url(${userData.avatar})`;
+        profile.href = `/profile/${userData.username}`;
         const circlesComponent = document.createElement('app-circles');
         const modalsComponent = document.createElement('app-modals');
         const ChatComponent = document.createElement('app-chat');

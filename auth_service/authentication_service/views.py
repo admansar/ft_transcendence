@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
-import jwt
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -194,8 +193,6 @@ class Login(APIView):
         user = User.objects.filter(Q(username=username) | Q(email=email)).first()
         if user is None or not user.check_password(password):
             return Response({'error': 'Incorrect username or password'}, status=status.HTTP_404_NOT_FOUND)
-        # if not user.check_password(password):
-        #     return Response({'error': 'Incorrect Password'}, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
             refresh = RefreshToken.for_user(user)
@@ -281,7 +278,8 @@ class Me(APIView):
         if not token:
             raise AuthenticationFailed('Unauthorized')
         
-        return Response({'access': token})
+        id = JWTAuthentication().get_validated_token(token).get('user_id')
+        return Response({'access': token, 'id': id})
 
 class Logout(APIView):
     def post(self, request):
