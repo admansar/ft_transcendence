@@ -2,6 +2,7 @@ import "../components/circleInteractions.js";
 import "../components/modal.js";
 import "../components/chat.js";
 import "../components/settings.js"
+import "../components/search.js";
 import { getUserDataByID } from "../services/utils.js";
 import { getToken } from "../services/utils.js";
 
@@ -25,6 +26,10 @@ export class HomePage extends HTMLElement {
         this.appendChild(circlesComponent);
         this.appendChild(modalsComponent);
         this.appendChild(ChatComponent);
+
+        const searchComponent = document.createElement('app-search');
+        this.appendChild(searchComponent);
+
     }
 }
 
