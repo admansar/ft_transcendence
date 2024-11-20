@@ -152,8 +152,49 @@ class Profile extends HTMLElement {
                                 <span class="btn_static_click" id="achivements_bar">ACHIVEMENTS</span>
                                 <span class="btn_static_click" id="rank_bar">RANK</span>
                             </div>
-                            <div class="HISTORYdata">
+                            <div class="HISTORYdata active">
                                 ${await this.renderScore(userData)}
+                            </div>
+                            <div class="ACHIVEMENTSdata">
+                                <div class="medal_achivement_bar 5win">
+                                    <div class="medal brounz"></div>
+                                    <div class="title">WIN 5 Games</div>
+                                </div>
+                                <div class="medal_achivement_bar 10win">
+                                    <div class="medal silver"></div>
+                                    <div class="title">WIN 10 Games</div>
+                                </div>
+                                <div class="medal_achivement_bar 20win">
+                                    <div class="medal gold"></div>
+                                    <div class="title">WIN 20 Games</div>
+                                </div>
+                            </div>
+                            <div class="RANKYdata">
+
+                                <div class="rank_bar 1" id=USER>
+                                    <div class="rank_number"> 1 </div>
+                                    <div class="rank_info">
+                                        <div class="rank_profile"></div>
+                                        <div class="rank_name">USER</div>
+                                    </div>
+                                    <div class="rank_wins">
+                                        <div class="icons_wins"></div>
+                                        <div class="numbers_wins">42</div>
+                                    </div>
+                                </div>
+
+                                <div class="rank_bar 2" id=USER>
+                                    <div class="rank_number"> 2 </div>
+                                    <div class="rank_info">
+                                        <div class="rank_profile"></div>
+                                        <div class="rank_name">USER 2</div>
+                                    </div>
+                                    <div class="rank_wins">
+                                        <div class="icons_wins"></div>
+                                        <div class="numbers_wins">2</div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -213,19 +254,34 @@ class Profile extends HTMLElement {
             const closeModalButtons = document.querySelectorAll('.close_modal');
 
             const cata = document.querySelectorAll('.btn_static_click');
-            const hist = document.getElementById('history_bar');
-            const arch = document.getElementById('achivements_bar');
-            const rank = document.getElementById('rank_bar');
-
+            const hisBar = document.querySelector('.HISTORYdata');
+            const rankBar = document.querySelector('.RANKYdata');
+            const achBar = document.querySelector('.ACHIVEMENTSdata');
+        
             cata.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Remove the 'active' class from all cata
+                    // Remove 'active' class from all buttons
                     cata.forEach(btn => btn.classList.remove('active'));
                     
-                    // Add the 'active' class to the clicked button
+                    // Add 'active' class to the clicked button
                     button.classList.add('active');
+        
+                    // Hide all sections
+                    hisBar.classList.remove('active');
+                    rankBar.classList.remove('active');
+                    achBar.classList.remove('active');
+        
+                    // Show the relevant section based on the clicked button
+                    if (button.id === 'history_bar') {
+                        hisBar.classList.add('active');
+                    } else if (button.id === 'achivements_bar') {
+                        achBar.classList.add('active');
+                    } else if (button.id === 'rank_bar') {
+                        rankBar.classList.add('active');
+                    }
                 });
             });
+            
             
             pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
