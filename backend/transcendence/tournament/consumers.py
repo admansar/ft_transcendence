@@ -10,6 +10,10 @@ from channels.db import database_sync_to_async
 from game.consumers import GameRoom, GameState
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
+from game.services import (
+    get_user_from_api,
+    get_user_from_api_by_id,
+)
 
 players = []
 game_rooms = {}
@@ -82,8 +86,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 print ('--------so its an intra-------')
                 self.token = self.scope['cookies'].get('jwt')
             user = await self.authenticate_user(self.token)
-            self.user_name = user.username
-            print (f"User : {user.username}")
+            self.user_name = user['username']
+            print (f"User : {user['username']}")
             if user is not None:
                 self.user = user
             else:
@@ -104,7 +108,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
-            user = jwt_auth.get_user(validated_token)  # This is also a sync method
+            print (f"Validated Token : {validated_token['user_id']}")
+            user = get_user_from_api_by_id(validated_token['user_id'])
+            print('User=========>', user)
             return user
         except Exception as e:
             return None
@@ -263,8 +269,8 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 print ('--------so its an intra-------')
                 self.token = self.scope['cookies'].get('jwt')
             user = await self.authenticate_user(self.token)
-            self.user_name = user.username
-            print (f"User : {user.username}")
+            self.user_name = user['username']
+            print (f"User : {user['username']}")
             if user is not None:
                 self.user = user
             else:
@@ -280,11 +286,13 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
 
 
     @database_sync_to_async
-    def authenticate_user(self, token: str) ->  None :
+    def authenticate_user(self, token: str) -> None :
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
-            user = jwt_auth.get_user(validated_token)  # This is also a sync method
+            print (f"Validated Token : {validated_token['user_id']}")
+            user = get_user_from_api_by_id(validated_token['user_id'])
+            print('User=========>', user)
             return user
         except Exception as e:
             return None
