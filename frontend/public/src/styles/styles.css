@@ -1599,6 +1599,13 @@ input[type=text-chat]{
     background-image: url('../../src/img/share.png');
 }
 
+.adding_friend {
+    background-image: url('../../src/img/addingfriend.svg');
+}
+.block_user {
+    background-image: url('../../src/img/blocking.svg');
+}
+
 .pending_friends_modal {
     display: none;
     position: fixed;
