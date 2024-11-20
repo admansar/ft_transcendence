@@ -14,6 +14,7 @@ export class HomePage extends HTMLElement {
         let profile = document.querySelector('.profile');
         let jwt = await getToken();
         let userData = await getUserDataByID(jwt.id);
+        app.userData = userData;
         profile.style.backgroundImage = `url(${userData.avatar})`;
         profile.href = `/profile/${userData.username}`;
         const circlesComponent = document.createElement('app-circles');
