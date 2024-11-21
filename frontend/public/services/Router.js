@@ -1,6 +1,6 @@
 import { isAuth } from '../services/utils.js';
 
-    let chatSocket = ""
+    // var chatSocket = ""
     export const Router = {
         normalizeRoute(route) {
             if (route.endsWith('/') && route.length > 1) {
@@ -31,10 +31,10 @@ import { isAuth } from '../services/utils.js';
             return params;
         },
         findRoute: (route) => {
-        chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
-        chatSocket.onopen = function(e) {
-            console.log('WebSocket connection established!');
-        }
+        // chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+        // chatSocket.onopen = function(e) {
+        //     console.log('WebSocket connection established!');
+        // }
         route = Router.normalizeRoute(route);
         for (let i = 0; i < routes.length; i++) {
             const params = Router.matchRoute(route, routes[i].path);
@@ -150,7 +150,7 @@ function handleBackNavigation() {
     Router.findRoute(path);
 };
 
-export function getwebsocket () {
-    return chatSocket
-}
+// export function getwebsocket () {
+//     return chatSocket
+// }
 window.addEventListener('popstate', handleBackNavigation);

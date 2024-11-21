@@ -30,6 +30,9 @@
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
+            const message = data.message
+            const user = data.user
+            
             // Display received message
             document.getElementById('messages').innerText += data.user +  ' : '  + data.message + '   ';
         };
