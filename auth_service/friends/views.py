@@ -37,6 +37,7 @@ def Reject_method(P_user : Profile, s_user_id : int, s_user : User):
         P_user.waiting.remove(s_user)
 
 def Block_user(user ,P_user : Profile, s_user_id : int,  s_user : User):
+    profile = Profile.objects.all()
     user_P : Profile = profile.get(user=s_user)
     if user_P.friends.filter(id=user.id).exists():
       user_P.friends.remove(user)
@@ -48,6 +49,7 @@ def Block_user(user ,P_user : Profile, s_user_id : int,  s_user : User):
 
 def Unfriend(P_user : Profile , s_user_id : int, s_user : User, _user : User):
     user_P : Profile = profile.get(user=s_user)
+    profile = Profile.objects.all()
     if P_user.friends.filter(id=s_user_id).exists():
         P_user.friends.remove(s_user)
     if user_P.friends.filter(id=_user.id).exists():
@@ -61,6 +63,7 @@ def Createfriend_rolation(friend_reciver : User, user_P : Profile, resiver_user_
                     if not resiver_user_P.waiting.filter(id=_user.id).exists():
                         friend = friend_request.objects.create(sender=_user, reciver=friend_reciver)
                         friend.save()
+                        return Response({"message" : " request send . "})
                     else:
                         return Response({"error" : " You have allredy sent request wait for response. "})
                 else:
@@ -73,6 +76,8 @@ def Createfriend_rolation(friend_reciver : User, user_P : Profile, resiver_user_
         return Response({"error" : " You Can't add This User. "})
 
 def  ADD_method(_user, _reciver_id):
+    user = User.objects.all()
+    profile = Profile.objects.all()
     if user.filter(id=_reciver_id).exists():
         friend_reciver : User = user.get(id=_reciver_id)
         user_P : Profile = profile.get(user=_user)
@@ -80,7 +85,6 @@ def  ADD_method(_user, _reciver_id):
         return Createfriend_rolation(friend_reciver, user_P, resiver_user_P, _user)
     else:
         return Response({"error" : " Invalid username. "})
-    return Response({"message" : " request send . "})
 
 class Userprofile(APIView):
     # authentication_classes = [JWTAuthentication]
@@ -116,6 +120,7 @@ class Request_methods(APIView):
         status = request.data.get("status") 
         _reciver : str = request.data.get('user_id')
         P_user : Profile = profile.get(user=_user)
+        # mydata = SerializerProfile(P_user)
         if status == "ADD":
             return ADD_method(_user, _reciver)
         elif status == "REJECT" or status == "BLOCK" or status == "ACCEPT" \
@@ -138,4 +143,4 @@ class Request_methods(APIView):
             if sender != None:
                 sender.delete()
         P_user.save()
-        return Response(None)
+        return Response()
