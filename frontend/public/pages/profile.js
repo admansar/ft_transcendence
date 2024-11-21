@@ -1,14 +1,22 @@
 import { Router } from '../services/Router.js'
 import { makeAuthRequest } from '../services/utils.js'
+import app from '../components/state.js';
 
+document.addEventListener('userDataReady', () => {
+    const userData = app.getUserData();
+    console.log('User data in other component:', userData);
+
+    // Use userData in your component logic
+});
 class Profile extends HTMLElement {
     constructor() {
         super();
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         const username = this.getAttribute('username');
-        this.render(username);
+        await this.render(username);
+        await this.renderProfile(username);
     }
 
     async renderScore(data) {
@@ -105,7 +113,31 @@ class Profile extends HTMLElement {
         }
     }
 
-    async render(username) {
+    async getProfileData(username) {
+        const addFriendButton = document.getElementById('add_friend');
+
+        // addFriendButton.addEventListener('userDataReady', () => {
+            console.log('app.userData', app.getUserData());
+        // });
+
+        addFriendButton.addEventListener('click', async () => {
+            console.log('Add friend clicked');
+            // addFriendButton.style.display = 'none';
+            const response = await makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+
+            })
+        })
+    }
+
+    async renderProfile(username) {
+        let profileData = await this.getProfileData(username);
+    }
+
+    async render(username, userData) {
         try {
             let userData = await getUserData(username);
             console.log(userData);
@@ -263,20 +295,20 @@ class Profile extends HTMLElement {
             const hisBar = document.querySelector('.HISTORYdata');
             const rankBar = document.querySelector('.RANKYdata');
             const achBar = document.querySelector('.ACHIVEMENTSdata');
-        
+
             cata.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     // Remove 'active' class from all buttons
                     cata.forEach(btn => btn.classList.remove('active'));
-                    
+
                     // Add 'active' class to the clicked button
                     button.classList.add('active');
-        
+
                     // Hide all sections
                     hisBar.classList.remove('active');
                     rankBar.classList.remove('active');
                     achBar.classList.remove('active');
-        
+
                     // Show the relevant section based on the clicked button
                     if (button.id === 'history_bar') {
                         hisBar.classList.add('active');
@@ -287,8 +319,8 @@ class Profile extends HTMLElement {
                     }
                 });
             });
-            
-            
+
+
             pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
             });
@@ -321,7 +353,7 @@ class Profile extends HTMLElement {
 
         } catch (e) {
             console.log(e);
-            Router.findRoute('404');
+            app.router.findRoute('404');
         }
     }
 }
@@ -335,7 +367,6 @@ export function attachDOM({ username }) {
 }
 
 async function getUserData(username) {
-    console.log('username from getUserData', username);
     let options = {
         method: 'POST',
         headers: {

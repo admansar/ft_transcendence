@@ -147,7 +147,7 @@ export const routes = [
 function handleBackNavigation() {
     let path = window.location.pathname;
     console.log('path', path);
-    app.router.findRoute(path);
+    Router.findRoute(path);
 };
 
 export function getwebsocket () {

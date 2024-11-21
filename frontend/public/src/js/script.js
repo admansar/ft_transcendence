@@ -1,16 +1,19 @@
-// import { navigate } from '../../services/Router.js';
 import { Router } from '../../services/Router.js'
-import { Circles } from '../../components/circleInteractions.js'
-import { setupModal } from '../../components/modal.js';
-import { Modals } from '../../components/modal.js';
-import { setupChat } from '../../components/chat.js';
-import { Chat } from '../../components/chat.js';
-import { setupSwitches } from '../../components/switch.js';
+import app from '../../components/state.js';
 
-window.app = {};
-app.router = Router;
-app.root = document.getElementById('app');
+// window.app = {};
+// app.router = Router;
+// app.root = document.getElementById('app');
+document.addEventListener('userDataReady', () => {
+    const userData = app.state.loggedUser
+    console.log('User data in other component:', userData);
 
+});
+window.addEventListener('userDataReady', () => {
+    const userData = app.state.loggedUser
+    console.log('User data in other component:', userData);
+
+});
 document.addEventListener('DOMContentLoaded', () => {
     let path = window.location.pathname;   
     app.router.findRoute(path);

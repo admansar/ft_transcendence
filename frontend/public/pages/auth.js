@@ -3,7 +3,8 @@ import '../components/register.js'
 import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
 import notifications from '../components/notifications.js'
-
+import app
+ from '../components/state.js'
 class Auth extends HTMLElement {
     constructor() {
         super()
