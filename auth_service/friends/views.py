@@ -83,8 +83,8 @@ def  ADD_method(_user, _reciver_id):
     return Response({"message" : " request send . "})
 
 class Userprofile(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def get(self, request):
         profile = Profile.objects.all()
         _user = get_user_from_token(request)
@@ -93,8 +93,8 @@ class Userprofile(APIView):
         return Response({"Profile" : Serializer.data})
 
 class Search(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def post(self, request):
         user = User.objects.all()
         _username_or_email = request.data.get("user_or_email")
@@ -106,8 +106,8 @@ class Search(APIView):
             return Response({"error" : " User not fond ."})
 
 class Request_methods(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     def post(self, request):
         user = User.objects.all()
         profile = Profile.objects.all()

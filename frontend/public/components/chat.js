@@ -1,5 +1,11 @@
-import { getwebsocket } from "../services/Router.js";
+// import { getwebsocket } from "../services/Router.js";
 
+
+// var chatSocket = getwebsocket()
+const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+chatSocket.onopen = function(e) {
+    console.log('WebSocket connection established!');
+}
 
 export function setupChat() {
     const profile_messanger = document.querySelector('.friend-profile');
@@ -16,6 +22,7 @@ export function setupChat() {
     friends.addEventListener('click', function (e) {
         const UserDATA = e.target.closest('.friend-profile')
         if (UserDATA) {
+            console.log("im here");
             if (!document.querySelector(`#${UserDATA.id}-chat`)) {
                 const chat = document.getElementById('chat');
                 const div = document.createElement('div');
@@ -130,15 +137,6 @@ export class Chat extends HTMLElement {
                 <div class="friend-profile-status"></div>
             </div>
             <div class="friend-profile" id="Adnan">
-                <div class="friend-profile-status"></div>
-            </div>
-            <div class="friend-profile" id="Ayoub">
-                <div class="friend-profile-status"></div>
-            </div>
-            <div class="friend-profile" id="Salim">
-                <div class="friend-profile-status"></div>
-            </div>
-            <div class="friend-profile" id="Yassine">
                 <div class="friend-profile-status"></div>
             </div>
         </div>
