@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-
+import { Router } from '../../services/Router.js'
 // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
@@ -576,6 +576,19 @@ function game_score ()
 			who === 1 ? { x: -1.5, y: 0.5, z: 0.8 } : { x: -1.5, y: 0.5, z: -0.8 },
 			{ x: 0, y: Math.PI / 2, z: 0 },
 			who);
+		if (score1 === 11 || score2 === 11)
+		{
+			showPopupText("Game Over", { x: 0, y: 1, z: 0 }, 2000, 0xff0000);
+			// lets make the gravity of the world 0
+			world.gravity.set(0, 0, 0);
+			// make the ball invisible
+			ballMesh.visible = false;
+			sleep(2000).then(() => {
+				//from '../../services/router.js' import { Router }
+
+				Router.findRoute('/404');
+			});
+		}	
 		game_reset ()
 	}
 }
@@ -877,9 +890,8 @@ document.addEventListener('mousemove', function(event)
 		paddleBody.position.z = -mouseY * paddleRangeZ;
 	});
 
-export function game_3d()
+export async function game_3d()
 {
-	loadEnvironment().then(() => {
-		animate()
-	})
+	await loadEnvironment()
+	animate()
 }

@@ -75,9 +75,12 @@ export class settings extends HTMLElement {
             // closeModal();
             // await sleep(3000);
         } else {
-            console.log('Failed to update user info');
-            console.log(data);
-            notifications.notify('Failed to update user info', 'danger', 3000, modal);
+            console.log('Failed to update user info', data);
+            for (let key in data) {
+                notifications.notify(`Error: ${data[key]}`, 'danger', 3000, modal);
+            }
+            // console.log(data);
+            // notifications.notify('Failed to update user info', 'danger', 3000, modal);
         }
     }
 

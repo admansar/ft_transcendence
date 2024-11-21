@@ -765,7 +765,7 @@ input[type=search]{
 .chat-border{
     flex-direction: row;
     position: relative;
-    bottom: -355px;
+    bottom: -335px;
     right: 0px;
     padding-top: 10px;
     align-items: center;
@@ -783,7 +783,7 @@ input[type=search]{
 }
 
 .chat-border.active{
-    bottom: 0px;
+    bottom: 10px;
     transition: all 0.2s ease-in-out;
 }
 

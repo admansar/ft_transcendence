@@ -278,8 +278,10 @@ class Me(APIView):
         if not token:
             raise AuthenticationFailed('Unauthorized')
         
-        id = JWTAuthentication().get_validated_token(token).get('user_id')
-        return Response({'access': token, 'id': id})
+        jwt = JWTAuthentication()
+        validated_token = jwt.get_validated_token(token)
+        user = jwt.get_user(validated_token)
+        return Response({'access': token, 'id': user.id, 'username': user.username})
 
 class Logout(APIView):
     def post(self, request):
@@ -291,7 +293,7 @@ class Logout(APIView):
         return response
 
 class UpdateUser(APIView):
-    # permission_classes = [IsAuthenticated]
+    # permission_classes = .sAuthenticated]
     # authentication_classes = [JWTAuthentication]
     def put(self,request):
         print('request.data', request.data)
