@@ -18,4 +18,4 @@ COPY init.sh /usr/bin/
 
 ENTRYPOINT [ "sh", "/usr/bin/init.sh" ]
 
-CMD     ["gunicorn", "authentication_service.wsgi:application", "--bind", "0.0.0.0:3000"]
+CMD ["daphne", "authentication_service.asgi:application", "--port", "3000", "-b", "0.0.0.0"]

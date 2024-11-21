@@ -14,8 +14,10 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+import django
 
 load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,13 +36,17 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
+    'authentication_service',
     'django.contrib.admin',
     'django.contrib.auth',
+    'friends',
+    'chat',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication_service',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
@@ -49,7 +55,6 @@ INSTALLED_APPS = [
     'django_otp.plugins.otp_static',
     'django_otp.plugins.otp_totp',
     'two_factor',
-    'friends',
 ]
 
 SIMPLE_JWT = {
@@ -158,10 +163,18 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
         'HOST': os.getenv('POSTGRES_HOST'),
-        'PORT': int(os.getenv('DB_PORT')),
+        'PORT': 5432,
     }
 }
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))],
+        },
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -211,3 +224,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'authentication_service.User'
+ASGI_APPLICATION = "authentication_service.asgi.application"
+DJANGO_SETTINGS_MODULE = os.getenv('DJANGO_SETTINGS_MODULE')

@@ -201,8 +201,8 @@ STATIC_URL = 'static/'
 #     os.path.join(BASE_DIR, 'frontend'),
 #     # BASE_DIR / 'static',
 # )
-if os.getenv('PRODUCTION'):
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost",
