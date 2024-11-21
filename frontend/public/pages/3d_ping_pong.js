@@ -16,8 +16,8 @@ class Game_3d  extends HTMLElement {
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <meta charset="UTF-8" />
             <title>Three.js - Hello cube</title>
-            <link rel="stylesheet" href="public/game/css/style_3d.css">
-            <link rel="icon" type="image/x-icon" href="public/game/images/140412.png">
+            <link rel="stylesheet" href="../public/game/css/style_3d.css">
+            <link rel="icon" type="image/x-icon" href="../public/game/images/140412.png">
             <script type="importmap">
             {
                 "imports": {
@@ -30,7 +30,7 @@ class Game_3d  extends HTMLElement {
         <body>
             <div id="threejs-container"></div>
             <script src="https://cdn.jsdelivr.net/npm/cannon/build/cannon.min.js"></script>
-        	<script type="module" src="public/game/js/game_3d.js"></script>
+        	<script type="module" src="../public/game/js/game_3d.js"></script>
         </body>
         </html>
         `

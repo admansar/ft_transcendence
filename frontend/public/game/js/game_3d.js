@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
@@ -77,6 +79,10 @@ const light_intensity = 0.3
 
 // Camera details
 const camera_position = { x: 0, y: 1, z: 3 }
+//some good camera positions
+//{ x: 0, y: 1, z: 3 }
+//{x: -0.0034280941894782343, y: 0.6036275962200779, z: 2.6432065525610726}
+//{x: -0.024363862923210137, y: 0.8729448110023423, z: 2.521385087432608}
 const camera_fov = 50
 const camera_aspect = width / height
 const camera_near = 0.1
@@ -153,7 +159,7 @@ function create_light(light_position, light_color, light_intensity, point_light_
 	scene.add(ambientLight)
 
 	const light = new THREE.DirectionalLight(light_color, light_intensity)
-	const pointLight = new THREE.PointLight(light_color, 0.5)
+	const pointLight = new THREE.PointLight(light_color, 0.8)
 	pointLight.position.set(point_light_position.x, point_light_position.y, point_light_position.z)
 	scene.add(pointLight)
 	light.position.set(light_position.x, light_position.y, light_position.z)
@@ -268,8 +274,8 @@ const renderer = create_renderer(width, height)
 const light = create_light(light_position, light_color, light_intensity, point_light_position)
 //const helper = light_helper(light)
 
-const axisHelper = new THREE.AxesHelper(100, 100, 100);
-scene.add(axisHelper);
+// const axisHelper = new THREE.AxesHelper(100, 100, 100);
+// scene.add(axisHelper);
 
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.update();
@@ -540,13 +546,13 @@ function game_score ()
 		{
 			ball_bonce1++
 			ball_bonce2 = 0
-			console.log ("bounce lhih");
+			// console.log ("bounce lhih");
 		}
 		else if (ballBody.position.z > 0)
 		{
 			ball_bonce2++
 			ball_bonce1 = 0
-			console.log ("bounce hna");
+			// console.log ("bounce hna");
 		}
 	}
 	if (ball_bonce1 >= 2 || ball_bonce2 >= 2)
@@ -629,6 +635,52 @@ function removeAllText()
 		}
 	});
 	textMesh_collector = [null, null];
+}
+
+
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+
+pmremGenerator.dispose();
+
+// scene.environment = envMap;
+// scene.background = envMap;
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.5); // Adjust intensity
+// scene.add(hemiLight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // Choose tone mapping type
+renderer.toneMappingExposure = 0.5; // Adjust to control overall brightness
+
+
+function loadEnvironment() {
+    let ftl = '/public/game/images/back.hdr';  // Your HDR file path
+
+    return new Promise((resolve, reject) => {
+        const loader = new RGBELoader();
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+
+        loader.load(
+            ftl,
+            hdrTexture => {
+                // Generate the environment map from the HDR texture
+                const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+
+                // Properly dispose of the original HDR texture
+                hdrTexture.dispose();
+                pmremGenerator.dispose();
+
+                // Set the environment and background
+                scene.background = envMap;
+                scene.environment = envMap;
+
+                resolve(); // Resolve when successful
+            },
+            undefined,
+            error => {
+                console.error('Error loading HDR texture:', error);
+                reject(error); // Reject the promise if loading fails
+            }
+        );
+    });
 }
 
 
@@ -743,6 +795,7 @@ function animate(time)
     if (paused)
 		return;
     requestAnimationFrame(animate);
+	// console.log ("camera postion : ", camera.position)
 
     // to seconds
     const currentTime = time * 0.001;
@@ -826,10 +879,7 @@ document.addEventListener('mousemove', function(event)
 
 export function game_3d()
 {
-	// how can i check if jwt is valid or not
-	// if (localStorage.getItem('jwtToken') === null)
-	// {
-	// 	window.location.replace('/login')
-	// }
-	animate()
+	loadEnvironment().then(() => {
+		animate()
+	})
 }

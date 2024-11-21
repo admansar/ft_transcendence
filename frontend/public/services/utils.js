@@ -72,3 +72,7 @@ export async function getUserDataByID(id) {
     const data = await response.json();
     return data;
 }
+
+export async function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

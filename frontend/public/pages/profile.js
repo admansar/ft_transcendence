@@ -131,9 +131,9 @@ class Profile extends HTMLElement {
                             </div>
                             <div class="tools_profile">
                              <span style="display:none">
-                                <span class="request_list pending_list" id="pending_list"></span>
-                                <span class="request_list block_list" id="block_list"></span>
-                                <span class="request_list share_profile" id="share_profil"></span>
+                            <span class="request_list pending_list" id="pending_list"></span>
+                            <span class="request_list block_list" id="block_list"></span>
+                            <span class="request_list share_profile" id="share_profil"></span>
                             </span>
                             <span style="display:contents">
                                 <span class="request_list adding_friend" id="add_friend"></span>

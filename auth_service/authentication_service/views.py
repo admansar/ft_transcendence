@@ -289,19 +289,27 @@ class Logout(APIView):
             'message': 'success'
         }
         return response
-    
+
 class UpdateUser(APIView):
+    # permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
     def put(self,request):
-        token = request.COOKIES.get('jwt')
+        print('request.data', request.data)
+        token = request.COOKIES.get('access')
         print(token)
         if not token:
             raise AuthenticationFailed('Unauthenticated')
+
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Unauthenticated')
-        user = User.objects.filter(id=payload['id']).first()
-        serializer = UserSerializer(user, data=request.data)
+            jwt = JWTAuthentication()
+            validated_token = jwt.get_validated_token(token)
+            user = jwt.get_user(validated_token)
+            print('user', user)
+        except Exception as e:
+            print('Error:', e)
+            return Response({'error': 'Invalid token or user not found'}, status=401)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+            

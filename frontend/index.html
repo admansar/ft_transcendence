@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/public/src/styles/styles.css">
+    <link rel="stylesheet" href="/public/src/styles/search.css">
     <script type="importmap">
         {
             "imports": {
@@ -27,7 +28,10 @@
         <div class="logo">
             <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
         </div>
-        <input type="search" placeholder="Search players...">
+        <div class="search-bar" id="search-container">
+            <input type="search" id="search" placeholder="Search users..." />
+            <ul id="search-results"></ul>
+        </div>
     </header>
     </div>
     <div id="app"></div>
