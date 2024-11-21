@@ -1,7 +1,7 @@
+import { getwebsocket } from "../services/Router.js";
 
 
 export function setupChat() {
-
     const profile_messanger = document.querySelector('.friend-profile');
     const friends = document.querySelector('.messanger-list');
     const sms = document.querySelector('.messanger');

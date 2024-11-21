@@ -1,35 +1,40 @@
 import { isAuth } from '../services/utils.js';
 
-export const Router = {
-    normalizeRoute(route) {
-        if (route.endsWith('/') && route.length > 1) {
-            route = route.slice(0, -1);
-            return this.normalizeRoute(route);
-        }
-        return route;
-    },
-    matchRoute(route, routePattern) {
-        let routeSegments = route.split('/').filter(el => el !== '');
-        let patternSegments = routePattern.split('/').filter(el => el !== '');
-
-        if (routeSegments.length !== patternSegments.length) {
-            return null;
-        }
-
-        const params = {};
-        for (let i = 0; i < patternSegments.length; i++) {
-            // params['path'] = routeSegments[0];
-            if (patternSegments[i].startsWith(':')) {
-                const paramName = patternSegments[i].slice(1);
-                params[paramName] = routeSegments[i];
-            } else if (patternSegments[i] !== routeSegments[i]) {
+    let chatSocket = ""
+    export const Router = {
+        normalizeRoute(route) {
+            if (route.endsWith('/') && route.length > 1) {
+                route = route.slice(0, -1);
+                return this.normalizeRoute(route);
+            }
+            return route;
+        },
+        matchRoute(route, routePattern) {
+            let routeSegments = route.split('/').filter(el => el !== '');
+            let patternSegments = routePattern.split('/').filter(el => el !== '');
+            
+            if (routeSegments.length !== patternSegments.length) {
                 return null;
             }
+            
+            const params = {};
+            for (let i = 0; i < patternSegments.length; i++) {
+                // params['path'] = routeSegments[0];
+                if (patternSegments[i].startsWith(':')) {
+                    const paramName = patternSegments[i].slice(1);
+                    params[paramName] = routeSegments[i];
+                } else if (patternSegments[i] !== routeSegments[i]) {
+                    return null;
+                }
+            }
+            console.log('params', params);
+            return params;
+        },
+        findRoute: (route) => {
+        chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+        chatSocket.onopen = function(e) {
+            console.log('WebSocket connection established!');
         }
-        console.log('params', params);
-        return params;
-    },
-    findRoute: (route) => {
         route = Router.normalizeRoute(route);
         for (let i = 0; i < routes.length; i++) {
             const params = Router.matchRoute(route, routes[i].path);
@@ -145,4 +150,7 @@ function handleBackNavigation() {
     app.router.findRoute(path);
 };
 
+export function getwebsocket () {
+    return chatSocket
+}
 window.addEventListener('popstate', handleBackNavigation);

@@ -39,4 +39,5 @@ urlpatterns = [
     path('api/auth/users/', GetAllUsers.as_view(), name='get_all_users'),
 
     path('api/friends/', include('friends.urls')),
+    path('chat/', include('chat.urls')),
 ]
