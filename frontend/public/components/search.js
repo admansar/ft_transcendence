@@ -39,7 +39,7 @@ class Search extends HTMLElement {
                     console.log(user);
                     searchResults.innerHTML += `
                         <li>
-                            <a target="_blank" href="/profile/${user.username}">
+                            <a href="/profile/${user.username}">
                                 <img src="${user.avatar}" alt="${user.username}'s avatar" class="user-avatar" />
                                 ${user.username}
                             </a>
