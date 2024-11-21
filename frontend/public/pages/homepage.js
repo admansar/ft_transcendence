@@ -3,9 +3,8 @@ import "../components/modal.js";
 import "../components/chat.js";
 import "../components/settings.js"
 import "../components/search.js";
-import { getUserDataByID } from "../services/utils.js";
-import { getToken } from "../services/utils.js";
-import app from "../components/state.js";
+import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
+import { getMe } from "../services/utils.js";
 
 export class HomePage extends HTMLElement {
     constructor() {
@@ -14,14 +13,11 @@ export class HomePage extends HTMLElement {
 
     async connectedCallback() {
         let profile = document.querySelector('.profile');
-        let jwt = await getToken();
+        let jwt = await getMe();
         let userData = await getUserDataByID(jwt.id);
         
-        app.setUserData(userData);
-        app.state.loggedUser = userData.username;
-        console.log('loggedUser from Homepage', app.state.loggedUser);
-        console.log('app.userData from Homepage', app.getUserData());
-        document.dispatchEvent(new Event('userDataReady'));
+        app.loggedUser = userData.username;
+        console.log('app.loggedUser', app.loggedUser);
         // let event = new CustomEvent('userDataReady', {
         //     detail: {
         //         userData

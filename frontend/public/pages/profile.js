@@ -1,6 +1,7 @@
 import { Router } from '../services/Router.js'
 import { makeAuthRequest } from '../services/utils.js'
-import app from '../components/state.js';
+import { getMe } from '../services/utils.js'
+// import app from '../components/state.js';
 
 document.addEventListener('userDataReady', () => {
     const userData = app.getUserData();
@@ -15,8 +16,9 @@ class Profile extends HTMLElement {
 
     async connectedCallback() {
         const username = this.getAttribute('username');
-        await this.render(username);
-        await this.renderProfile(username);
+        let userData = await getUserData(username);
+        await this.render(username, userData);
+        await this.renderProfile(userData);
     }
 
     async renderScore(data) {
@@ -113,33 +115,33 @@ class Profile extends HTMLElement {
         }
     }
 
-    async getProfileData(username) {
+    async getProfileData(userData) {
         const addFriendButton = document.getElementById('add_friend');
 
-        // addFriendButton.addEventListener('userDataReady', () => {
-            console.log('app.userData', app.getUserData());
-        // });
+        if (!app.loggedUser) {
+            let me = await getMe();
+            console.log('me.username', me.username);
+        }
 
         addFriendButton.addEventListener('click', async () => {
             console.log('Add friend clicked');
             // addFriendButton.style.display = 'none';
-            const response = await makeAuthRequest('/api/friends/methods/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            // const response = await makeAuthRequest('/api/friends/methods/', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     }
 
-            })
+            // })
         })
     }
 
-    async renderProfile(username) {
-        let profileData = await this.getProfileData(username);
+    async renderProfile(userData) {
+        let profileData = await this.getProfileData(userData);
     }
 
     async render(username, userData) {
         try {
-            let userData = await getUserData(username);
             console.log(userData);
             let userStats = await this.getUserStats(userData);
             this.innerHTML = `
