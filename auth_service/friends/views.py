@@ -48,8 +48,8 @@ def Block_user(user ,P_user : Profile, s_user_id : int,  s_user : User):
     P_user.block.add(s_user)
 
 def Unfriend(P_user : Profile , s_user_id : int, s_user : User, _user : User):
-    user_P : Profile = profile.get(user=s_user)
     profile = Profile.objects.all()
+    user_P : Profile = profile.get(user=s_user)
     if P_user.friends.filter(id=s_user_id).exists():
         P_user.friends.remove(s_user)
     if user_P.friends.filter(id=_user.id).exists():
