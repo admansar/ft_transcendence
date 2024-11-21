@@ -24,15 +24,18 @@ permission_classes = [IsAuthenticated]
 game_started = False
 champion = None
 tounament_finished = False
+g_id: int = 0
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     player_num = 4  # Total number of players in the tournament
     match_size = 2  # Each match is a 1v1
     user_name = ''
+    id: int = 0
 
     async def connect(self):
         # Authenticate and connect user
         try:
+            print (f"Scope : {self.scope}")
             self.user_name = await self.get_username_from_db() 
         except Exception as e:
             print (f"Error in connect : {e}")
@@ -55,6 +58,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
         self.room_id = await self.assign_room(self.user_name)
         await self.accept()
+        global g_id
+        g_id += 1
+        self.id = g_id
     
         print (f'{self.user_name} connected')
         players.append(self)
@@ -68,12 +74,14 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             for idx, player in enumerate(players):
                 print (f"player: {player.user_name}, opponent: {player.opponent.user_name} idx : {idx}")
             print (f"starting match {self.user_name} : {self.opponent.user_name}")
+            print ('starting match for ', self.user_name)
             await self.start_match(self, self.opponent)
             # creating a loop to check for the winners
 
         elif len(players) > self.player_num:
             # wait for the next round
             print ('waiting for the next round')
+            self.disconnect(1000)
             self.close()
             pass  # Handle overflow later
         
@@ -129,6 +137,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         print (f"Starting match between {player1.user_name} and {player2.user_name}")
         await asyncio.sleep(1)
         for player in players:
+            await asyncio.sleep(0.1 * self.id)
             await player.send(text_data=json.dumps({
                 'type': 'start_game',
                 'self': player1.user_name,
@@ -147,6 +156,17 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 # game_started = True
                 print ('starting the championship')
                 await self.start_championship()
+        if data['type'] == 'end_tournament':
+            winners_classes.clear()
+            winners.clear()
+            players.clear()
+            game_rooms.clear()
+            global g_id
+            g_id = 0
+            print ('tournament ended')
+            await asyncio.sleep(5)
+            # await self.close()
+            # await self.disconnect(1000)
                 # await self.start_match(winners_classes[0], winners_classes[1])
 
             
@@ -261,10 +281,10 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             self.room.game_loop_task = asyncio.create_task(self.game_loop())
         
         
-    async def get_username_from_db(self):
+    async def get_username_from_db(self) -> str | None:
         if "=" in self.scope['query_string'].decode():
             self.token = self.scope['query_string'].decode().split('=')[1]
-            # print (f"Token : {self.token}")
+            print (f"Token : {self.token}")
             if self.token == 'null': # means i got token=null from the frontend
                 print ('--------so its an intra-------')
                 self.token = self.scope['cookies'].get('jwt')

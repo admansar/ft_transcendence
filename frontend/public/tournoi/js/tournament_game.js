@@ -95,7 +95,7 @@ let gameState = {
 };
 
 // WebSocket connection
-let token = null;
+// let token = null;
 
 // let response = await fetch('http://localhost:8000/api/accounts/me',
 //   {
@@ -108,36 +108,37 @@ let token = null;
 //   }
 // )
 // let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
-let response = await makeAuthRequest('api/auth/me', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include',
-});
+// let data = null;
+// let response = await makeAuthRequest('api/auth/me', {
+//   method: 'POST',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+//   credentials: 'include',
+// });
 
-if (response.ok) {
-  let data = await response.json();
-  // console.log ('full data: ', data)
-  token = data.access;
-}
-else
-{
-  data = null;
-  console.log('Error fetching user data');
-}
+// if (response.ok) {
+//   data = await response.json();
+//   // console.log ('full data: ', data)
+//   token = data.access;
+// }
+// else
+// {
+//   console.log('Error fetching user data');
+// }
 
-let roomName = 'group_01'; // This should be dynamic based on matchmaking or user selection
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament_game/${roomName}/?token=${token}`);
-
-// WebSocket event handlers
-gameSocket.onopen = function () {
-  console.log('Connected to the game server.');
-};
-
-export function tour_game(self, opponent)
-{
+export function tour_game(user_token) {
   return new Promise((resolve, reject) => {
+
+
+  console.log ('the fucking token: ', user_token)
+  let roomName = 'group_01'; // This should be dynamic based on matchmaking or user selection
+  let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament_game/${roomName}/?token=${user_token}`);
+
+  // WebSocket event handlers
+  gameSocket.onopen = function () {
+    console.log('Connected to the game server.');
+  };
 
   gameSocket.onmessage = function (e)
   {
@@ -578,11 +579,11 @@ export function tour_game(self, opponent)
   }
 
   {
-    if (!token)
-    {
-      show_notification('You must login first!');
-      Router.findRoute('/login');
-    }
+    // if (!token)
+    // {
+    //   show_notification('You must login first!');
+    //   Router.findRoute('/login');
+    // }
     game_loop();
   }
   });

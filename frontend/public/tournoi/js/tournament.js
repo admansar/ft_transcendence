@@ -40,7 +40,7 @@ let response = await makeAuthRequest('/api/auth/me', {
 
 if (response.ok) {
 	data = await response.json();
-	console.log ('full data: ', data)
+	// console.log ('full data: ', data)
 	token = data.access;
 }
 else
@@ -78,7 +78,8 @@ gameSocket.onmessage = function (e) {
         console.log('game started');
 
         const module = await import(`./tournament_game.js?t=${Date.now()}`);
-        await module.tour_game(data.self, data.opponent);
+        console.log ('le token: ', token)
+        await module.tour_game(token);
         
         // await new Promise((resolve) => {setTimeout(resolve, 5000);});
         console.log('lets continue the tournament');
@@ -136,6 +137,26 @@ gameSocket.onmessage = function (e) {
             console.log ('the champion chep is : ', data.winners)
             let win = document.getElementById('champion');
             win.innerHTML = data.winners[2].winner;
+            new Promise((resolve) => {
+                setTimeout(resolve, 3000);
+            }
+            ).then(() => {
+                gameSocket.send(JSON.stringify(
+                    {
+                        'type': 'end_tournament',
+                    }));
+                console.log ('closing ...');
+                try {
+                    gameSocket.close();
+                }
+                catch (e)
+                {
+                    console.log ('error closing socket: ', e);
+                }
+            });
+                // new Promise((resolve) => {
+                //     setTimeout(resolve, 3000);
+                // }).then(() => {console.log ('closing ...');gameSocket.close()});
         }
     }
     // else if (data.type === 'winner_winner_chicken_dinner')
