@@ -1,36 +1,43 @@
 import { isAuth } from '../services/utils.js';
 
-    // var chatSocket = ""
-    export const Router = {
-        normalizeRoute(route) {
-            if (route.endsWith('/') && route.length > 1) {
-                route = route.slice(0, -1);
-                return this.normalizeRoute(route);
-            }
-            return route;
-        },
-        matchRoute(route, routePattern) {
-            let routeSegments = route.split('/').filter(el => el !== '');
-            let patternSegments = routePattern.split('/').filter(el => el !== '');
-            
-            if (routeSegments.length !== patternSegments.length) {
+
+document.addEventListener('userDataReady', () => {
+    // const userData = app.state.loggedUser
+    console.log('User data in ROuter');
+
+});
+
+// var chatSocket = ""
+export const Router = {
+    normalizeRoute(route) {
+        if (route.endsWith('/') && route.length > 1) {
+            route = route.slice(0, -1);
+            return this.normalizeRoute(route);
+        }
+        return route;
+    },
+    matchRoute(route, routePattern) {
+        let routeSegments = route.split('/').filter(el => el !== '');
+        let patternSegments = routePattern.split('/').filter(el => el !== '');
+
+        if (routeSegments.length !== patternSegments.length) {
+            return null;
+        }
+
+        const params = {};
+        for (let i = 0; i < patternSegments.length; i++) {
+            // params['path'] = routeSegments[0];
+            if (patternSegments[i].startsWith(':')) {
+                const paramName = patternSegments[i].slice(1);
+                params[paramName] = routeSegments[i];
+            } else if (patternSegments[i] !== routeSegments[i]) {
                 return null;
             }
-            
-            const params = {};
-            for (let i = 0; i < patternSegments.length; i++) {
-                // params['path'] = routeSegments[0];
-                if (patternSegments[i].startsWith(':')) {
-                    const paramName = patternSegments[i].slice(1);
-                    params[paramName] = routeSegments[i];
-                } else if (patternSegments[i] !== routeSegments[i]) {
-                    return null;
-                }
-            }
-            console.log('params', params);
-            return params;
-        },
-        findRoute: (route) => {
+        }
+        console.log('params', params);
+        return params;
+    },
+    findRoute: (route) => {
         // chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
         // chatSocket.onopen = function(e) {
         //     console.log('WebSocket connection established!');
@@ -107,7 +114,7 @@ export const routes = [
     {
         path: '/profile/:username',
         // path: '/profile',
-        component: async ({username}) => import('../pages/profile.js').then(module => {
+        component: async ({ username }) => import('../pages/profile.js').then(module => {
             module.attachDOM({ username });
         })
     },

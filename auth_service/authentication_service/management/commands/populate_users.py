@@ -55,15 +55,18 @@ class Command(BaseCommand):
         try:
             print ("---------- user creation ----------")
             for user_data in sample_users:
-                User.objects.create_user(
-                    first_name=user_data["first_name"],
-                    last_name=user_data["last_name"],
-                    username=user_data["username"],
-                    email=user_data["email"],
-                    password=user_data["first_name"],  # Replace with your desired default password
-                    avatar=user_data["avatar"] + user_data["username"],
-                )
-                self.stdout.write(self.style.SUCCESS(f"User '{user_data['username']}' created successfully."))
+                try:
+                    User.objects.create_user(
+                        first_name=user_data["first_name"],
+                        last_name=user_data["last_name"],
+                        username=user_data["username"],
+                        email=user_data["email"],
+                        password=user_data["first_name"],  # Replace with your desired default password
+                        avatar=user_data["avatar"] + user_data["username"],
+                    )
+                    self.stdout.write(self.style.SUCCESS(f"User '{user_data['username']}' created successfully."))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f"Error: {e}"))
 
             self.stdout.write(self.style.SUCCESS("Database populated with sample users."))
         except Exception as e:

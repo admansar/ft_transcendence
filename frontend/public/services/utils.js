@@ -14,7 +14,7 @@ async function verifyToken(token) {
 export async function makeAuthRequest(url, options = {}) {
     options.credentials = 'include';
 
-    let token = await getToken();
+    let token = await getMe();
     console.log('token', token.access);
     let response = await verifyToken(token.access);
     if (!response) {
@@ -34,7 +34,7 @@ export async function makeAuthRequest(url, options = {}) {
     return response
 }
 
-export async function getToken() {
+export async function getMe() {
     const response = await fetch('/api/auth/me', {
         method: 'POST',
         headers: {

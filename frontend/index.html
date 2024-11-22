@@ -23,15 +23,29 @@
 
 <body>
     <header>
-        <a class="profile"></a>
-        <div></div>
-        <div class="logo">
-            <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
+        <div class="headline">
+            <div class="left-menu">
+                <div class="menu-icon" id="menu-icon">
+                    <div class="menu-content">
+                        <li>Item 1</li>
+                        <li>Item 2</li>
+                        <br>
+                        <li>Item 3</li>
+                    </div>
+                </div>
+                <div style="width: 120px;"></div>
+                <div class="profile"></div>
+                <div class="message" style="font-size: 35px;"></div>
+            </div>
+            <div class="logo">
+                <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
+            </div>
+            <div class="search-bar" id="search-container">
+                <input type="search" id="search" placeholder="Search users..." />
+                <ul id="search-results"></ul>
+            </div>
         </div>
-        <div class="search-bar" id="search-container">
-            <input type="search" id="search" placeholder="Search users..." />
-            <ul id="search-results"></ul>
-        </div>
+    </div>
     </header>
     </div>
     <div id="app"></div>

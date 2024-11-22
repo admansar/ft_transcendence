@@ -1,6 +1,7 @@
 import { Router } from '../services/Router.js'
 import { makeAuthRequest } from '../services/utils.js'
-import app from '../components/state.js';
+import { getMe } from '../services/utils.js'
+// import app from '../components/state.js';
 
 document.addEventListener('userDataReady', () => {
     const userData = app.getUserData();
@@ -15,8 +16,9 @@ class Profile extends HTMLElement {
 
     async connectedCallback() {
         const username = this.getAttribute('username');
-        await this.render(username);
-        await this.renderProfile(username);
+        let userData = await getUserData(username);
+        await this.render(username, userData);
+        await this.renderProfile(userData);
     }
 
     async renderScore(data) {
@@ -113,33 +115,33 @@ class Profile extends HTMLElement {
         }
     }
 
-    async getProfileData(username) {
+    async getProfileData(userData) {
         const addFriendButton = document.getElementById('add_friend');
 
-        // addFriendButton.addEventListener('userDataReady', () => {
-            console.log('app.userData', app.getUserData());
-        // });
+        if (!app.loggedUser) {
+            let me = await getMe();
+            console.log('me.username', me.username);
+        }
 
         addFriendButton.addEventListener('click', async () => {
             console.log('Add friend clicked');
             // addFriendButton.style.display = 'none';
-            const response = await makeAuthRequest('/api/friends/methods/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            // const response = await makeAuthRequest('/api/friends/methods/', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     }
 
-            })
+            // })
         })
     }
 
-    async renderProfile(username) {
-        let profileData = await this.getProfileData(username);
+    async renderProfile(userData) {
+        let profileData = await this.getProfileData(userData);
     }
 
     async render(username, userData) {
         try {
-            let userData = await getUserData(username);
             console.log(userData);
             let userStats = await this.getUserStats(userData);
             this.innerHTML = `
@@ -162,15 +164,15 @@ class Profile extends HTMLElement {
                                 </div>
                             </div>
                             <div class="tools_profile">
-                             <span style="display:none">
-                            <span class="request_list pending_list" id="pending_list"></span>
-                            <span class="request_list block_list" id="block_list"></span>
-                            <span class="request_list share_profile" id="share_profil"></span>
+                            <span style="display:none">
+                                <span class="request_list pending_list" id="pending_list"></span>
+                                <span class="request_list block_list" id="block_list"></span>
                             </span>
                             <span style="display:contents">
                                 <span class="request_list adding_friend" id="add_friend"></span>
                                 <span class="request_list block_user" id="block_that"></span>
                             </span>
+                            <span class="request_list share_profile" id="share_profil"></span>
                             </div>
                         </div>
                     </div>
@@ -295,7 +297,7 @@ class Profile extends HTMLElement {
             const hisBar = document.querySelector('.HISTORYdata');
             const rankBar = document.querySelector('.RANKYdata');
             const achBar = document.querySelector('.ACHIVEMENTSdata');
-
+            
             cata.forEach(button => {
                 button.addEventListener('click', function () {
                     // Remove 'active' class from all buttons
@@ -319,7 +321,11 @@ class Profile extends HTMLElement {
                     }
                 });
             });
+            const add_remove = document.querySelector('.request_list.adding_friend');
 
+            add_remove.addEventListener('click', function () {
+                add_remove.classList.add('active');
+            });
 
             pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
