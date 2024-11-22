@@ -45,6 +45,7 @@ class GenerateOTPView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        response = Response()
         try:
             otp_handler = OTP()
             otp = otp_handler.generate_otp()
@@ -68,65 +69,69 @@ class GenerateOTPView(APIView):
             )
             request.session['otp'] = otp
             request.session['otp_email'] = to_email
+
+            print(f"Session ID: {request.session.session_key}")
+
+            print('request.session before', request.session.keys())
+
+            response.set_cookie(key='otp_email', value=to_email)
+            response.set_cookie(key='otp', value=otp)
             
-            return Response(
-                {"message": "OTP sent successfully"}, 
-                status=status.HTTP_200_OK
-            )
+            response.data = {
+                'message': 'OTP sent successfully'
+            }
+            return response
         except Exception as e:
-            return Response(
-                {"error": "An error occurred while sending the email. Please try again."}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            response.data = {
+                'error': 'An error occurred while sending the email. Please try again.'
+            }
+            return response
 class VerifyOTPView(APIView):
     def post(self, request):
         user_otp = request.data.get('otp')
         user_email = request.data.get('email')
-        
-        stored_otp = request.session.get('otp')
-        stored_email = request.session.get('otp_email')
-        
-        # Vérifier si l'OTP et l'email sont fournis
+
+        print(f"Session ID: {request.session.session_key}")
+
+        print('request.session', request.session.keys())
+
+        stored_otp = request.COOKIES.get('otp')
+        stored_email = request.COOKIES.get('otp_email')
+
+        print(user_email)
+        print(user_otp)
+
+        print('stored_otp', stored_otp)
+        print('stored_email', stored_email)
+                
         if not user_otp or not user_email:
             return Response(
                 {"error": "OTP and email are required"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Vérifier si un OTP existe en session
-        if not stored_otp or not stored_email:
-            return Response(
-                {"error": "No active OTP found. Please generate a new OTP"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-                    
-        # Vérifier si l'email correspond
+            
         if user_email != stored_email:
             return Response(
                 {"error": "Email does not match"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        # Vérifier si l'OTP est correct
         if user_otp != stored_otp:
             return Response(
                 {"error": "Invalid OTP"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        try:
-            # Clear the OTP from session after successful verification
-            request.session.pop('otp', None)
-            request.session.pop('otp_email', None)
-            
-        except KeyError:
-            pass  # Ignorer si les clés n'existent pas
-            
+
+        request.COOKIES.pop('otp')
+        request.COOKIES.pop('otp_email')
+        
+        # del request.COOKIES['otp']
+        # del request.COOKIES['otp_email']
+        
         return Response(
             {"message": "OTP verified successfully"}, 
             status=status.HTTP_200_OK
         )
-
 class Oauth42(APIView):
     def get(self, request):
         code = request.GET.get('code')

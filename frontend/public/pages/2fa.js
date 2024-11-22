@@ -1,12 +1,16 @@
+import { Router } from "../services/Router.js";
+import { makeAuthRequest } from "../services/utils.js";
+import { getMe } from "../services/utils.js";
+
 class TwoFactorAuth extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         this.render();
-        this.init();
+        await this.init();
     }
 
     render() {
@@ -67,15 +71,16 @@ class TwoFactorAuth extends HTMLElement {
         `;
     }
 
-    init() {
+    async init() {
         this.otpLength = 6;
         this.otpInputContainer = this.shadowRoot.getElementById('otpInputContainer');
         this.verifyButton = this.shadowRoot.getElementById('verifyButton');
         this.messageElement = this.shadowRoot.getElementById('message');
-        
-        this.generatedOTP = this.generateOTP();
-        
+
         this.createOTPInputs();
+        // otpServer = await otpServer.json();
+        // console.log('otpServer', otpServer);
+
         this.addEventListeners();
     }
 
@@ -102,7 +107,7 @@ class TwoFactorAuth extends HTMLElement {
         const value = input.value;
 
         if (!/^\d*$/.test(value)) {
-            input.value = value.replace(/\D/g, '');
+            input.value = value.replace(/\D/g, '');// Remove non-numeric characters
             return;
         }
 
@@ -118,7 +123,6 @@ class TwoFactorAuth extends HTMLElement {
 
     handleKeyDown(e) {
         const input = e.target;
-                
         if (e.key === 'Backspace' && input.value === '') {
             const prevInput = input.previousElementSibling;
             if (prevInput) {
@@ -131,30 +135,43 @@ class TwoFactorAuth extends HTMLElement {
     checkOTPCompletion() {
         const inputs = this.otpInputContainer.querySelectorAll('input');
         const allFilled = Array.from(inputs).every(input => input.value !== '');
-        
+
+
         this.verifyButton.disabled = !allFilled;
     }
 
-    verifyOTP() {
+    async verifyOTP() {
         const inputs = this.otpInputContainer.querySelectorAll('input');
         const enteredOTP = Array.from(inputs)
-            .map(input => input.value)
-            .join('');
+        .map(input => input.value)
+        .join('');
+        
+        
+        let me = await getMe();       
+        console.log('userData', me.email);
+        this.generatedOTP = await makeAuthRequest('/api/auth/verify-otp/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                email: me.email,
+                otp: enteredOTP
+            })
+        })
 
-        if (enteredOTP === this.generatedOTP) {
-            this.showMessage('Verification Successful!', 'green');
-            // Dispatch custom event for successful verification
-            this.dispatchEvent(new CustomEvent('otpVerified', { 
-                detail: { verified: true },
-                bubbles: true 
-            }));
+        this.generatedOTP = await this.generatedOTP.json();
+        console.log('this.generatedOTP===>', this.generatedOTP);
+
+        if (this.generatedOTP.message === 'OTP verified successfully') {
+            this.showMessage('OTP verified successfully', 'green');
+            setTimeout(() => {
+                Router.findRoute('/');
+            }, 1000);
         } else {
             this.showMessage('Incorrect OTP. Please try again.', 'red');
         }
-    }
-
-    generateOTP() {
-        return Math.floor(100000 + Math.random() * 900000).toString();
     }
 
     showMessage(text, color) {

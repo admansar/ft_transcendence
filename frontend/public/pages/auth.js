@@ -3,8 +3,8 @@ import '../components/register.js'
 import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
 import notifications from '../components/notifications.js'
-import app
-    from '../components/state.js'
+import { getMe } from '../services/utils.js'
+
 class Auth extends HTMLElement {
     constructor() {
         super()
@@ -121,33 +121,31 @@ function login() {
             if (response.ok) {
                 console.log('access', data.access);
                 console.log('refresh', data.refresh);
-                localStorage.setItem('access', data.access);
-                localStorage.setItem('refresh', data.refresh);
+                // localStorage.setItem('access', data.access);
+                // localStorage.setItem('refresh', data.refresh);
                 notifications.notify('Login successful!', 'success');
-                setTimeout(async () => {
-                    Router.findRoute(`/verify-otp`);
-                    let userData = await fetch('/api/auth/me', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                
+                let me = await getMe();
+                console.log('userData', me.email);
+                let otp = await fetch('api/auth/generate-otp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials:"include",
+                    body: JSON.stringify({
+                        email: me.email
                     })
-                    userData = await userData.json();
-                    console.log('userData', userData.email);
-                    let otp = await fetch('api/auth/generate-otp/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: userData.email
-                        })
+                }).then(res=>{
+                    console.log(res);
+                    console.log(res.headers);
+                    res.json().then(res=>{
+                        console.log(res)
                     })
-                    otp = await otp.json();
-                    console.log('otp', otp);
-                }, 1000);
+                })
+                Router.findRoute(`/verify-otp`);
             } else {
-                // login failed
+
                 console.log(data.error);
                 notifications.notify(data.error, 'danger');
             }
