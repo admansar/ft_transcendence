@@ -1,9 +1,8 @@
 test multiple player at once after fixing login page => will done 
 
-add multirooms for sockets
-tournoi
-
-
 close socket after ending in the tournament 
 Link 2fa with Front-end api to generate Otp = http://localhost/api/accounts/generate-otp/
-to verify OTP http://localhost/api/accounts/verify-otp
+to verify OTP http://localhost/api/accounts/verify-otpupdate routing from 404 to login to test
+ 
+upgrade game front 
+devide game and tournament by containers (optional)

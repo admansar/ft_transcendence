@@ -124,6 +124,7 @@ gameSocket.onmessage = async function (e) {
 		// renderGame();
 	}
 	else if (data.type === 'countdown') {
+		disableWaitingOverlay();
 		console.log('Countdown: ', data.countdown);
 		let dict = {
 			'3': 'Ready',
@@ -521,6 +522,7 @@ function updateCountdown(txt = '') {
 	countdownElement.style.animation = null;
 }
 
+
 export function game_2d() {
 	if (!token) {
 		show_notification('You must login first!');
@@ -528,5 +530,41 @@ export function game_2d() {
 		Router.findRoute('/login');
 		breaker = true
 	}
+	showWaitingOverlay()
 	game_loop();
+}
+
+
+function showWaitingOverlay() {
+    const waitingOverlay = document.getElementById('waiting-overlay');
+    const waitingProgress = document.getElementById('waiting-progress');
+    waitingOverlay.style.display = 'flex'; // Show the waiting overlay
+    waitingProgress.style.width = '0'; // Reset progress
+
+    // Simulate progress
+    let width = 0;
+    const interval = setInterval(() => {
+        if (width >= 100) {
+            clearInterval(interval);
+            // Optionally handle logic if no opponent connects
+        } else {
+            width++;
+            waitingProgress.style.width = width + '%';
+        }
+    }, 100); // Adjust speed of the loading
+}
+
+function disableWaitingOverlay() {
+    const waitingOverlay = document.getElementById('waiting-overlay');
+    const waitingProgress = document.getElementById('waiting-progress');
+
+    // Animate the waiting bar upwards
+    waitingProgress.style.transition = 'height 0.5s ease, width 0.5s ease';
+    waitingProgress.style.height = '0'; // Shrink height to 0
+    waitingProgress.style.width = '0'; // Reset width for the animation
+
+    setTimeout(() => {
+        waitingOverlay.style.display = 'none'; // Hide overlay after animation
+        // Start your game logic here
+    }, 500); // Time for the animation to complete
 }
