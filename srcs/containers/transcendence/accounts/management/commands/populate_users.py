@@ -2,7 +2,6 @@
 import random
 from django.core.management.base import BaseCommand
 from accounts.models import User  # Replace 'your_app' with the name of your app
-
 class Command(BaseCommand):
     help = "Populates the database with sample user data"
 

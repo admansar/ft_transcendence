@@ -125,14 +125,19 @@ class Profile extends HTMLElement {
 
         addFriendButton.addEventListener('click', async () => {
             console.log('Add friend clicked');
-            // addFriendButton.style.display = 'none';
-            // const response = await makeAuthRequest('/api/friends/methods/', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     }
-
-            // })
+            addFriendButton.style.display = 'none';
+            const response = await makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "ADD",
+                    "user_id": String(userData.id)
+                })
+            })
+            const data = await response.json();
+            console.log(data);
         })
     }
 
