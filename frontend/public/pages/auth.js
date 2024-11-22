@@ -126,7 +126,7 @@ function login() {
                 notifications.notify('Login successful!', 'success');
                 setTimeout(async () => {
                     Router.findRoute(`/verify-otp`);
-                    let userData = await makeAuthRequest('/api/auth/me', {
+                    let userData = await fetch('/api/auth/me', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ function login() {
                     })
                     userData = await userData.json();
                     console.log('userData', userData.email);
-                    let otp = await makeAuthRequest('api/auth/generate-otp', {
+                    let otp = await fetch('api/auth/generate-otp/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -143,6 +143,8 @@ function login() {
                             email: userData.email
                         })
                     })
+                    otp = await otp.json();
+                    console.log('otp', otp);
                 }, 1000);
             } else {
                 // login failed
