@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 "first_name": "berrim",
                 "last_name": "berrim",
                 "username": "berrim",
-                "email": "berrim@example.com",
+                "email": "yassineberrim99@gmail.com",
                 "avatar" : "https://robohash.org/",
             },
         ]
