@@ -1,10 +1,13 @@
 async function verifyToken(token) {
     // const response = await fetch('http://localhost:8000/api/token/verify/', {
+    
     const response = await fetch('/api/auth/token/verify/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
+        
+        
         body: JSON.stringify({ token }),
     })
     console.log('verifyToken', response.ok);
@@ -12,6 +15,7 @@ async function verifyToken(token) {
 }
 
 export async function makeAuthRequest(url, options = {}) {
+    
     options.credentials = 'include';
 
     let token = await getMe();

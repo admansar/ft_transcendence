@@ -3,8 +3,8 @@ import '../components/register.js'
 import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
 import notifications from '../components/notifications.js'
-import app
- from '../components/state.js'
+import { getMe } from '../services/utils.js'
+
 class Auth extends HTMLElement {
     constructor() {
         super()
@@ -19,7 +19,7 @@ class Auth extends HTMLElement {
         const registerPage = document.createElement('register-page');
         const loginPage = document.createElement('login-page');
         console.log(page);
-        
+
         if (page === 'register') {
             this.appendChild(registerPage)
             register();
@@ -28,7 +28,7 @@ class Auth extends HTMLElement {
             this.appendChild(loginPage)
             login();
         }
-        
+
         document.addEventListener('click', (event) => {
             if (event.target && event.target.id === 'open-register') {
                 this.innerHTML = ''
@@ -36,7 +36,7 @@ class Auth extends HTMLElement {
                 history.pushState(null, null, '/register');
                 register();
             }
-            
+
             if (event.target && event.target.id === 'close-register') {
                 this.innerHTML = ''
                 this.appendChild(loginPage)
@@ -102,7 +102,7 @@ function login() {
     btn.addEventListener('click', async () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('pwd').value;
-       
+
         try {
             let response = await fetch('api/auth/login/', {
                 method: 'POST',
@@ -110,7 +110,7 @@ function login() {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                
+
                 body: JSON.stringify({
                     username: username,
                     password: password
@@ -121,14 +121,31 @@ function login() {
             if (response.ok) {
                 console.log('access', data.access);
                 console.log('refresh', data.refresh);
-                localStorage.setItem('access', data.access);
-                localStorage.setItem('refresh', data.refresh);
+                // localStorage.setItem('access', data.access);
+                // localStorage.setItem('refresh', data.refresh);
                 notifications.notify('Login successful!', 'success');
-                setTimeout(() => {
-                    Router.findRoute(`/`);
-                }, 1000);
+                
+                let me = await getMe();
+                console.log('userData', me.email);
+                let otp = await fetch('api/auth/generate-otp/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials:"include",
+                    body: JSON.stringify({
+                        email: me.email
+                    })
+                }).then(res=>{
+                    console.log(res);
+                    console.log(res.headers);
+                    res.json().then(res=>{
+                        console.log(res)
+                    })
+                })
+                Router.findRoute(`/verify-otp`);
             } else {
-                // login failed
+
                 console.log(data.error);
                 notifications.notify(data.error, 'danger');
             }

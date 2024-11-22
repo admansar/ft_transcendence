@@ -20,18 +20,26 @@ class Game_online extends HTMLElement {
         <link rel="icon" type="image/x-icon" href="public/game/images/140412.png">
       </head>
       <body>
-        <div id="header">
-          <div id="score-board">
-            <div>
-              <span id="player1-name"></span> vs <span id="player2-name"></span>
-            </div>
+      <div id="header">
+        <div id="score-board">
+          <span id="score1">0</span>
           <div id="timer">Time: <span id="timer-value">0:00</span></div>
-            <div>
-              <span id="score1">0</span> : <span id="score2">0</span>
-            </div>
-
+          <span id="score2">0</span>
+      </div>
+      <div id="player-names">
+          <span id="player1-name">Player 1</span>
+          <span id="player2-name">Player 2</span>
+      </div>
+      </div>
+  
+          <div id="waiting-overlay">
+          <div id="waiting-text">Waiting for opponent...</div>
+              <div id="waiting-bar">
+            <div id="waiting-progress"></div>
           </div>
         </div>
+
+
 
         <div id="game-container">
           <canvas id="canvas"></canvas>

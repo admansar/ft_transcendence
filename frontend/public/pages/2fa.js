@@ -1,134 +1,187 @@
-class TWOFA extends HTMLElement {
+import { Router } from "../services/Router.js";
+import { makeAuthRequest } from "../services/utils.js";
+import { getMe } from "../services/utils.js";
+
+class TwoFactorAuth extends HTMLElement {
     constructor() {
         super();
-        // Créer un Shadow DOM pour encapsuler le style et la logique
         this.attachShadow({ mode: "open" });
     }
 
-    connectedCallback() {
-        // Appelé lorsque l'élément est ajouté au DOM
+    async connectedCallback() {
         this.render();
-        this.addEventListeners();
+        await this.init();
     }
 
     render() {
-        console.log('LISTEN');
-        // Ajouter le style et l'interface utilisateur
         this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
                     font-family: Arial, sans-serif;
-                    padding: 20px;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
                     max-width: 300px;
-                    margin: 20px auto;
-                    background: #f9f9f9;
+                    margin: auto;
+                }
+                .container {
+                    background-color: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                     text-align: center;
                 }
-                button {
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    padding: 10px;
-                    border-radius: 5px;
-                    cursor: pointer;
+                .otp-input {
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    margin-bottom: 20px;
                 }
-                button:disabled {
-                    background-color: #ccc;
-                }
-                input {
-                    width: calc(100% - 20px);
-                    padding: 10px;
-                    margin: 10px 0;
+                .otp-input input {
+                    width: 40px;
+                    height: 40px;
+                    text-align: center;
+                    font-size: 20px;
                     border: 1px solid #ddd;
                     border-radius: 4px;
                 }
-                .message {
-                    margin-top: 10px;
-                    font-size: 14px;
-                    color: #555;
+                #verifyButton {
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                #verifyButton:disabled {
+                    background-color: #cccccc;
+                    cursor: not-allowed;
+                }
+                #message {
+                    margin-top: 15px;
+                    font-weight: bold;
                 }
             </style>
-            <h3>2FA Authentication</h3>
-            <button id="generate-otp">Generate OTP</button>
-            <div id="otp-section" style="display: none;">
-                <input type="text" id="otp-input" placeholder="Enter OTP" />
-                <button id="verify-otp">Verify OTP</button>
+            <div class="container">
+                <h2>Two-Factor Authentication</h2>
+                <p>Enter the 6-digit code sent to your email</p>
+                <div class="otp-input" id="otpInputContainer"></div>
+                <button id="verifyButton" disabled>Verify</button>
+                <div id="message"></div>
             </div>
-            <div id="message" class="message"></div>
         `;
     }
 
+    async init() {
+        this.otpLength = 6;
+        this.otpInputContainer = this.shadowRoot.getElementById('otpInputContainer');
+        this.verifyButton = this.shadowRoot.getElementById('verifyButton');
+        this.messageElement = this.shadowRoot.getElementById('message');
+
+        this.createOTPInputs();
+        // otpServer = await otpServer.json();
+        // console.log('otpServer', otpServer);
+
+        this.addEventListeners();
+    }
+
+    createOTPInputs() {
+        for (let i = 0; i < this.otpLength; i++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            input.setAttribute('data-index', i);
+            input.addEventListener('input', this.handleInput.bind(this));
+            input.addEventListener('keydown', this.handleKeyDown.bind(this));
+            this.otpInputContainer.appendChild(input);
+        }
+
+        this.otpInputContainer.firstChild.focus();
+    }
+
     addEventListeners() {
-        const generateOtpBtn = this.shadowRoot.querySelector("#generate-otp");
-        const verifyOtpBtn = this.shadowRoot.querySelector("#verify-otp");
-        const otpSection = this.shadowRoot.querySelector("#otp-section");
-        const otpInput = this.shadowRoot.querySelector("#otp-input");
-        const messageDiv = this.shadowRoot.querySelector("#message");
+        this.verifyButton.addEventListener('click', this.verifyOTP.bind(this));
+    }
 
-        // const API_BASE_URL = "http://localhost:8000/api/accounts";
-        const API_BASE_URL = "http://localhost:3000/api/accounts";
+    handleInput(e) {
+        const input = e.target;
+        const value = input.value;
 
-        // Gestionnaire pour générer un OTP
-        generateOtpBtn.addEventListener("click", async () => {
-            try {
-                const response = await fetch(`${API_BASE_URL}/generate-otp/`, {
-                    method: "GET",
-                });
-                const data = await response.json();
+        if (!/^\d*$/.test(value)) {
+            input.value = value.replace(/\D/g, '');// Remove non-numeric characters
+            return;
+        }
 
-                if (response.ok) {
-                    messageDiv.textContent = "OTP généré et envoyé avec succès!";
-                    messageDiv.style.color = "green";
-                    otpSection.style.display = "block";
-                } else {
-                    messageDiv.textContent = data.message || "Une erreur est survenue.";
-                    messageDiv.style.color = "red";
-                }
-            } catch (error) {
-                console.error("Erreur lors de la génération de l'OTP:", error);
-                messageDiv.textContent = "Erreur lors de la génération de l'OTP.";
-                messageDiv.style.color = "red";
+        if (value.length === 1) {
+            const nextInput = input.nextElementSibling;
+            if (nextInput) {
+                nextInput.focus();
             }
-        });
+        }
 
-        // Gestionnaire pour vérifier un OTP
-        verifyOtpBtn.addEventListener("click", async () => {
-            const otp = otpInput.value.trim();
+        this.checkOTPCompletion();
+    }
 
-            if (!otp) {
-                messageDiv.textContent = "Veuillez entrer un OTP.";
-                messageDiv.style.color = "red";
-                return;
+    handleKeyDown(e) {
+        const input = e.target;
+        if (e.key === 'Backspace' && input.value === '') {
+            const prevInput = input.previousElementSibling;
+            if (prevInput) {
+                prevInput.focus();
+                prevInput.value = '';
             }
+        }
+    }
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/verify-otp/`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ otp }),
-                });
+    checkOTPCompletion() {
+        const inputs = this.otpInputContainer.querySelectorAll('input');
+        const allFilled = Array.from(inputs).every(input => input.value !== '');
 
-                const data = await response.json();
 
-                if (response.ok) {
-                    messageDiv.textContent = "OTP validé avec succès!";
-                    messageDiv.style.color = "green";
-                } else {
-                    messageDiv.textContent = data.message || "OTP invalide ou expiré.";
-                    messageDiv.style.color = "red";
-                }
-            } catch (error) {
-                console.error("Erreur lors de la vérification de l'OTP:", error);
-                messageDiv.textContent = "Erreur lors de la vérification de l'OTP.";
-                messageDiv.style.color = "red";
-            }
-        });
+        this.verifyButton.disabled = !allFilled;
+    }
+
+    async verifyOTP() {
+        const inputs = this.otpInputContainer.querySelectorAll('input');
+        const enteredOTP = Array.from(inputs)
+        .map(input => input.value)
+        .join('');
+        
+        
+        let me = await getMe();       
+        console.log('userData', me.email);
+        this.generatedOTP = await makeAuthRequest('/api/auth/verify-otp/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                email: me.email,
+                otp: enteredOTP
+            })
+        })
+
+        this.generatedOTP = await this.generatedOTP.json();
+        console.log('this.generatedOTP===>', this.generatedOTP);
+
+        if (this.generatedOTP.message === 'OTP verified successfully') {
+            this.showMessage('OTP verified successfully', 'green');
+            setTimeout(() => {
+                Router.findRoute('/');
+            }, 1000);
+        } else {
+            this.showMessage('Incorrect OTP. Please try again.', 'red');
+        }
+    }
+
+    showMessage(text, color) {
+        this.messageElement.textContent = text;
+        this.messageElement.style.color = color;
     }
 }
-
-customElements.define("two-fa", TWOFA);
+export function attachDOM() {
+    const twoFactorAuth = document.createElement('two-factor-auth');
+    app.root.innerHTML = '';
+    app.root.appendChild(twoFactorAuth);
+}
+customElements.define('two-factor-auth', TwoFactorAuth);

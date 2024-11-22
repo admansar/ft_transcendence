@@ -1,5 +1,3 @@
-# game.consumers
-
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -9,14 +7,11 @@ import time
 from typing import Any
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .services import (
-    get_user_from_api,
-    get_user_from_api_by_id,
-)
+from .services import get_user_from_api, get_user_from_api_by_id
 
 # Constants
 CANVAS_WIDTH: int = 1000
-CANVAS_HEIGHT: int = 800 
+CANVAS_HEIGHT: int = 800
 BALL_RADIUS: int = 15
 RACKET_WIDTH: float = 20
 RACKET_HEIGHT: float = 140
@@ -26,7 +21,8 @@ GAME_TICK_RATE: int = 30  # fps
 RACKET_POS: float = 50
 RACKET_SPEED: float = 20
 
-game_rooms: dict = {}
+game_rooms: dict = {}  # Tracks all active game rooms
+
 
 class GameState:
     def __init__(self, room_id: int) -> None:
@@ -79,93 +75,84 @@ class GameState:
         if magnitude != 0:
             self.ball_dir['x'] /= magnitude
             self.ball_dir['y'] /= magnitude
-            
+
 
 class GameRoom:
-    def __init__(self, room_id: int) -> None:
-        self.room_id: int = room_id
+    def __init__(self, room_id: str) -> None:
+        self.room_id: str = room_id
         self.players: list = []
         self.game_state: GameState = GameState(room_id)
         self.game_loop_task = None
 
 
-class GameConsumer(AsyncWebsocketConsumer):
+class FriendsGameConsumer(AsyncWebsocketConsumer):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    room_group_name: str = "room_01" # default room
-    room_id: int = 1 # default room
-    room: GameRoom = None
-    user: dict = None
-    user_name: str = None
-    breaker = False
-    # def get
-            
+    room_group_name: str = ''
+    breaker: bool = False
 
-    async def connect(self) -> None:
-        # print (f"Scope : {self.scope}")
+    async def connect(self):
         try:
-            # self.user_name = 'test_while_fixing_api_username'
-            self.user_name = await self.get_username_from_db() 
-        except Exception as e:
-            print (f"Error in connect : {e}")
-            await self.close()
-        self.room_id = await self.assign_room(self.user_name)
-        self.room_group_name = f'room_{self.room_id}'
-        print (f"creating room : {self.room_group_name}")
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name,
-        )
+            self.user_name = await self.get_username_from_db()
+            self.room_id = self.scope['query_string'].decode().split('=')[1]  # Extract room ID from query params
+            self.room_group_name = self.room_id
+            if self.room_id not in game_rooms:
+                game_rooms[self.room_id] = GameRoom(self.room_id)
 
-        await self.accept()
-        await self.send_init_state()
-        self.room = game_rooms[self.room_id]
-        if len(self.room.players) == 2 and not self.room.game_loop_task:
-            other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
-            await other_player.send_player_info(self.user_name)
-            await self.start_countdown(other_player)
-            self.room.game_state.start_game()
-            self.room.game_loop_task = asyncio.create_task(self.game_loop())
-        
-        
+            self.room = game_rooms[self.room_id]
+            self.room.players.append(self)
+
+            await self.channel_layer.group_add(
+                self.room_id,
+                self.channel_name,
+            )
+            await self.accept()
+            await self.send_init_state()
+            self.room = game_rooms[self.room_id]
+            if len(self.room.players) == 2 and not self.room.game_loop_task:
+                other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
+                await other_player.send_player_info(self.user_name)
+                await self.start_countdown(other_player)
+                self.room.game_state.start_game()
+                self.room.game_loop_task = asyncio.create_task(self.game_loop())
+        except Exception as e:
+            print(f"Error in connect: {e}")
+            await self.close()
+
     async def get_username_from_db(self):
-        if "=" in self.scope['query_string'].decode():
-            self.token = self.scope['query_string'].decode().split('=')[1]
-            # print (f"Token : {self.token}")
-            if self.token == 'null': # means i got token=null from the frontend
-                print ('--------so its an intra-------')
-                self.token = self.scope['cookies'].get('jwt')
-            print (f"Token : {self.token}")
+        try:
+            self.token = self.scope.get ('cookies').get ('access')
             user = await self.authenticate_user(self.token)
-            print (f"User : {user}")
-            self.user_name = user['username']
-            print (f"User : {user['username']}")
-            if user is not None:
-                self.user = user
-            else:
-                await self.close()
-                return
-        else:
-            self.user = self.scope['user']
-            self.user_name = self.user.username
-            if not self.user.is_authenticated:
-                await self.close()
-                return
-        return self.user_name
+            if user:
+                self.user_name = user['username']
+                return self.user_name
+        except Exception as e:
+            print(f"Error in getting username: {e}")
+            await self.close()
 
     @database_sync_to_async
-    def authenticate_user(self, token: str) -> None :
+    def authenticate_user(self, token: str):
         try:
             jwt_auth = JWTAuthentication()
-            validated_token = jwt_auth.get_validated_token(token)  # This is a sync method
-            print (f"Validated Token : {validated_token['user_id']}")
+            validated_token = jwt_auth.get_validated_token(token)
+            print(f"Validated token: {validated_token}")
             user = get_user_from_api_by_id(validated_token['user_id'])
-            print('User=========>', user)
             return user
         except Exception as e:
+            print(f"Error in authentication: {e}")
             return None
 
-
+    async def start_countdown(self, other) -> None:
+        data: dict = {
+                    'type': 'countdown',
+                    'countdown': ""
+                }
+        changes: list = [n for n in range(3, 0, -1)]
+        for change in changes:
+            data['countdown'] = change
+            await self.send(text_data=json.dumps(data))
+            await other.send(text_data=json.dumps(data))
+            await asyncio.sleep(1)
 
     async def send_player_info(self, opponent: str) -> None:
         await self.channel_layer.group_send(
@@ -182,19 +169,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             'type': 'player_info',
             'opponent': opponent
         }))
-
-    async def start_countdown(self, other) -> None:
-        data: dict = {
-                    'type': 'countdown',
-                    'countdown': ""
-                }
-        changes: list = [n for n in range(3, 0, -1)]
-        for change in changes:
-            data['countdown'] = change
-            await self.send(text_data=json.dumps(data))
-            await other.send(text_data=json.dumps(data))
-            await asyncio.sleep(1)
-
 
     async def disconnect(self, keycode) -> None:
         try:
@@ -411,14 +385,20 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room = game_rooms.get(self.room_id)
         if not self.room:
             return
-        for player in self.room.players:
-            print (f"player : {player.user}")
-        winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
+        print ('notifying players about game over')
+        try:
+            for player in self.room.players:
+                print (f"player : {player.user}")
+        except Exception as e:
+            print (f"Error in notifying players : {e}")
+            pass
+        self.winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
+        print (f"winner : {self.winner}")
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'game_over',
-                'winner': winner
+                'winner': self.winner
             }
             # GameScore.winner
         )
@@ -436,28 +416,3 @@ class GameConsumer(AsyncWebsocketConsumer):
             print (f"Error in game_over : {e}")
         finally:
             await self.disconnect(1000)
-
-    @database_sync_to_async
-    def assign_room(self, username: str) -> int:
-        # Assign the player to an existing room with less than 2 players
-        for room_id, self.room in game_rooms.items():
-            if len(self.room.players) < 2:
-                self.room.players.append(self)
-                return room_id
-        # Create a new room
-        new_room_id = len(game_rooms)
-        game_rooms[new_room_id] = GameRoom(room_id=new_room_id)
-        game_rooms[new_room_id].players.append(self)
-        return new_room_id
-
-#   
-#                        _       _                              
-#                       (_)     | |                             
-#    ___ _ __   ___  ___ _  __ _| |   __ _  __ _ _ __ ___   ___ 
-#   / __| '_ \ / _ \/ __| |/ _` | |  / _` |/ _` | '_ ` _ \ / _ \
-#   \__ \ |_) |  __/ (__| | (_| | | | (_| | (_| | | | | | |  __/
-#   |___/ .__/ \___|\___|_|\__,_|_|  \__, |\__,_|_| |_| |_|\___|
-#       | |                           __/ |                     
-#       |_|                          |___/                      
-#   
-#   

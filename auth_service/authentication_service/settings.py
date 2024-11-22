@@ -89,6 +89,8 @@ SESSION_COOKIE_SECURE = False  # Use True in production
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = False     # Use True in production
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Default
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

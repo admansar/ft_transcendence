@@ -13,6 +13,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from game.routing import websocket_urlpatterns as game_websocket_urlpatterns
 from tournament.routing import websocket_urlpatterns as tournament_websocket_urlpatterns
+from friends_game.routing import websocket_urlpatterns as friends_game_websocket_urlpatterns
 
  
 
@@ -22,7 +23,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            game_websocket_urlpatterns + tournament_websocket_urlpatterns
+            game_websocket_urlpatterns + tournament_websocket_urlpatterns + friends_game_websocket_urlpatterns
         )
     ),
     })

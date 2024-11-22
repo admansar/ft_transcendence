@@ -146,6 +146,20 @@ export const routes = [
             module.attachDOM();
         })
     },
+    {
+        path: '/verify-otp',
+        isAuth: false,
+        component: () => import('../pages/2fa.js').then(module => {
+            module.attachDOM();
+        })
+    },
+    {
+        path: '/game/friends',
+        isAuth: false,
+        component: () => import('../pages/friends_game_component.js').then(module => {
+            module.attachDOM();
+        })
+    },
 ]
 
 

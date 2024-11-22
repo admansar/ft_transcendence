@@ -14,12 +14,16 @@ import requests
 from django.shortcuts import redirect
 import pyotp
 from django.shortcuts import get_object_or_404
-from django.conf import settings
+# from django.conf import settings
 import os
 from friends.models import Profile
-
+from authentication_service import settings
+from django.core.mail import send_mail
+import secrets
+import string
 
 User = get_user_model()
+
 
 class OTP:
     def __init__(self):
@@ -34,13 +38,14 @@ class OTP:
 class GenerateOTPView(APIView):
     def post(self, request):
         to_email = request.data.get('email')
-        
+        print('to_email', to_email)
         if not to_email:
             return Response(
                 {"error": "Email is required"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        response = Response()
         try:
             otp_handler = OTP()
             otp = otp_handler.generate_otp()
@@ -49,7 +54,12 @@ class GenerateOTPView(APIView):
             message = f'Your OTP is: {otp}'
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [to_email]
-            
+        except Exception as e:
+            return Response(
+                {"error": "Couldn't send the email."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
             send_mail(
                 subject,
                 message,
@@ -59,25 +69,41 @@ class GenerateOTPView(APIView):
             )
             request.session['otp'] = otp
             request.session['otp_email'] = to_email
-            
-            return Response(
-                {"message": "OTP sent successfully"}, 
-                status=status.HTTP_200_OK
-            )
-        except Exception as e:
-            return Response(
-                {"error": "An error occurred while sending the email. Please try again."}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
+            print(f"Session ID: {request.session.session_key}")
+
+            print('request.session before', request.session.keys())
+
+            response.set_cookie(key='otp_email', value=to_email)
+            response.set_cookie(key='otp', value=otp)
+            
+            response.data = {
+                'message': 'OTP sent successfully'
+            }
+            return response
+        except Exception as e:
+            response.data = {
+                'error': 'An error occurred while sending the email. Please try again.'
+            }
+            return response
 class VerifyOTPView(APIView):
     def post(self, request):
         user_otp = request.data.get('otp')
         user_email = request.data.get('email')
-        
-        stored_otp = request.session.get('otp')
-        stored_email = request.session.get('otp_email')
-        
+
+        print(f"Session ID: {request.session.session_key}")
+
+        print('request.session', request.session.keys())
+
+        stored_otp = request.COOKIES.get('otp')
+        stored_email = request.COOKIES.get('otp_email')
+
+        print(user_email)
+        print(user_otp)
+
+        print('stored_otp', stored_otp)
+        print('stored_email', stored_email)
+                
         if not user_otp or not user_email:
             return Response(
                 {"error": "OTP and email are required"}, 
@@ -95,16 +121,17 @@ class VerifyOTPView(APIView):
                 {"error": "Invalid OTP"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        # Clear the OTP from session after successful verification
-        del request.session['otp']
-        del request.session['otp_email']
+
+        request.COOKIES.pop('otp')
+        request.COOKIES.pop('otp_email')
+        
+        # del request.COOKIES['otp']
+        # del request.COOKIES['otp_email']
         
         return Response(
             {"message": "OTP verified successfully"}, 
             status=status.HTTP_200_OK
         )
-
 class Oauth42(APIView):
     def get(self, request):
         code = request.GET.get('code')
@@ -281,7 +308,7 @@ class Me(APIView):
         jwt = JWTAuthentication()
         validated_token = jwt.get_validated_token(token)
         user = jwt.get_user(validated_token)
-        return Response({'access': token, 'id': user.id, 'username': user.username})
+        return Response({'access': token, 'id': user.id, 'username': user.username, 'email': user.email})
 
 class Logout(APIView):
     def post(self, request):
