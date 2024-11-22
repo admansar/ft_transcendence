@@ -14,12 +14,16 @@ import requests
 from django.shortcuts import redirect
 import pyotp
 from django.shortcuts import get_object_or_404
-from django.conf import settings
+# from django.conf import settings
 import os
 from friends.models import Profile
-
+from authentication_service import settings
+from django.core.mail import send_mail
+import secrets
+import string
 
 User = get_user_model()
+
 
 class OTP:
     def __init__(self):
@@ -34,7 +38,7 @@ class OTP:
 class GenerateOTPView(APIView):
     def post(self, request):
         to_email = request.data.get('email')
-        
+        print('to_email', to_email)
         if not to_email:
             return Response(
                 {"error": "Email is required"}, 
@@ -49,7 +53,12 @@ class GenerateOTPView(APIView):
             message = f'Your OTP is: {otp}'
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [to_email]
-            
+        except Exception as e:
+            return Response(
+                {"error": "Couldn't send the email."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
             send_mail(
                 subject,
                 message,
@@ -69,7 +78,6 @@ class GenerateOTPView(APIView):
                 {"error": "An error occurred while sending the email. Please try again."}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 class VerifyOTPView(APIView):
     def post(self, request):
         user_otp = request.data.get('otp')
@@ -78,28 +86,42 @@ class VerifyOTPView(APIView):
         stored_otp = request.session.get('otp')
         stored_email = request.session.get('otp_email')
         
+        # Vérifier si l'OTP et l'email sont fournis
         if not user_otp or not user_email:
             return Response(
                 {"error": "OTP and email are required"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
+        
+        # Vérifier si un OTP existe en session
+        if not stored_otp or not stored_email:
+            return Response(
+                {"error": "No active OTP found. Please generate a new OTP"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+                    
+        # Vérifier si l'email correspond
         if user_email != stored_email:
             return Response(
                 {"error": "Email does not match"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
             
+        # Vérifier si l'OTP est correct
         if user_otp != stored_otp:
             return Response(
                 {"error": "Invalid OTP"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        # Clear the OTP from session after successful verification
-        del request.session['otp']
-        del request.session['otp_email']
-        
+        try:
+            # Clear the OTP from session after successful verification
+            request.session.pop('otp', None)
+            request.session.pop('otp_email', None)
+            
+        except KeyError:
+            pass  # Ignorer si les clés n'existent pas
+            
         return Response(
             {"message": "OTP verified successfully"}, 
             status=status.HTTP_200_OK
@@ -281,7 +303,7 @@ class Me(APIView):
         jwt = JWTAuthentication()
         validated_token = jwt.get_validated_token(token)
         user = jwt.get_user(validated_token)
-        return Response({'access': token, 'id': user.id, 'username': user.username})
+        return Response({'access': token, 'id': user.id, 'username': user.username, 'email': user.email})
 
 class Logout(APIView):
     def post(self, request):

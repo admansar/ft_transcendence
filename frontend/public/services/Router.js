@@ -146,6 +146,13 @@ export const routes = [
             module.attachDOM();
         })
     },
+    {
+        path: '/verify-otp',
+        isAuth: false,
+        component: () => import('../pages/2fa.js').then(module => {
+            module.attachDOM();
+        })
+    },
 ]
 
 
