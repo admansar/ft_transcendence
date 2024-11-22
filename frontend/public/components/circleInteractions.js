@@ -1,6 +1,7 @@
 export class Circles extends HTMLElement {
     constructor() {
         super();
+        this.last_clicked_circle = null;
     }
 
     connectedCallback() {
@@ -88,7 +89,8 @@ export class Circles extends HTMLElement {
         if (circle.id === 'circle3') {
             const playText = circle.querySelector('.circle-text');
             playText.addEventListener('click', () => {
-                playModal.style.display = 'block'; // Show modal
+                if (playModal)
+                    playModal.style.display = 'block'; // Show modal
             });
         }
 
@@ -100,21 +102,26 @@ export class Circles extends HTMLElement {
                 setModal.style.display = 'flex'; // Show modal
             });
         }
-        // Background image change with fading effect
-        const backgroundImage = circle.getAttribute('data-background');
 
-        // Step 1: Fade the screen to black
-        document.body.classList.add('fade-to-black'); // Apply fade to black class
+        if (this.last_clicked_circle != circle.id)
+        {
+            // Background image change with fading effect
+            const backgroundImage = circle.getAttribute('data-background');
 
-        setTimeout(function () {
-            // Step 2: Change the background image after the black fade
-            document.body.style.backgroundImage = `radial-gradient(circle, rgba(151, 151, 151, 0), rgba(32, 32, 32, 1) 60% 80%), url('${backgroundImage}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
+            // Step 1: Fade the screen to black
+            document.body.classList.add('fade-to-black'); // Apply fade to black class
 
-            // Step 3: Fade the screen back to the new background image
-            document.body.classList.remove('fade-to-black');
-        }, 1000); // Wait for 1 second (matching the fade-out duration)
+            setTimeout(function () {
+                // Step 2: Change the background image after the black fade
+                document.body.style.backgroundImage = `radial-gradient(circle, rgba(151, 151, 151, 0), rgba(32, 32, 32, 1) 60% 80%), url('${backgroundImage}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+
+                // Step 3: Fade the screen back to the new background image
+                document.body.classList.remove('fade-to-black');
+            }, 800); // Wait for 0.8 second (matching the fade-out duration)
+        }
+        this.last_clicked_circle = circle.id;
 
         // Center the clicked circle
         const circleRect = circle.getBoundingClientRect();
