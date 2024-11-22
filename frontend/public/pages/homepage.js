@@ -3,10 +3,14 @@ import "../components/modal.js";
 import "../components/chat.js";
 import "../components/settings.js"
 import "../components/search.js";
+import "../components/menu.js"
+import app from "../components/state.js";
 import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
 import { getMe } from "../services/utils.js";
 
+
 export class HomePage extends HTMLElement {
+    
     constructor() {
         super();
     }
@@ -26,6 +30,7 @@ export class HomePage extends HTMLElement {
         // window.dispatchEvent(event);
         
         profile.style.backgroundImage = `url(${userData.avatar})`;
+        document.querySelector('.message').innerHTML = `${userData.username}`;
         profile.addEventListener('click', e => {
             e.preventDefault();
             app.router.findRoute(`/profile/${userData.username}`);
@@ -34,6 +39,8 @@ export class HomePage extends HTMLElement {
         const modalsComponent = document.createElement('app-modals');
         const ChatComponent = document.createElement('app-chat');
         const SettingsComponent = document.createElement('app-settings');
+        const menu = document.createElement('app-menu');
+        this.appendChild(menu);
         this.appendChild(SettingsComponent);
         this.appendChild(circlesComponent);
         this.appendChild(modalsComponent);
@@ -42,6 +49,7 @@ export class HomePage extends HTMLElement {
         const searchComponent = document.createElement('app-search');
         this.appendChild(searchComponent);
 
+        
     }
 }
 

@@ -48,6 +48,24 @@ search-results {
     flex-direction: column;
 }
 
+#search-results {
+    position: absolute;
+    top: 65%;
+    right: 2%;
+    width: 400px;
+    max-height: 150px; /* Limit the height */
+    overflow-y: auto; /* Add scrolling if content overflows */
+    background-color: #333333;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: none; /* Initially hidden */
+    z-index: 10;
+}
 /* Each result item */
 #search-results li {
     z-index: 1;

@@ -169,15 +169,15 @@ class Profile extends HTMLElement {
                                 </div>
                             </div>
                             <div class="tools_profile">
-                             <span style="display:none">
-                            <span class="request_list pending_list" id="pending_list"></span>
-                            <span class="request_list block_list" id="block_list"></span>
-                            <span class="request_list share_profile" id="share_profil"></span>
+                            <span style="display:none">
+                                <span class="request_list pending_list" id="pending_list"></span>
+                                <span class="request_list block_list" id="block_list"></span>
                             </span>
                             <span style="display:contents">
                                 <span class="request_list adding_friend" id="add_friend"></span>
                                 <span class="request_list block_user" id="block_that"></span>
                             </span>
+                            <span class="request_list share_profile" id="share_profil"></span>
                             </div>
                         </div>
                     </div>
@@ -302,7 +302,7 @@ class Profile extends HTMLElement {
             const hisBar = document.querySelector('.HISTORYdata');
             const rankBar = document.querySelector('.RANKYdata');
             const achBar = document.querySelector('.ACHIVEMENTSdata');
-
+            
             cata.forEach(button => {
                 button.addEventListener('click', function () {
                     // Remove 'active' class from all buttons
@@ -326,7 +326,11 @@ class Profile extends HTMLElement {
                     }
                 });
             });
+            const add_remove = document.querySelector('.request_list.adding_friend');
 
+            add_remove.addEventListener('click', function () {
+                add_remove.classList.add('active');
+            });
 
             pendingListButton.addEventListener('click', function () {
                 pendingModal.style.display = 'flex';
