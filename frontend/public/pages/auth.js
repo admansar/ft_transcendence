@@ -4,7 +4,7 @@ import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
 import notifications from '../components/notifications.js'
 import app
- from '../components/state.js'
+    from '../components/state.js'
 class Auth extends HTMLElement {
     constructor() {
         super()
@@ -19,7 +19,7 @@ class Auth extends HTMLElement {
         const registerPage = document.createElement('register-page');
         const loginPage = document.createElement('login-page');
         console.log(page);
-        
+
         if (page === 'register') {
             this.appendChild(registerPage)
             register();
@@ -28,7 +28,7 @@ class Auth extends HTMLElement {
             this.appendChild(loginPage)
             login();
         }
-        
+
         document.addEventListener('click', (event) => {
             if (event.target && event.target.id === 'open-register') {
                 this.innerHTML = ''
@@ -36,7 +36,7 @@ class Auth extends HTMLElement {
                 history.pushState(null, null, '/register');
                 register();
             }
-            
+
             if (event.target && event.target.id === 'close-register') {
                 this.innerHTML = ''
                 this.appendChild(loginPage)
@@ -102,7 +102,7 @@ function login() {
     btn.addEventListener('click', async () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('pwd').value;
-       
+
         try {
             let response = await fetch('api/auth/login/', {
                 method: 'POST',
@@ -110,7 +110,7 @@ function login() {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                
+
                 body: JSON.stringify({
                     username: username,
                     password: password
@@ -124,8 +124,25 @@ function login() {
                 localStorage.setItem('access', data.access);
                 localStorage.setItem('refresh', data.refresh);
                 notifications.notify('Login successful!', 'success');
-                setTimeout(() => {
-                    Router.findRoute(`/`);
+                setTimeout(async () => {
+                    Router.findRoute(`/verify-otp`);
+                    let userData = await makeAuthRequest('/api/auth/me', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    userData = await userData.json();
+                    console.log('userData', userData.email);
+                    let otp = await makeAuthRequest('api/auth/generate-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: userData.email
+                        })
+                    })
                 }, 1000);
             } else {
                 // login failed
