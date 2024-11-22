@@ -146,6 +146,13 @@ export const routes = [
             module.attachDOM();
         })
     },
+    {
+        path: '/game/friends',
+        isAuth: false,
+        component: () => import('../pages/friends_game_component.js').then(module => {
+            module.attachDOM();
+        })
+    },
 ]
 
 
