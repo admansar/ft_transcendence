@@ -9,6 +9,7 @@ class TwoFactorAuth extends HTMLElement {
     }
 
     async connectedCallback() {
+        console.log('email in 2fa', app.email);
         this.render();
         await this.init();
     }
@@ -146,17 +147,14 @@ class TwoFactorAuth extends HTMLElement {
         .map(input => input.value)
         .join('');
         
-        
-        let me = await getMe();       
-        console.log('userData', me.email, app.otp); 
-        this.generatedOTP = await makeAuthRequest('/api/auth/verify-otp/', {
+        console.log('userData', app.email, app.otp); 
+        this.generatedOTP = await fetch('/api/auth/verify-otp/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include',
             body: JSON.stringify({
-                email: me.email,
+                email: app.email,
                 otp: enteredOTP,
                 otp_token: app.otp//jwt
             })

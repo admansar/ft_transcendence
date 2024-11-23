@@ -140,11 +140,20 @@ class VerifyOTPView(APIView):
                 {"error": "Invalid OTP"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        return Response(
-            {"message": "OTP verified successfully"}, 
-            status=status.HTTP_200_OK
-        )
+        
+        response = Response()
+        user = User.objects.get(email=user_email)
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        response.set_cookie(key='access', value=str(access))
+        response.set_cookie(key='refresh', value=str(refresh))
+        response.data = {
+            'message': 'OTP verified successfully',
+            'access': str(access),
+            'refresh': str(refresh)
+        }
+        response.status_code = status.HTTP_200_OK
+        return response
 
 class OtpUpdate(APIView):
     def post(self, request):
@@ -264,6 +273,18 @@ class Login(APIView):
             except Exception as e:
                 print ("Error: ", e)
                 return Response({'error': 'Error while generating token'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        is_2fa_enabled = user.is_2fa_enabled
+        if is_2fa_enabled:
+            response = Response()
+            response.data = {
+                'message': '2FA enabled',
+                'is_2fa_enabled': is_2fa_enabled,
+                'email': user.email
+            }
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return response
+        
         access = refresh.access_token
         response = Response()
         response.data = {

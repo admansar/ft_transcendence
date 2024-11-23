@@ -27,7 +27,7 @@ class Auth extends HTMLElement {
         else {
             this.appendChild(loginPage)
             login();
-            Oauth42(); 
+            Oauth42();
         }
 
         document.addEventListener('click', (event) => {
@@ -78,8 +78,8 @@ function Oauth42() {
         if (!checkAuth()) {
             // Using encodeURIComponent to properly encode the redirect URI
             const redirectUri = encodeURIComponent('http://localhost/api/auth/oauth42/');
-            
-            window.location.href = 'https://api.intra.42.fr/oauth/authorize?' + 
+
+            window.location.href = 'https://api.intra.42.fr/oauth/authorize?' +
                 'client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&' +
                 `redirect_uri=${redirectUri}&` +
                 'response_type=code';
@@ -148,58 +148,58 @@ function login() {
         const password = document.getElementById('pwd').value;
 
         try {
-            let response = await fetch('api/auth/login/', {
+            let response = await fetch('/api/auth/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include',
-
                 body: JSON.stringify({
                     username: username,
                     password: password
                 })
             });
             const data = await response.json()
-
-            if (response.ok) {
-                console.log('access', data.access);
-                console.log('refresh', data.refresh);
-                // localStorage.setItem('access', data.access);
-                // localStorage.setItem('refresh', data.refresh);
-                notifications.notify('Login successful!', 'success');
-                
-                let me = await getMe();
-                console.log('userData', me);
-                if (me.is_2fa_enabled) {
-                    let otp = await makeAuthRequest('/api/auth/generate-otp/', {
+            console.log('data', data);
+            app.email = data.email;
+            try {
+                if (response.status === 403) {
+                    await fetch('/api/auth/generate-otp/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        credentials:"include",
                         body: JSON.stringify({
-                            email: me.email
+                            email: data.email
                         })
-                    }).then(res=>{
-                        res.json().then(res=>{
+                    }).then(res => {
+                        res.json().then(res => {
                             console.log(res)
                             app.otp = res.otp_token;
                             console.log('app.otp from auth.js', app.otp);
                         })
+                    }).catch(e => {
+                        console.log('Error generating OTP', e);
                     })
                     Router.findRoute('/verify-otp');
                     return;
                 }
-                Router.findRoute(`/`);
-            } else {
-
-                console.log(data.error);
-                notifications.notify(data.error, 'danger');
+                if (response.ok) {
+                    console.log('access', data.access);
+                    console.log('refresh', data.refresh);
+                    // localStorage.setItem('access', data.access);
+                    // localStorage.setItem('refresh', data.refresh);
+                    notifications.notify('Login successful!', 'success');
+                    Router.findRoute(`/`);
+                } else {
+                    console.log(data.error);
+                    notifications.notify(data.error, 'danger');
+                }
+            } catch (e) {
+                console.log('Error logging in', e);
             }
         } catch (e) {
             console.log('Error logging in');
-            notifications.notify(data.error, 'danger');
+            // notifications.notify(data.error, 'danger');
         }
     })
 }
