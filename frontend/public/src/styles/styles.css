@@ -474,9 +474,12 @@ input[type="password"]:hover {
 
 /* Hover effect for buttons */
 .button-logs button:hover {
-    background-color: #ffcc00; /* Light Yellow on hover */
+    background-color: #ffcc00;
     border: 2px solid #ffcc00;
-}
+    transform: translateY(-2px); /* Léger effet de flottement */
+    box-shadow: 0 4px 8px rgba(255, 204, 0, 0.3); /* Ombre dorée */
+    color: #000000; /* Pour assurer une bonne lisibilité */
+    transition: all 0.3s ease-in-out; /* Animation fluide */
 .logo-log {
     display: block;         /* Ensure it's a block-level element */
     margin-left: auto;     /* Center it horizontally */
@@ -487,7 +490,7 @@ input[type="password"]:hover {
     margin-bottom: 20px;   /* Space below the logo */
 }
 
-.connect-button {
+/* .connect-button {
     padding: 8px 110px;
     display: inline-block;
     background-color: #202020; /* Green background */
@@ -500,8 +503,43 @@ input[type="password"]:hover {
     cursor: pointer;
     margin-top: 10px; /* Space above the button */
     transition: border-color 0.5s ease-in-out,box-shadow 0.5s ease-in-out, color 0.5s ease-in-out,background-color 0.5s ease-in-out;
+} */
+.connect-button {
+    padding: 12px 110px;
+    display: inline-block;
+    background-color: #202020;
+    color: white;
+    font-family: 'Kanit', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    border: 2px solid #202020;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    position: relative;
+    overflow: hidden;
 }
 
+.connect-button:hover {
+    background-color: transparent;
+    color: #202020;
+    box-shadow: 0 6px 20px rgba(32, 32, 32, 0.15);
+    transform: translateY(-2px);
+}
+
+.connect-button:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(32, 32, 32, 0.1);
+}
+
+/* Option : Ajoutez un effet de focus pour l'accessibilité */
+.connect-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(32, 32, 32, 0.3);
+}
 .connect-button:hover {
     background-color: #ffcc00; /* Darker green background on hover */
     border-color: #ffcc00; /* Darker border on hover */
@@ -534,41 +572,14 @@ input[type="password"]:hover {
 }
 
 /* Style the checkbox container */
-.stay-sign {
+/* Sign-in Container */
+.Sign-in {
     display: flex;
+    gap: 12px;
     align-items: center;
 }
 
-/* Style the checkbox */
-.stay-sign input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-/* Style the label */
-.stay-sign label {
-    font-size: 16px;
-    color: #fff;
-    cursor: pointer;
-    font-family: 'Kanit', sans-serif; /* Makes the label clickable */
-}
-
-
-.message{
-    
-    font-size: 12px;
-    font-family: 'Kanit', sans-serif;
-    color :rgb(255, 196, 0);
-    padding-top: 12px;
-}
-.Sign-in {
-    display: flex;
-    gap: 10px;
-    align-items: center; /* Pour un meilleur alignement vertical */
-}
-
+/* Sign-in Button */
 .Sign-in-button {
     min-width: 80px;
     padding: 11px 16px;
@@ -580,15 +591,101 @@ input[type="password"]:hover {
     font-size: 14px;
     text-align: center;
     text-decoration: none;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
 .Sign-in-button:hover {
     background-color: #fbe383;
     color: rgb(105, 84, 0);
-    transform: scale(1.05); /* Léger effet de zoom au survol */
-    box-shadow: 0 2px 8px rgba(251, 204, 10, 0.3); /* Ombre subtile au survol */
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(251, 204, 10, 0.4);
+}
+
+.Sign-in-button:active {
+    transform: scale(1);
+    box-shadow: 0 2px 6px rgba(251, 204, 10, 0.3);
+}
+
+/* Stay Signed In Checkbox Container */
+.stay-sign {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    padding: 4px 0;
+}
+
+/* Custom Checkbox Style */
+.stay-sign input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 2px solid #FBCC0A;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.stay-sign input[type="checkbox"]:checked {
+    background-color: #FBCC0A;
+    border-color: #FBCC0A;
+}
+
+.stay-sign input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #202020;
+    font-size: 14px;
+}
+
+.stay-sign input[type="checkbox"]:hover {
+    border-color: #fbe383;
+}
+
+/* Label Style */
+.stay-sign label {
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Kanit', sans-serif;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+.stay-sign label:hover {
+    color: #fbe383;
+}
+
+/* Message Style */
+.message {
+    font-size: 12px;
+    font-family: 'Kanit', sans-serif;
+    color: rgb(255, 196, 0);
+    padding-top: 12px;
+    transition: color 0.3s ease;
+    opacity: 0.9;
+}
+
+.message:hover {
+    opacity: 1;
+    color: #fbe383;
+}
+
+/* Focus States for Accessibility */
+.Sign-in-button:focus-visible,
+.stay-sign input[type="checkbox"]:focus-visible {
+    outline: 2px solid #fbe383;
+    outline-offset: 2px;
 }
 .registing{
     position: relative;
