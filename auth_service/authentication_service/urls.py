@@ -10,6 +10,7 @@ from .views import (
     Me,
     GenerateOTPView,
     VerifyOTPView,
+    OtpUpdate,
     GetAllUsers,
 )
 
@@ -30,6 +31,7 @@ urlpatterns = [
     path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired'),
     path('api/auth/generate-otp/', GenerateOTPView.as_view(), name='generate-otp'),
     path('api/auth/verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),
+    path('api/auth/update-otp/', OtpUpdate.as_view(), name='update-otp'),
     path('api/auth/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('api/auth/token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired'),

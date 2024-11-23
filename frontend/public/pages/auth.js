@@ -126,24 +126,28 @@ function login() {
                 notifications.notify('Login successful!', 'success');
                 
                 let me = await getMe();
-                console.log('userData', me.email);
-                let otp = await fetch('api/auth/generate-otp/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials:"include",
-                    body: JSON.stringify({
-                        email: me.email
+                console.log('userData', me);
+                if (me.is_2fa_enabled) {
+                    let otp = await makeAuthRequest('/api/auth/generate-otp/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials:"include",
+                        body: JSON.stringify({
+                            email: me.email
+                        })
+                    }).then(res=>{
+                        res.json().then(res=>{
+                            console.log(res)
+                            app.otp = res.otp_token;
+                            console.log('app.otp from auth.js', app.otp);
+                        })
                     })
-                }).then(res=>{
-                    console.log(res);
-                    console.log(res.headers);
-                    res.json().then(res=>{
-                        console.log(res)
-                    })
-                })
-                Router.findRoute(`/verify-otp`);
+                    Router.findRoute('/verify-otp');
+                    return;
+                }
+                Router.findRoute(`/`);
             } else {
 
                 console.log(data.error);

@@ -148,7 +148,7 @@ class TwoFactorAuth extends HTMLElement {
         
         
         let me = await getMe();       
-        console.log('userData', me.email);
+        console.log('userData', me.email, app.otp); 
         this.generatedOTP = await makeAuthRequest('/api/auth/verify-otp/', {
             method: 'POST',
             headers: {
@@ -157,7 +157,8 @@ class TwoFactorAuth extends HTMLElement {
             credentials: 'include',
             body: JSON.stringify({
                 email: me.email,
-                otp: enteredOTP
+                otp: enteredOTP,
+                otp_token: app.otp//jwt
             })
         })
 

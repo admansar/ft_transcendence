@@ -1,14 +1,7 @@
 import { Router } from '../services/Router.js'
 import { makeAuthRequest } from '../services/utils.js'
 import { getMe } from '../services/utils.js'
-// import app from '../components/state.js';
 
-document.addEventListener('userDataReady', () => {
-    const userData = app.getUserData();
-    console.log('User data in other component:', userData);
-
-    // Use userData in your component logic
-});
 class Profile extends HTMLElement {
     constructor() {
         super();
