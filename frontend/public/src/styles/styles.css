@@ -157,7 +157,7 @@ header {
 .circle-description{
     opacity: 0;
     position: absolute;
-    bottom: -30px;
+    bottom: -40px;
     font-size: 8px;
     font-family: 'arial';
     z-index: 1;

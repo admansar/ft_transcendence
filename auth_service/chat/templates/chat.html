@@ -32,9 +32,10 @@
             const data = JSON.parse(e.data);
             const message = data.message
             const user = data.user
-            
+            console.log (data);
             // Display received message
-            document.getElementById('messages').innerText += data.user +  ' : '  + data.message + '   ';
+            if (!data.type)
+                document.getElementById('messages').innerText += data.user +  ' : '  + data.message + '   ';
         };
 
         chatSocket.onclose = function(e){
@@ -52,14 +53,17 @@
             }
 
             // Send message with user hashtag
+            //console.log(`${userHashtag.value} : ` + messageInput.value);
             chatSocket.send(JSON.stringify({
                 'message': messageInput.value,
                 'user': userHashtag.value
             }));
 
+
             // Clear input fields
             messageInput.value = '';
         }
+
     </script>
 </body>
 </html>

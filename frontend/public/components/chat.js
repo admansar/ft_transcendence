@@ -1,10 +1,59 @@
 // import { getwebsocket } from "../services/Router.js";
 
-
 // var chatSocket = getwebsocket()
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
-chatSocket.onopen = function(e) {
-    console.log('WebSocket connection established!');
+function socket_impel() {
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+
+    chatSocket.onopen = function(e) {
+        console.log('WebSocket connection established!');
+    }
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+
+        if (data.type === 'broadcast')
+        {
+            console.log('broadcasting message');
+            let users = data.users;
+            for (let i = 0; i < users.length; i++)
+            {
+                console.log('adding user :', users[i]);
+                front_inject_user(users[i]);
+            }
+        }
+        else if (data.type === 'remove_user')
+        {
+            console.log('removing user :', data.user);
+            front_remove_user(data.user);
+        }
+    }
+}
+
+function front_remove_user(user)
+{
+    const messengerList = document.querySelector('.messanger-list');
+    if (document.querySelector(`#${user}`))
+    {
+        console.log('removing user :', user);
+        messengerList.removeChild(document.querySelector(`#${user}`));
+    }
+}
+
+function front_inject_user(user)
+{
+    const messengerList = document.querySelector('.messanger-list');
+    if (!document.querySelector(`#${user}`))
+    {
+        console.log('injecting user : ', user);
+        messengerList.insertAdjacentHTML('beforeend', `
+                <div class="friend-profile" id="${user}" style="background-image: url(&quot;https://robohash.org/${user}?set=set3&quot;); background-size: cover; background-position: center center;" >
+                    <div class="friend-profile-status" ></div>
+                </div>
+            `);
+        const ue = document.querySelector(`#${user} .friend-profile-status`)
+        ue.style.backgroundColor = 'green';
+    }
 }
 
 export function setupChat() {
@@ -123,7 +172,8 @@ export class Chat extends HTMLElement {
 
     connectedCallback() {
         this.render();
-        setupChat()
+        setupChat();
+        socket_impel();
     }
 
     render() {
@@ -133,12 +183,7 @@ export class Chat extends HTMLElement {
             <img src="public/src/img/sms.png">
         </div>
         <div class="messanger-list">
-            <div class="friend-profile" id="Ckannane">
-                <div class="friend-profile-status"></div>
-            </div>
-            <div class="friend-profile" id="Adnan">
-                <div class="friend-profile-status"></div>
-            </div>
+
         </div>
     </div>
     <div class="sms" id="chat"></div>

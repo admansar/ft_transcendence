@@ -8,10 +8,12 @@ import redis
 import django
 django.setup()
 from .models import Client
+from friends.models import Profile
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from authentication_service.models import User
 
+online_users: list = []
 
 @database_sync_to_async
 def get_user_from_token(token):
@@ -86,6 +88,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception:
             await self.close(code=1008)
         await self.accept()
+        await sync_to_async (online_users.append)(self)
+        await self.broadcast_online_users()
+
+        
+    async def broadcast_online_users(self):
+        for user in online_users:
+            await user.send(json.dumps({
+                'type': 'broadcast',
+                'broadcast': f"{self.scope['user'].username} is online",
+                'users': [user.scope['user'].username for user in online_users],
+            }))
 
     async def receive(self, text_data):
         text_data = await sync_to_async(json.loads)(text_data)
@@ -97,12 +110,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if status == "send":
             await self.trough_channel(my_client.channel_name, text_data)
 
-    @database_sync_to_async
-    def disconnect(self, event):
+    # @database_sync_to_async
+    async def disconnect(self, event):
         try:
-            my_client = self.client.get(username=self.scope["user"].username)
+            for user in online_users:
+                await user.send(json.dumps({
+                    'type': 'remove_user',
+                    'broadcast': f"{self.scope['user'].username} is offline",
+                    'user': self.scope['user'].username,
+                }))
+                if user.scope["user"].username == self.scope["user"].username:
+                    online_users.remove(user)
+        except Exception as e:
+            print ("error : ", e)
+            pass
+        try:
+            my_client = await sync_to_async(self.client.get)(username=self.scope["user"].username)
             my_client.update_status("offline")
-            my_client.save()
+            await sync_to_async(my_client.save)()
         except Exception:
             return None
 
