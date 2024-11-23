@@ -530,7 +530,7 @@ export function game_2d() {
 		Router.findRoute('/login');
 		breaker = true
 	}
-	// showWaitingOverlay()
+	showWaitingOverlay()
 	game_loop();
 }
 
