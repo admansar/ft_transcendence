@@ -3,8 +3,8 @@ import '../components/register.js'
 import '../components/login.js'
 import { makeAuthRequest } from '../services/utils.js'
 import notifications from '../components/notifications.js'
-import app
-    from '../components/state.js'
+import { getMe } from '../services/utils.js'
+
 class Auth extends HTMLElement {
     constructor() {
         super()
@@ -27,6 +27,7 @@ class Auth extends HTMLElement {
         else {
             this.appendChild(loginPage)
             login();
+            Oauth42();
         }
 
         document.addEventListener('click', (event) => {
@@ -46,13 +47,56 @@ class Auth extends HTMLElement {
         });
     }
 }
-
 export function attachDOM(page) {
     const authPage = document.createElement('auth-page');
     authPage.setAttribute('data-page', page);
     app.root.innerHTML = ''
     app.root.appendChild(authPage);
 }
+
+function Oauth42() {
+    const button = document.querySelector('.btn1');
+
+    // Check if user is already authenticated
+    const checkAuth = () => {
+        const accessToken = getCookie('access');
+        if (accessToken) {
+            window.location.href = '/dashboard';
+            return true;
+        }
+        return false;
+    };
+
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    };
+
+    button.addEventListener('click', () => {
+        if (!checkAuth()) {
+            // Using encodeURIComponent to properly encode the redirect URI
+            const redirectUri = encodeURIComponent('http://localhost/api/auth/oauth42/');
+
+            window.location.href = 'https://api.intra.42.fr/oauth/authorize?' +
+                'client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&' +
+                `redirect_uri=${redirectUri}&` +
+                'response_type=code';
+        }
+    });
+
+    window.addEventListener('load', () => {
+        if (checkAuth() && window.location.pathname === '/') {
+            window.location.href = '/dashboard';
+        }
+    });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    Oauth42();
+});
 
 function register() {
     const btn = document.querySelector('button.submit-button');
@@ -104,54 +148,58 @@ function login() {
         const password = document.getElementById('pwd').value;
 
         try {
-            let response = await fetch('api/auth/login/', {
+            let response = await fetch('/api/auth/login/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                credentials: 'include',
-
                 body: JSON.stringify({
                     username: username,
                     password: password
                 })
             });
             const data = await response.json()
-
-            if (response.ok) {
-                console.log('access', data.access);
-                console.log('refresh', data.refresh);
-                localStorage.setItem('access', data.access);
-                localStorage.setItem('refresh', data.refresh);
-                notifications.notify('Login successful!', 'success');
-                setTimeout(async () => {
-                    Router.findRoute(`/verify-otp`);
-                    let userData = await makeAuthRequest('/api/auth/me', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                    userData = await userData.json();
-                    console.log('userData', userData.email);
-                    let otp = await makeAuthRequest('api/auth/generate-otp', {
+            console.log('data', data);
+            app.email = data.email;
+            try {
+                if (response.status === 403) {
+                    await fetch('/api/auth/generate-otp/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            email: userData.email
+                            email: data.email
                         })
+                    }).then(res => {
+                        res.json().then(res => {
+                            console.log(res)
+                            app.otp = res.otp_token;
+                            console.log('app.otp from auth.js', app.otp);
+                        })
+                    }).catch(e => {
+                        console.log('Error generating OTP', e);
                     })
-                }, 1000);
-            } else {
-                // login failed
-                console.log(data.error);
-                notifications.notify(data.error, 'danger');
+                    Router.findRoute('/verify-otp');
+                    return;
+                }
+                if (response.ok) {
+                    console.log('access', data.access);
+                    console.log('refresh', data.refresh);
+                    // localStorage.setItem('access', data.access);
+                    // localStorage.setItem('refresh', data.refresh);
+                    notifications.notify('Login successful!', 'success');
+                    Router.findRoute(`/`);
+                } else {
+                    console.log(data.error);
+                    notifications.notify(data.error, 'danger');
+                }
+            } catch (e) {
+                console.log('Error logging in', e);
             }
         } catch (e) {
             console.log('Error logging in');
-            notifications.notify(data.error, 'danger');
+            // notifications.notify(data.error, 'danger');
         }
     })
 }

@@ -89,6 +89,7 @@ class FriendsGameConsumer(AsyncWebsocketConsumer):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     room_group_name: str = ''
+    breaker: bool = False
 
     async def connect(self):
         try:
@@ -120,7 +121,7 @@ class FriendsGameConsumer(AsyncWebsocketConsumer):
 
     async def get_username_from_db(self):
         try:
-            self.token = self.scope['query_string'].decode().split('=')[1]
+            self.token = self.scope.get ('cookies').get ('access')
             user = await self.authenticate_user(self.token)
             if user:
                 self.user_name = user['username']
@@ -134,6 +135,7 @@ class FriendsGameConsumer(AsyncWebsocketConsumer):
         try:
             jwt_auth = JWTAuthentication()
             validated_token = jwt_auth.get_validated_token(token)
+            print(f"Validated token: {validated_token}")
             user = get_user_from_api_by_id(validated_token['user_id'])
             return user
         except Exception as e:
@@ -160,6 +162,13 @@ class FriendsGameConsumer(AsyncWebsocketConsumer):
                 'opponent': opponent
             }
         )
+        
+    async def player_info(self, event: Any) -> None:
+        opponent = event['opponent']
+        await self.send(text_data=json.dumps({
+            'type': 'player_info',
+            'opponent': opponent
+        }))
 
     async def disconnect(self, keycode) -> None:
         try:
@@ -376,14 +385,20 @@ class FriendsGameConsumer(AsyncWebsocketConsumer):
         self.room = game_rooms.get(self.room_id)
         if not self.room:
             return
-        for player in self.room.players:
-            print (f"player : {player.user}")
-        winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
+        print ('notifying players about game over')
+        try:
+            for player in self.room.players:
+                print (f"player : {player.user}")
+        except Exception as e:
+            print (f"Error in notifying players : {e}")
+            pass
+        self.winner = self.room.players[0].user_name if self.room.game_state.score1 >= MAX_SCORE else self.room.players[1].user_name
+        print (f"winner : {self.winner}")
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'game_over',
-                'winner': winner
+                'winner': self.winner
             }
             # GameScore.winner
         )

@@ -2,6 +2,7 @@
 import random
 from django.core.management.base import BaseCommand
 from authentication_service.models import User  # Replace 'your_app' with the name of your app
+from friends.models import Profile
 
 class Command(BaseCommand):
     help = "Populates the database with sample user data"
@@ -47,7 +48,7 @@ class Command(BaseCommand):
                 "first_name": "berrim",
                 "last_name": "berrim",
                 "username": "berrim",
-                "email": "berrim@example.com",
+                "email": "yassineberrim99@gmail.com",
                 "avatar" : "https://robohash.org/",
             },
         ]
@@ -56,14 +57,15 @@ class Command(BaseCommand):
             print ("---------- user creation ----------")
             for user_data in sample_users:
                 try:
-                    User.objects.create_user(
+                    user = User.objects.create_user(
                         first_name=user_data["first_name"],
                         last_name=user_data["last_name"],
                         username=user_data["username"],
                         email=user_data["email"],
-                        password=user_data["first_name"],  # Replace with your desired default password
+                        password=user_data["first_name"],
                         avatar=user_data["avatar"] + user_data["username"],
                     )
+                    Profile.objects.create(user=user)
                     self.stdout.write(self.style.SUCCESS(f"User '{user_data['username']}' created successfully."))
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f"Error: {e}"))

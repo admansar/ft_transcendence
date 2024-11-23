@@ -1,4 +1,3 @@
-// import { navigate } from "../../js/router.js";
 import { Router } from '../../services/Router.js'
 import { makeAuthRequest } from '../../services/utils.js';
 
@@ -74,9 +73,11 @@ else
 let breaker = false;
 
 
-let roomName = 'vip_room_0'; // This should be dynamic based on matchmaking or user selection
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/friends_game/${roomName}/?token=12345`);
-console.log(`ws://${window.location.host}/ws/friends_game/${roomName}/?token=${token}`);
+let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
+// token should be changed to room_id
+let room_id = '12345'; // should be fetched from the server
+let gameSocket = new WebSocket(`ws://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
+console.log(`ws://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
 // WebSocket event handlers
 gameSocket.onopen = function () {
 	console.log('Connected to the game server.');
@@ -91,7 +92,6 @@ gameSocket.onmessage = async function (e) {
 
 	// console.log ('data type : ', data.type)
 	if (data.type === 'init_state') {
-        console.log ('init state: ', data)
 		playerId = data.game_state.player_id;
 		roomId = data.game_state.room_id;
 		roomName = data.game_state.room_name;
@@ -402,7 +402,7 @@ function renderGame() {
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.lineWidth = 5;
-	ctx.strokeStyle = '#eac646';
+	ctx.strokeStyle = '#5DFF00';
 	ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
 	// Draw the net
@@ -410,7 +410,7 @@ function renderGame() {
 	ctx.setLineDash([20, 10]);
 	ctx.moveTo(canvas.width / 2, 0);
 	ctx.lineTo(canvas.width / 2, canvas.height);
-	ctx.strokeStyle = '#eac646';
+	ctx.strokeStyle = '#5DFF00';
 	ctx.lineWidth = 5;
 	ctx.stroke();
 	ctx.setLineDash([]);
@@ -422,11 +422,11 @@ function renderGame() {
 	ctx.fill();
 
 	// Draw racket1
-	let racket1_color = "#eac646";
+	let racket1_color = "#5DFF00";
 	drawRoundedRect(gameState.racket1_pos.x, gameState.racket1_pos.y, 20, 120, 10, racket1_color);
 
 	// Draw racket2
-	let racket2_color = "#eac646";
+	let racket2_color = "#5DFF00";
 	drawRoundedRect(gameState.racket2_pos.x, gameState.racket2_pos.y, 20, 120, 10, racket2_color);
 
 	// Draw player names and scores
