@@ -4,47 +4,14 @@ import { makeAuthRequest } from "../services/utils.js";
 
 // var chatSocket = getwebsocket()
 let chatSocket = null;
-function socket_impel() {
-    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
 
-    chatSocket.onopen = function(e) {
-        console.log('WebSocket connection established!');
-    }
-
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        console.log(data);
-
-        if (data.type === 'broadcast')
-        {
-            console.log('broadcasting message');
-            let users = data.users;
-            for (let i = 0; i < users.length; i++)
-            {
-                console.log('adding user :', users[i]);
-                front_inject_user(users[i]);
-            }
-        }
-        else if (data.type === 'remove_user')
-        {
-            console.log('removing user :', data.user);
-            front_remove_user(data.user);
-        }
-        else if (data.type === 'send_message')
-        {
-            console.log('receiving message');
-            let user = data.user;
-            let message = data.message;
-            front_receive_message(user, message);
-        }
-    }
-}
 
 function front_receive_message(user, message)
 {
+    front_remove_user(user);
     const chatMessages = document.getElementById(`chatMessages-${user}`);
     if (chatMessages)
-    {
+    {   
         const newMessage = document.createElement('div');
         newMessage.classList.add('chat-message-guest');
         newMessage.textContent = message;
@@ -77,6 +44,7 @@ function front_inject_user(user)
         let avatar = res.avatar;
         console.log('avatar :', avatar);
         const messengerList = document.querySelector('.messanger-list');
+        const chat = document.getElementById('chat');
         if (!document.querySelector(`#${user}`))
         {
             console.log('injecting user : ', user);
@@ -87,6 +55,110 @@ function front_inject_user(user)
                 `);
             const ue = document.querySelector(`#${user} .friend-profile-status`)
             ue.style.backgroundColor = '#00b100';
+            if (!document.querySelector(`#${user}-chat`)) {
+                const chat = document.getElementById('chat');
+                const div = document.createElement('div');
+                const chatform = `
+            
+                <span class="chat-border active" style="display:none" id="${user}-chat">
+                    <span class="chat-topic" id="${user}-topic">
+                        <span class="message" id="user1" style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">${user}</span>
+                    </span>
+                    <span class="chat-close-btn" id="${user}-btn" style="position: absolute; top: 6px; right: 10px; transform: scale(0.7);">&times;</span>
+                    <div class="chat-message" id="chatMessages-${user}"></div>
+    
+                    <div class="chat-under">
+                        <span class="import">
+                            <input type="text" id="textInput-${user}" placeholder="type here ..." required>
+                        </span>
+                        <span class="playWith" id="play-with-${user}"></span>
+                        <button class="send" id="send-${user}" ></button>
+                    </div>
+                </span>
+                <div class="play-with-moba" id="play-with-${user}-window">
+                    <div class="play-with-moba-bar">
+                        <div class="message-notif">You are invited to Play with ${user}</div>
+                        <div class="profile-pic-play-with"></div>
+                        <div class="requeat-play-with">
+                            <span class="request accepted" id="${user}-acp">ACCEPT</span>
+                            <span class="request rejected" id="${user}-rjt">REJECT</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+    
+                div.innerHTML = chatform;
+                chat.appendChild(div);
+                const chat_messanger_user = document.querySelector(`#${user}-chat`);
+                const chat_messanger_user_close_btn = document.querySelector(`#${user}-btn`);
+    
+                chat_messanger_user_close_btn.addEventListener('click', function () {
+                    chat_messanger_user.classList.remove('active');
+                    chat_messanger_user.style.display = 'none';
+                });
+                document.querySelectorAll('.friend-profile').forEach(friendProfile => {
+                    friendProfile.addEventListener('click', (event) => {
+                      // Get the user ID from the clicked element's ID
+                      const userId = event.target.id;
+                  
+                      // Find the corresponding chat element
+                      const chatElement = document.getElementById(`${userId}-chat`);
+                      if (chatElement) {
+                        // Set its display to "flex"
+                        chatElement.style.display = "flex";
+                      }
+                    });
+                  });
+                document.querySelector(`#${user}-topic`).addEventListener('click', e => {
+                    chat_messanger_user.classList.toggle('active');
+                });
+                function sendMessage() {
+                    const messageText = document.getElementById(`textInput-${user}`).value;
+    
+                    if (messageText.trim() !== ""){
+                        const newMessage = document.createElement('div');
+                        newMessage.classList.add('chat-message-user');
+                        newMessage.textContent = messageText;
+                        chatSocket.send(JSON.stringify({
+                            'type': 'send_message',
+                            'message': messageText,
+                            'user': user
+                        }));
+                        const chatMessages = document.getElementById(`chatMessages-${user}`);
+                        chatMessages.appendChild(newMessage);
+    
+                        document.getElementById(`textInput-${user}`).value = '';
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                }
+    
+                document.getElementById(`textInput-${user}`).addEventListener('keypress', function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        sendMessage();
+                    }
+                });
+                const playWithWindow = document.getElementById(`play-with-${user}-window`);
+                document.getElementById(`play-with-${user}`).addEventListener('click', function () {
+                    console.log("Invite triggered");
+
+                    playWithWindow.style.display = 'flex';
+                });
+
+
+                document.getElementById(`${user}-rjt`).addEventListener('click', function () {
+                    playWithWindow.style.display = 'none';
+                });
+
+                document.getElementById(`send-${user}`).addEventListener('click', function (event) {
+                    sendMessage();
+                });
+            }
+            else { document.querySelector(`#${user}-chat`).style.display = 'flex' }
+    
+            profile_messanger.addEventListener('click', function () {
+                chat_messanger_user.style.display = 'flex';
+            });
         }    
     })
 }
@@ -106,98 +178,6 @@ export function setupChat() {
         const UserDATA = e.target.closest('.friend-profile')
         if (UserDATA) {
             console.log("im here");
-            if (!document.querySelector(`#${UserDATA.id}-chat`)) {
-                const chat = document.getElementById('chat');
-                const div = document.createElement('div');
-                const chatform = `
-            
-                <span class="chat-border active" id="${UserDATA.id}-chat">
-                    <span class="chat-topic" id="${UserDATA.id}-topic">
-                        <span class="message" id="user1" style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">${UserDATA.id}</span>
-                    </span>
-                    <span class="chat-close-btn" id="${UserDATA.id}-btn" style="position: absolute; top: 6px; right: 10px; transform: scale(0.7);">&times;</span>
-                    <div class="chat-message" id="chatMessages-${UserDATA.id}"></div>
-    
-                    <div class="chat-under">
-                        <span class="import">
-                            <input type="text" id="textInput-${UserDATA.id}" placeholder="type here ..." required>
-                        </span>
-                        <span class="playWith" id="play-with-${UserDATA.id}"></span>
-                        <button class="send" id="send-${UserDATA.id}" ></button>
-                    </div>
-                </span>
-                <div class="play-with-moba" id="play-with-${UserDATA.id}-window">
-                    <div class="play-with-moba-bar">
-                        <div class="message-notif">You are invited to Play with ${UserDATA.id}</div>
-                        <div class="profile-pic-play-with"></div>
-                        <div class="requeat-play-with">
-                            <span class="request accepted" id="${UserDATA.id}-acp">ACCEPT</span>
-                            <span class="request rejected" id="${UserDATA.id}-rjt">REJECT</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-    
-                div.innerHTML = chatform;
-                chat.appendChild(div);
-                const chat_messanger_user = document.querySelector(`#${UserDATA.id}-chat`);
-                const chat_messanger_user_close_btn = document.querySelector(`#${UserDATA.id}-btn`);
-    
-                chat_messanger_user_close_btn.addEventListener('click', function () {
-                    chat_messanger_user.classList.remove('active');
-                    chat_messanger_user.style.display = 'none';
-                });
-
-                document.querySelector(`#${UserDATA.id}-topic`).addEventListener('click', e => {
-                    chat_messanger_user.classList.toggle('active');
-                });
-                function sendMessage() {
-                    const messageText = document.getElementById(`textInput-${UserDATA.id}`).value;
-    
-                    if (messageText.trim() !== ""){
-                        const newMessage = document.createElement('div');
-                        newMessage.classList.add('chat-message-user');
-                        newMessage.textContent = messageText;
-                        chatSocket.send(JSON.stringify({
-                            'type': 'send_message',
-                            'message': messageText,
-                            'user': UserDATA.id
-                        }));
-                        const chatMessages = document.getElementById(`chatMessages-${UserDATA.id}`);
-                        chatMessages.appendChild(newMessage);
-    
-                        document.getElementById(`textInput-${UserDATA.id}`).value = '';
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    }
-                }
-    
-                document.getElementById(`textInput-${UserDATA.id}`).addEventListener('keypress', function (event) {
-                    if (event.key === "Enter") {
-                        event.preventDefault();
-                        sendMessage();
-                    }
-                });
-                const playWithWindow = document.getElementById(`play-with-${UserDATA.id}-window`);
-                document.getElementById(`play-with-${UserDATA.id}`).addEventListener('click', function () {
-                    console.log("Invite triggered");
-
-                    playWithWindow.style.display = 'flex';
-                });
-
-
-                document.getElementById(`${UserDATA.id}-rjt`).addEventListener('click', function () {
-                    playWithWindow.style.display = 'none';
-                });
-
-                document.getElementById(`send-${UserDATA.id}`).addEventListener('click', function (event) {
-                    sendMessage();
-                });
-            }
-            else { document.querySelector(`#${UserDATA.id}-chat`).style.display = 'flex' }
-    
-            profile_messanger.addEventListener('click', function () {
-                chat_messanger_user.style.display = 'flex';
-            });
     
         };
     });
@@ -229,4 +209,44 @@ export class Chat extends HTMLElement {
     }
 }
 
+function socket_impel() {
+    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+
+    chatSocket.onopen = function(e) {
+        console.log('WebSocket connection established!');
+    }
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log(data);
+
+        if (data.type === 'broadcast')
+        {
+            console.log('broadcasting message');
+            let users = data.users;
+            for (let i = 0; i < users.length; i++)
+            {
+                console.log('adding user :', users[i]);
+                front_inject_user(users[i]);
+            }
+        }
+        else if (data.type === 'remove_user')
+        {
+            console.log('removing user :', data.user);
+            front_remove_user(data.user);
+        }
+        else if (data.type === 'send_message')
+        {
+            console.log('receiving message');
+            let user = data.user;
+            let message = data.message;
+            console.log("iiiiiiiiiihereherehereiiiiiiiiiii")
+            console.log(user)
+            console.log(message)
+            console.log("iiiiiiiiiiiiihereherehereiiiiiiiii")
+            front_inject_user(user);
+            front_receive_message(user, message);
+        }
+    }
+}
 customElements.define('app-chat', Chat)
