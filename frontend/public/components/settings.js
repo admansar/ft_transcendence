@@ -102,27 +102,6 @@ export class settings extends HTMLElement {
                 'last_name': new_last_name,
             }
         } else if (securityInfoEl.classList.contains('active')) {
-            // let me = await getMe();
-            // let staySign = document.getElementById('stay-sign').checked;
-            // if (me.is_2fa_enabled) {
-            //     staySign = !staySign;
-            // } else {
-            //     staySign = staySign;
-            // }
-            // document.getElementById('stay-sign').checked = staySign;
-            // let updateOTP = await makeAuthRequest('/api/auth/update-otp/', {
-            //     'method': 'POST',
-            //     'headers': {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     'body': JSON.stringify({
-            //         'is_2fa_enabled': staySign,
-            //     }),
-            // })
-            // let data = await updateOTP.json();
-            // console.log('2FA updated successfully', data);
-            // notifications.notify('2FA updated successfully', 'success', 1000);
-            // await sleep(1000);
             if (new_pwd !== confirmed_new_pwd) {
                 notifications.notify('Passwords do not match', 'danger', 3000);
                 return {};

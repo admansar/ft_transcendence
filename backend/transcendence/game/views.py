@@ -62,10 +62,12 @@ class UpdateScore(APIView):
         # player = get_object_or_404(User, username=request.data.get('username'))
         game = get_object_or_404(GameScore, id=request.data.get('game_id'))
         player = get_user_from_api(request.data.get('username'))
-        if request.data.get('username') == player['username']:
+        
+        if game.player_a_id == player['id']:
             game.score_a = request.data.get('score')
         else:
             game.score_b = request.data.get('score')
+            
         game.save()
         print('game', game.id, game.player_a_id, game.player_b_id)
         return Response({'updateScore': request.data})
@@ -112,16 +114,3 @@ def select_game(request):
     permission_classes = [IsAuthenticated]
 
     return Response({"message": f"Welcome, {request.user.username}"}, status=200)
-    # return render(request, 'select_game.html')
-
-# @login_required
-# def game_3d(request):
-#     return render(request, "game_3d.html")
-
-# @login_required
-# def game_2d_off(request):
-#     return render(request, 'offline_2dgame.html')
-
-# @login_required
-# def tournament(request):
-#     return render(request, 'tournament.html')

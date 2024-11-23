@@ -4,7 +4,6 @@ import "../components/chat.js";
 import "../components/settings.js"
 import "../components/search.js";
 import "../components/menu.js"
-import app from "../components/state.js";
 import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
 import { getMe } from "../services/utils.js";
 

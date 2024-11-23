@@ -22,6 +22,7 @@ from django.core.mail import send_mail
 import secrets
 import string
 from jwt import DecodeError
+from friends.models import Profile
 
 User = get_user_model()
 
@@ -229,6 +230,7 @@ class Oauth42(APIView):
                 'avatar': user_info.get('image', {}).get('link', ''),
             }
         )
+        Profile.objects.get_or_create(user=user)
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)

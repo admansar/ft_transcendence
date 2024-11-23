@@ -227,7 +227,7 @@ gameSocket.onmessage = async function (e) {
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
-			console.log('last states: ', user_data);
+			console.log('last states from notif: ', user_data);
 			
 			await updateScore(user_data);
 			await finishGame(user_data);
@@ -236,7 +236,8 @@ gameSocket.onmessage = async function (e) {
 			breaker = true;
 			setTimeout(function () { }, 1000)
 			gameSocket.close()
-			Router.findRoute('404');
+			Router.findRoute('/');
+			return
 		}
 	}
 	else if (data.type === 'game_over' && !game_end_locker) {
@@ -255,8 +256,8 @@ gameSocket.onmessage = async function (e) {
 			last_state.other_name = playerName
 			user_data.score = last_state.score2
 		}
-		console.log('last states: ', user_data);
-		console.log('full data: ', last_state)
+		console.log('last states from game_over: ', user_data);
+		// console.log('full data: ', last_state)
 		// salim send last data here
 		await updateScore(user_data)
 		await finishGame(user_data);
@@ -264,7 +265,8 @@ gameSocket.onmessage = async function (e) {
 		breaker = true
 		setTimeout(function () { }, 1000)
 		gameSocket.close()
-		Router.findRoute('404');
+		Router.findRoute('/');
+		return
 
 	}
 	else if (data.type === 'broadcast_game_state') {

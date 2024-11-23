@@ -96,7 +96,8 @@ class Userprofile(APIView):
             userprofile = Profile.objects.get(user=_user)
             Serializer = SerializerProfile(userprofile)
             return Response({"Profile" : Serializer.data})
-        except Exception:
+        except Exception as e:
+            print('e========>', e)
             content = {"error" : "Please login"}
             return Response(content, status=status.HTTP_401_UNAUTHORIZED)
 
