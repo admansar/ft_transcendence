@@ -12,6 +12,7 @@ from friends.models import Profile
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from authentication_service.models import User
+import os
 
 online_users: list = []
 
@@ -37,7 +38,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         
     @database_sync_to_async
     def Backup_message_or_send(self, text_data, my_client : Client): # backup message if ther user offline and send message if the user online 
-        redis_client = (redis.Redis)(host='redis', port=6379, db=1)
+        redis_client = (redis.Redis)(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT')), db=1)
         text_data["sender"] = self.scope["user"].username
         if my_client != None:
             if my_client.status == "offline":
@@ -46,9 +47,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 (redis_client.hset)(f'{resiver}:{index}' , mapping=text_data)
             else:
                 return "send"
+
     @database_sync_to_async
     def Creat_client(self):
-        self.redis_client = (redis.Redis)(host='redis', port=6379, db=1)
+        self.redis_client = (redis.Redis)(host=os.getenv('REDIS_HOST'), port=int(os.getenv('REDIS_PORT')), db=1)
         data = (self.redis_client.keys)("*")
         user = []
         for i in range(len(data)):
@@ -88,7 +90,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception:
             await self.close(code=1008)
         await self.accept()
-        await sync_to_async (online_users.append)(self)
+        if (self.scope["user"].username not in [user.scope["user"].username for user in online_users]):
+            await sync_to_async (online_users.append)(self)
         await self.broadcast_online_users()
 
         
@@ -134,6 +137,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def send_message(self, event):
         await self.send(json.dumps({
+            'type': 'send_message',
             'message': (event["text"]),
             'user': (event["user"]),
         }))

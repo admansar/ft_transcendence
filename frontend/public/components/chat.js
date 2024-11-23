@@ -3,8 +3,9 @@
 import { makeAuthRequest } from "../services/utils.js";
 
 // var chatSocket = getwebsocket()
+let chatSocket = null;
 function socket_impel() {
-    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
 
     chatSocket.onopen = function(e) {
         console.log('WebSocket connection established!');
@@ -29,8 +30,29 @@ function socket_impel() {
             console.log('removing user :', data.user);
             front_remove_user(data.user);
         }
+        else if (data.type === 'send_message')
+        {
+            console.log('receiving message');
+            let user = data.user;
+            let message = data.message;
+            front_receive_message(user, message);
+        }
     }
 }
+
+function front_receive_message(user, message)
+{
+    const chatMessages = document.getElementById(`chatMessages-${user}`);
+    if (chatMessages)
+    {
+        const newMessage = document.createElement('div');
+        newMessage.classList.add('chat-message-guest');
+        newMessage.textContent = message;
+        chatMessages.appendChild(newMessage);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
 
 function front_remove_user(user)
 {
@@ -64,7 +86,7 @@ function front_inject_user(user)
                     </div>
                 `);
             const ue = document.querySelector(`#${user} .friend-profile-status`)
-            ue.style.backgroundColor = 'green';
+            ue.style.backgroundColor = '#00b100';
         }    
     })
 }
@@ -136,7 +158,11 @@ export function setupChat() {
                         const newMessage = document.createElement('div');
                         newMessage.classList.add('chat-message-user');
                         newMessage.textContent = messageText;
-    
+                        chatSocket.send(JSON.stringify({
+                            'type': 'send_message',
+                            'message': messageText,
+                            'user': UserDATA.id
+                        }));
                         const chatMessages = document.getElementById(`chatMessages-${UserDATA.id}`);
                         chatMessages.appendChild(newMessage);
     
