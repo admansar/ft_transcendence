@@ -14,6 +14,7 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 import json
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import status
 
 def get_user_from_token(request):
     token = request.COOKIES.get('access')
@@ -36,9 +37,8 @@ def Reject_method(P_user : Profile, s_user_id : int, s_user : User):
     if P_user.waiting.filter(id=s_user_id).exists():
         P_user.waiting.remove(s_user)
 
-def Block_user(user ,P_user : Profile, s_user_id : int,  s_user : User):
-    profile = Profile.objects.all()
-    user_P : Profile = profile.get(user=s_user)
+def Block_user(self, user ,P_user : Profile, s_user_id : int,  s_user : User):
+    user_P : Profile = self.profile.get(user=s_user)
     if user_P.friends.filter(id=user.id).exists():
       user_P.friends.remove(user)
     if P_user.friends.filter(id=s_user_id).exists():
@@ -47,100 +47,112 @@ def Block_user(user ,P_user : Profile, s_user_id : int,  s_user : User):
         P_user.waiting.remove(s_user)
     P_user.block.add(s_user)
 
-def Unfriend(P_user : Profile , s_user_id : int, s_user : User, _user : User):
-    profile = Profile.objects.all()
-    user_P : Profile = profile.get(user=s_user)
+def Unfriend(self, P_user : Profile , s_user_id : int, s_user : User, _user : User):
+    user_P : Profile = self.profile.get(user=s_user)
     if P_user.friends.filter(id=s_user_id).exists():
         P_user.friends.remove(s_user)
     if user_P.friends.filter(id=_user.id).exists():
         user_P.friends.remove(_user)
 
-def Createfriend_rolation(friend_reciver : User, user_P : Profile, resiver_user_P : Profile, _user):
-    if not user_P.block.filter(id=friend_reciver.id).exists():
-        if not resiver_user_P.block.filter(id=_user.id).exists():
-            if not user_P.friends.filter(id=friend_reciver.id).exists():
-                if not user_P.waiting.filter(id=friend_reciver.id).exists():
-                    if not resiver_user_P.waiting.filter(id=_user.id).exists():
-                        friend = friend_request.objects.create(sender=_user, reciver=friend_reciver)
-                        friend.save()
-                        return Response({"message" : " request send . "})
-                    else:
-                        return Response({"error" : " You have allredy sent request wait for response. "})
-                else:
-                    return Response({"error" : " This User Alrady Invite You And Waiting Your Confirm. "})
-            else:
-                return Response({"error" : " Already Have This User As Friend. "})
-        else:
-            return Response({"error" : " You Get Blocked From This User. "})
+def Createfriend_rolation(_reciver : User, user_P : Profile, resiver_user_P : Profile, _user):
+    if user_P.block.filter(id=_reciver.id).exists():
+        content = {"error" : " You Can't add This User. "}
+        return Response(content, status=status.HTTP_403_FORBIDDEN)
+    elif resiver_user_P.block.filter(id=_user.id).exists():
+        content = {"error" : " You Get Blocked From This User. "}
+        return Response(content, status=status.HTTP_403_FORBIDDEN)
+    elif user_P.friends.filter(id=_reciver.id).exists():
+        content = {"error" : " Already Have This User As Friend. "}
+        return Response(content, status=status.HTTP_400_BAD_REQUEST) 
+    elif user_P.waiting.filter(id=_reciver.id).exists():
+        content = {"error" : " This User Alrady Invite You And Waiting Your Confirm. "}
+        return Response(content, status=status.HTTP_409_CONFLICT)
+    elif resiver_user_P.waiting.filter(id=_user.id).exists():
+        content = {"error" : " You have allredy sent request wait for response. "}
+        return Response(content, status=status.HTTP_409_CONFLICT)
     else:
-        return Response({"error" : " You Can't add This User. "})
+        friend = friend_request.objects.create(sender=_user, reciver=_reciver)
+        friend.save()
+        content = {"message" : " request send . "}
+        return Response(content, status=status.HTTP_200_OK)
 
-def  ADD_method(_user, _reciver_id):
-    user = User.objects.all()
-    profile = Profile.objects.all()
-    if user.filter(id=_reciver_id).exists():
-        friend_reciver : User = user.get(id=_reciver_id)
-        user_P : Profile = profile.get(user=_user)
-        resiver_user_P : Profile = profile.get(user=friend_reciver)
-        return Createfriend_rolation(friend_reciver, user_P, resiver_user_P, _user)
+def  ADD_method(self, _user, _reciver_id):
+    if self.user.filter(id=_reciver_id).exists():
+        _reciver : User = self.user.get(id=_reciver_id)
+        user_P : Profile = self.profile.get(user=_user)
+        resiver_user_P : Profile = self.profile.get(user=_reciver)
+        return Createfriend_rolation(_reciver, user_P, resiver_user_P, _user)
     else:
-        return Response({"error" : " Invalid username. "})
+        content = {"error" : " Invalid username. "}
+        return Response(content, status=status.HTTP_404_NOT_FOUND)
 
 class Userprofile(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def get(self, request):
-        profile = Profile.objects.all()
-        _user = get_user_from_token(request)
-        userprofile = profile.get(user=_user)
-        Serializer = SerializerProfile(userprofile)
-        return Response({"Profile" : Serializer.data})
+        try:
+            profile = Profile.objects.all()
+            _user = get_user_from_token(request)
+            userprofile = Profile.objects.get(user=_user)
+            Serializer = SerializerProfile(userprofile)
+            return Response({"Profile" : Serializer.data})
+        except Exception:
+            content = {"error" : "Please login"}
+            return Response(content, status=status.HTTP_401_UNAUTHORIZED)
 
 class Search(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     def post(self, request):
         user = User.objects.all()
-        _username_or_email = request.data.get("user_or_email")
-        if user.filter(Q (username__startswith=_username_or_email) | Q (email=_username_or_email)):
-            theuser = user.filter(Q (username__startswith=_username_or_email) | Q (email=_username_or_email))
-            serializer = Serializer_User(theuser, many=True)
-            return Response(serializer.data)
-        else:
-            return Response({"error" : " User not fond ."})
+        try:
+            _username_or_email = request.data.get("user_or_email")
+            if user.filter(Q (username__startswith=_username_or_email) | Q (email=_username_or_email)).exists():
+                theuser = user.filter(Q (username__startswith=_username_or_email) | Q (email=_username_or_email))
+                serializer = Serializer_User(theuser, many=True)
+                return Response(serializer.data)
+            else:
+                content = {"error" : " User not fond ."}
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
+        except Exception:
+            content = {"error" : "Enter username_or_email ."}
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
 class Request_methods(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
+    user = User.objects.all()
+    profile = Profile.objects.all()
+    request_friend = friend_request.objects.all()
+    sender = None
     def post(self, request):
-        user = User.objects.all()
-        profile = Profile.objects.all()
-        request_friend = friend_request.objects.all()
-        _user = get_user_from_token(request)
-        status = request.data.get("status") 
-        _reciver : str = request.data.get('user_id')
-        P_user : Profile = profile.get(user=_user)
-        # mydata = SerializerProfile(P_user)
-        if status == "ADD":
-            return ADD_method(_user, _reciver)
-        elif status == "REJECT" or status == "BLOCK" or status == "ACCEPT" \
-                or status == "UNBLOCK" or status == "UNFRIEND":
-            s_user_id : str = request.data.get('user_id')
-            s_user : User = user.get(id=s_user_id)
-            sender = None
-            if request_friend.filter(sender=s_user, reciver=_user).exists():
-                sender : friend_request = request_friend.get(sender=s_user, reciver=_user)
-            if status == "ACCEPT":
-                Accept_method(sender)
-            elif status == "REJECT":
+        try:
+            _user = get_user_from_token(request)
+            method = request.data.get("status") 
+            s_user_id : int = request.data.get('user_id')
+            s_user : User = self.user.get(id=s_user_id)
+            P_user : Profile = self.profile.get(user=_user)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if method == "ADD":
+            return ADD_method(self, _user, s_user_id)
+        elif method == "REJECT" or method == "BLOCK" or method == "ACCEPT" \
+                or method == "UNBLOCK" or method == "UNFRIEND":
+            if method == "ACCEPT":
+                try:
+                    self.sender : friend_request = self.request_friend.get(sender=s_user, reciver=_user)
+                    Accept_method(self.sender)
+                except Exception:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+            elif method == "REJECT":
                 Reject_method(P_user, s_user_id, s_user)
-            elif status == "BLOCK":
-                Block_user(_user, P_user, s_user_id, s_user)
-            elif status == "UNBLOCK":
+            elif method == "BLOCK":
+                Block_user(self, _user, P_user, s_user_id, s_user)
+            elif method == "UNBLOCK":
                 Unblock_user(P_user, s_user, s_user_id)
-            elif status == "UNFRIEND":
-                Unfriend(P_user, s_user_id, s_user, _user)
-            if sender != None:
-                sender.delete()
+            elif method == "UNFRIEND":
+                return Unfriend(self, P_user, s_user_id, s_user, _user)
+            if self.sender != None:
+                self.sender.delete()
         P_user.save()
-        return Response()
+        return Response(status=status.HTTP_200_OK)

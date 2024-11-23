@@ -6,3 +6,19 @@ to verify OTP http://localhost/api/accounts/verify-otpupdate routing from 404 to
  
 upgrade game front 
 devide game and tournament by containers (optional)
+
+
+{
+   "status": "ADD",
+   "user_id": "1"
+}
+
+step 1: he sends to me msg tags<user, msg usr>
+step 2: i send to him msg (using his channel name) sending msg tags<msg usr, msg usr>
+
+
+
+
+{
+    "status": "UNFRIEND","user_id":"1"
+}
