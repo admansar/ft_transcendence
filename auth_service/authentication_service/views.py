@@ -170,17 +170,18 @@ class Oauth42(APIView):
             raise AuthenticationFailed('No code provided')
 
         api_url = 'https://api.intra.42.fr/oauth/token'
-        redirect_uri = 'http://localhost:8000/api/accounts/oauth42/'
+        redirect_uri = 'http://localhost/api/auth/oauth42/'
 
         # Step 1: Get the access token
         try:
             response_token = requests.post(api_url, data={
                 'code': code,
                 'client_id': 'u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b',
-                'client_secret': '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',
+                'client_secret': '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',
                 'redirect_uri': redirect_uri,
                 'grant_type': 'authorization_code'
             })
+            print('response_token', response_token)
         except requests.exceptions.RequestException as e:
             raise AuthenticationFailed(f'Error fetching token: {str(e)}')
 

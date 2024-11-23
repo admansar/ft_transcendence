@@ -27,6 +27,7 @@ class Auth extends HTMLElement {
         else {
             this.appendChild(loginPage)
             login();
+            Oauth42(); 
         }
 
         document.addEventListener('click', (event) => {
@@ -46,13 +47,56 @@ class Auth extends HTMLElement {
         });
     }
 }
-
 export function attachDOM(page) {
     const authPage = document.createElement('auth-page');
     authPage.setAttribute('data-page', page);
     app.root.innerHTML = ''
     app.root.appendChild(authPage);
 }
+
+function Oauth42() {
+    const button = document.querySelector('.btn1');
+
+    // Check if user is already authenticated
+    const checkAuth = () => {
+        const accessToken = getCookie('access');
+        if (accessToken) {
+            window.location.href = '/dashboard';
+            return true;
+        }
+        return false;
+    };
+
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    };
+
+    button.addEventListener('click', () => {
+        if (!checkAuth()) {
+            // Using encodeURIComponent to properly encode the redirect URI
+            const redirectUri = encodeURIComponent('http://localhost/api/auth/oauth42/');
+            
+            window.location.href = 'https://api.intra.42.fr/oauth/authorize?' + 
+                'client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&' +
+                `redirect_uri=${redirectUri}&` +
+                'response_type=code';
+        }
+    });
+
+    window.addEventListener('load', () => {
+        if (checkAuth() && window.location.pathname === '/') {
+            window.location.href = '/dashboard';
+        }
+    });
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    Oauth42();
+});
 
 function register() {
     const btn = document.querySelector('button.submit-button');

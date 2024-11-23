@@ -31,6 +31,7 @@ export class Login extends HTMLElement {
     }
 }
 
+
 export function attachDOM() {
     const page = document.createElement('login-page');
     document.appendChild(page);
