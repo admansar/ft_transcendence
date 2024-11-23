@@ -23,6 +23,7 @@ class Auth extends HTMLElement {
         if (page === 'register') {
             this.appendChild(registerPage)
             register();
+            Oauth42();
         }
         else {
             this.appendChild(loginPage)
@@ -202,17 +203,6 @@ function login() {
             // notifications.notify(data.error, 'danger');
         }
     })
-}
-
-function displayError(message) {
-    const errorEl = document.getElementById('error');
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-
-    setTimeout(() => {
-        errorEl.textContent = '';
-        errorEl.style.display = 'None';
-    }, 3000);
 }
 
 customElements.define('auth-page', Auth)

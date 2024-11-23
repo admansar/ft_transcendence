@@ -12,7 +12,7 @@ export class Register extends HTMLElement {
         <div class="registing" style="background-color: rgba(72, 95, 125, 0.6);">
             <img src="public/src/img/pingpong-logo.png" class="logo-log" style="margin: 10px;">
             <div class="registing">
-                <div class="message">Enterning the requirts for your regist:</div>
+                <div class="message"></div>
                     <input type="text_reg" id="username" name="username" placeholder="Username">
                     <input type="text_reg" id="fname" name="fname" placeholder="First Name">
                     <input type="text_reg" id="lname" name="lname" placeholder="Last Name">
@@ -23,8 +23,6 @@ export class Register extends HTMLElement {
                 <div class="message" style="color: #fff;">You can also create an account with</div>
                 <div class="button-logs">
                     <button class="btn1" type="button"></button>
-                    <button class="btn2" type="button"></button>
-                    <button class="btn3" type="button"></button>
                 </div>
                 <div class="close-register" id="close-register">Back to Login</div>
             </div>

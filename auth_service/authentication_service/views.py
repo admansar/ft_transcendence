@@ -170,7 +170,7 @@ class OtpUpdate(APIView):
         else:
             user.is_2fa_enabled = False
         user.save()
-        return Response({'message': '2FA status updated successfully'})
+        return Response({'message': '2FA status updated successfully', 'is_2fa_enabled': user.is_2fa_enabled})
 
 class Oauth42(APIView):
     def get(self, request):

@@ -2,6 +2,7 @@ import { Router } from '../services/Router.js';
 import { makeAuthRequest } from '../services/utils.js';
 import { sleep } from '../services/utils.js';
 import notifications from './notifications.js';
+import { getMe } from '../services/utils.js';
 
 export function setupSetting() {
     const setModal = document.querySelector('.modal_settings');
@@ -37,9 +38,10 @@ export class settings extends HTMLElement {
         super();
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         this.render();
         setupSetting();
+        await this.update2FA();
     }
 
     async updateUserInfo(newUserData) {
@@ -100,7 +102,47 @@ export class settings extends HTMLElement {
                 'last_name': new_last_name,
             }
         } else if (securityInfoEl.classList.contains('active')) {
+            // let me = await getMe();
+            // let staySign = document.getElementById('stay-sign').checked;
+            // if (me.is_2fa_enabled) {
+            //     staySign = !staySign;
+            // } else {
+            //     staySign = staySign;
+            // }
+            // document.getElementById('stay-sign').checked = staySign;
+            // let updateOTP = await makeAuthRequest('/api/auth/update-otp/', {
+            //     'method': 'POST',
+            //     'headers': {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     'body': JSON.stringify({
+            //         'is_2fa_enabled': staySign,
+            //     }),
+            // })
+            // let data = await updateOTP.json();
+            // console.log('2FA updated successfully', data);
+            // notifications.notify('2FA updated successfully', 'success', 1000);
+            // await sleep(1000);
+            if (new_pwd !== confirmed_new_pwd) {
+                notifications.notify('Passwords do not match', 'danger', 3000);
+                return {};
+            }
+            return {
+                'password': new_pwd,
+            }
+        }
+    }
+
+    async update2FA() {
+        let me = await getMe();
+        document.getElementById('stay-sign').checked = me.is_2fa_enabled;
+        // console.log('me', staySign);
+
+        // document.getElementById('stay-sign').checked = me.is_2fa_enabled;
+        let applyChange = document.querySelectorAll('.Confirmed_change')[1];
+        applyChange.addEventListener('click', async () => {
             let staySign = document.getElementById('stay-sign').checked;
+            console.log('me before', me, staySign);
             let updateOTP = await makeAuthRequest('/api/auth/update-otp/', {
                 'method': 'POST',
                 'headers': {
@@ -113,15 +155,10 @@ export class settings extends HTMLElement {
             let data = await updateOTP.json();
             console.log('2FA updated successfully', data);
             notifications.notify('2FA updated successfully', 'success', 1000);
+            // document.getElementById('stay-sign').checked = staySign;
+            document.getElementById('stay-sign').checked = data.is_2fa_enabled;
             await sleep(1000);
-            if (new_pwd !== confirmed_new_pwd) {
-                notifications.notify('Passwords do not match', 'danger', 3000);
-                return {};
-            }
-            return {
-                'password': new_pwd,
-            }
-        }
+        });
     }
 
     async render() {
@@ -164,9 +201,6 @@ export class settings extends HTMLElement {
 	        </div>
         `
 
-        // let applyChange = document.querySelector('.Confirmed_change');
-        // applyChange.addEventListener('click', async () => {
-        // })
         document.querySelector('.modal_settings').addEventListener('click', async (event) => {
             if (event.target && event.target.classList.contains('Confirmed_change')) {
                 let newUserData = await this.getNewUserData();

@@ -18,7 +18,7 @@ export class Login extends HTMLElement {
                         <div class="line"></div>
                     <div class="Sign-in">
                         <div class="message">Not registered yet?</div>
-                        <div class="Sign-in-button" id="open-register">Sign-in</div> <!-- Button to open registration form -->
+                        <div class="Sign-in-button" id="open-register">Register</div> <!-- Button to open registration form -->
                     </div>
                     <div class="button-logs">
                         <button class="btn1" type="button"></button>

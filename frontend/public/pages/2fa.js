@@ -9,7 +9,6 @@ class TwoFactorAuth extends HTMLElement {
     }
 
     async connectedCallback() {
-        console.log('email in 2fa', app.email);
         this.render();
         await this.init();
     }
@@ -144,10 +143,10 @@ class TwoFactorAuth extends HTMLElement {
     async verifyOTP() {
         const inputs = this.otpInputContainer.querySelectorAll('input');
         const enteredOTP = Array.from(inputs)
-        .map(input => input.value)
-        .join('');
-        
-        console.log('userData', app.email, app.otp); 
+            .map(input => input.value)
+            .join('');
+
+        console.log('userData', app.email, app.otp);
         this.generatedOTP = await fetch('/api/auth/verify-otp/', {
             method: 'POST',
             headers: {
@@ -179,6 +178,10 @@ class TwoFactorAuth extends HTMLElement {
     }
 }
 export function attachDOM() {
+    if (!app.email || !app.otp) {
+        Router.findRoute('/');
+        return;
+    }
     const twoFactorAuth = document.createElement('two-factor-auth');
     app.root.innerHTML = '';
     app.root.appendChild(twoFactorAuth);
