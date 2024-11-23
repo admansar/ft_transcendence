@@ -22,8 +22,6 @@ export class Login extends HTMLElement {
                     </div>
                     <div class="button-logs">
                         <button class="btn1" type="button"></button>
-                        <button class="btn2" type="button"></button>
-                        <button class="btn3" type="button"></button>
                     </div>
                 </div>
             </div>
