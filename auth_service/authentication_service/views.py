@@ -22,8 +22,6 @@ from django.core.mail import send_mail
 import secrets
 import string
 from jwt import DecodeError
-from friends.models import Profile
-
 User = get_user_model()
 
 
@@ -387,10 +385,6 @@ class UpdateUser(APIView):
         return Response(serializer.data)
             
 
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.db import models
-from .models import User
 class UpdateXpAndLevel(APIView):
     def post(self, request):
         print('XP and Level:', request.data)
@@ -412,8 +406,17 @@ class UpdateXpAndLevel(APIView):
 
         # Calculer la mise à jour des XP et du niveau
         if result == 'win':  # Pour une victoire
-            # Augmenter de 10% les XP actuels
-            user.xp += user.xp * 0.10
+            # Le taux de gain d'XP diminue avec le niveau
+            xp_multiplier = 0.10  # Valeur de base
+
+            # Ajuster le multiplicateur d'XP en fonction du niveau de l'utilisateur
+            if user.level >= 10:
+                xp_multiplier = 0.05  # 5% pour les niveaux plus élevés
+            elif user.level >= 5:
+                xp_multiplier = 0.07  # 7% pour les niveaux moyens
+
+            # Appliquer le multiplicateur à l'XP
+            user.xp += user.xp * xp_multiplier
         elif result == 'loss':  # Pour une défaite
             # Diminuer de 5% les XP actuels
             user.xp -= user.xp * 0.05
