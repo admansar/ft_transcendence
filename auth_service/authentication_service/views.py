@@ -386,3 +386,52 @@ class UpdateUser(APIView):
         serializer.save()
         return Response(serializer.data)
             
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db import models
+from .models import User
+class UpdateXpAndLevel(APIView):
+    def post(self, request):
+        print('XP and Level:', request.data)
+
+        username = request.data.get('username')
+        print('Username:', username)
+
+        xp_change = request.data.get('xp', 0)  # La valeur à ajouter ou soustraire des XP
+        level_change = request.data.get('level', 0)  # La valeur à ajouter au niveau
+        result = request.data.get('result')  # `win` ou `loss`
+
+        # Récupérer l'utilisateur à partir de la base de données
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'Utilisateur non trouvé'}, status=404)
+
+        print(f"XP actuel: {user.xp}, Niveau actuel: {user.level}")
+
+        # Calculer la mise à jour des XP et du niveau
+        if result == 'win':  # Pour une victoire
+            # Augmenter de 10% les XP actuels
+            user.xp += user.xp * 0.10
+        elif result == 'loss':  # Pour une défaite
+            # Diminuer de 5% les XP actuels
+            user.xp -= user.xp * 0.05
+
+        # Vérifier si l'XP dépasse 100 et passer au niveau suivant
+        if user.xp >= 100:
+            user.xp = 0  # Réinitialiser l'XP à 0
+            user.level += 1  # Augmenter le niveau
+            print(f"L'utilisateur a monté de niveau! Nouveau niveau : {user.level}")
+
+        print(f"XP mis à jour : {user.xp}, Niveau mis à jour : {user.level}")
+
+        # Sauvegarder les données mises à jour dans la base de données
+        user.save()
+
+        return Response({
+            'message': 'XP et Niveau mis à jour avec succès',
+            'username': user.username,
+            'xp': user.xp,
+            'level': user.level
+        })

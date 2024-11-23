@@ -116,38 +116,3 @@ def select_game(request):
     permission_classes = [IsAuthenticated]
 
     return Response({"message": f"Welcome, {request.user.username}"}, status=200)
-
-class UpdateXpAndLevel(APIView):
-    def post(self, request):
-        print('XP and Level', request.data)
-        username = request.data.get('username')
-        print('username', username)
-        
-        # Récupérer l'XP et le niveau actuels
-        xp = request.data.get('xp', 0)
-        level = request.data.get('level', 0)
-        print('Current xp', xp)
-        print('Current level', level)
-        
-        # Récupérer le résultat du jeu (win ou loss)
-        result = request.data.get('result')  # 'win' ou 'loss'
-        
-        if result == 'win':
-            xp += xp * 0.10  # +10% d'XP si victoire
-        elif result == 'loss':
-            xp -= xp * 0.05  # -5% d'XP si défaite
-        
-        # Si l'XP atteint ou dépasse 100%, passer au niveau suivant
-        if xp >= 100:
-            xp = 0  # Réinitialiser l'XP à 0
-            level += 1  # Augmenter le niveau de 1
-            print(f"User leveled up! New level: {level}")
-        
-        print(f"Updated xp: {xp}, Updated level: {level}")
-        
-        # Retourner la réponse avec les nouvelles valeurs
-        return Response({
-            'message': 'XP and Level updated successfully',
-            'xp': xp,
-            'level': level
-        })
