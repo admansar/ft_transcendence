@@ -6,3 +6,12 @@ to verify OTP http://localhost/api/accounts/verify-otpupdate routing from 404 to
  
 upgrade game front 
 devide game and tournament by containers (optional)
+
+
+
+
+
+
+{
+    "status": "UNFRIEND","user_id":"1"
+}
