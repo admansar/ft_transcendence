@@ -21,13 +21,13 @@ export class Circles extends HTMLElement {
     render() {
         this.innerHTML = `
             <div class="circle-container">
-        <span class="circle" id="circle1" data-background="public/src/img/store.png">
+        <span class="circle" id="circle1" style="background-color: rgb(68, 65, 50);" data-background="public/src/img/store.png">
             <img src="public/src/img/icons8-shop-60.png" alt="STORE Icon" class="circle-image">
             <span class="circle-text" style="font-size: 24px;">Store</span>
             <span class="circle-description">Manage your purchases, Shop some Ball or Paddle skins or buy abilities to
                 use in match</span>
         </span>
-        <span class="circle" id="circle2" data-background="public/src/img/inv.png">
+        <span class="circle" id="circle2" style="background-color: rgb(68, 65, 50);" data-background="public/src/img/inv.png">
             <img src="public/src/img/Frame 5.png" alt="INVENTORY Icon" class="circle-image">
             <span class="circle-text" style="font-size: 13px;">INVENTORY</span>
             <span class="circle-description">View your items, Set your play style and have a look on your
@@ -39,7 +39,7 @@ export class Circles extends HTMLElement {
             <span class="circle-description">Enjoy playing a ping pong match with contesting either online around the
                 world, local play, or with computer</span>
         </span>
-        <span class="circle" id="circle4" data-background="public/src/img/archi.jpeg">
+        <span class="circle" id="circle4" data-background="public/src/img/Archi.jpeg">
             <img src="public/src/img/Frame 3.png" alt="ACHIEVEMENTS Icon" class="circle-image">
             <span class="circle-text" style="font-size: 10px;">ACHIEVEMENTS</span>
             <span class="circle-description">Track your progress, have a look at your achievements, and play more games
@@ -74,7 +74,7 @@ export class Circles extends HTMLElement {
         const container = this.querySelector('.circle-container');
         const playModal = document.getElementById('play-modal'); // Ensure this element exists
         const setModal = document.querySelector('.modal_settings');
-
+        const achiModal = document.querySelector('.modal-achivements');
         // Reset scale for all circles
         circles.forEach(c => {
             c.classList.remove('active');
@@ -102,7 +102,14 @@ export class Circles extends HTMLElement {
                 setModal.style.display = 'flex'; // Show modal
             });
         }
+        if (circle.id === 'circle4') {
+            const setText = circle.querySelector('.circle-text');
+            console.log("im here in achivment");
 
+            setText.addEventListener('click', () => {
+                achiModal.style.display = 'flex'; // Show modal
+            });
+        }
         if (this.last_clicked_circle != circle.id)
         {
             // Background image change with fading effect

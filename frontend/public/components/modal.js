@@ -19,7 +19,25 @@ export function setupModal() {
     closeModalBtn.addEventListener('click', () => {
         playModal.style.display = 'none';
     });
-
+    document.querySelectorAll('.mode-button').forEach(button => {
+        button.addEventListener('mouseover', function () {
+            const imageContainer = document.getElementById('mode-image');
+            const imageUrl = this.getAttribute('data-image');
+            
+            // Set the image's src to the data-image value
+            imageContainer.src = imageUrl;
+            
+            // Make the image visible
+            imageContainer.style.display = 'block';
+        });
+    
+        button.addEventListener('mouseout', function () {
+            const imageContainer = document.getElementById('mode-image');
+            
+            // Hide the image
+            imageContainer.style.display = 'none';
+        });
+    });
     window.addEventListener('click', (event) => {
         if (event.target === playModal) {
             playModal.style.display = 'none';
@@ -47,11 +65,11 @@ export class Modals extends HTMLElement {
                             <img id="mode-image" src="" alt="Game Mode Image" style="display:none;">
                         </div>
                         <div class="buttons-container">
-                            <button class="mode-button" data-image="public/src/img/store.png" id="online-btn">Play Online</button>
-                            <button class="mode-button" data-image="public/src/img/set.jpeg" id="player-vs-computer-btn">Player vs
+                            <button class="mode-button" data-image="public/src/img/pingpong_playing.svg" id="online-btn">Play Online</button>
+                            <button class="mode-button" data-image="public/src/img/pong.jpg" id="player-vs-computer-btn">Player vs
                                 Computer</button>
-                            <button class="mode-button" data-image="public/src/img/inv.png" id="tournament-btn">Tournament</button>
-                            <button class="mode-button" data-image="public/src/img/Play image.jpeg" id="ping-pong-btn">3d ping pong game 
+                            <button class="mode-button" data-image="public/src/img/tournament.jpg" id="tournament-btn">Tournament</button>
+                            <button class="mode-button" data-image="public/src/img/3d_player.png" id="ping-pong-btn">3d ping pong game 
                                 (beta)</button>
                         </div>
                         <div class="dimention-select">

@@ -8,24 +8,42 @@ export class Menu extends HTMLElement {
     }
 
     render() {
-        console.log("I'm here in menu");
-
-        // Select the menu icon by its ID
         const menuIcon = document.getElementById('menu-icon');
-
-        // Add the click event listener to toggle menu content visibility
-        menuIcon.addEventListener('click', function () {
-            const content = menuIcon.querySelector('.menu-content');
-            menuIcon.classList.toggle('active'); // Toggle the active class
-
+        const content = document.querySelector('.menu-content');
+        
+        menuIcon.addEventListener('click', function (event) {
+            menuIcon.classList.toggle('active'); 
+        
             if (menuIcon.classList.contains('active')) {
-                content.style.maxHeight = '500px'; // Ensure the content is fully visible
-                content.style.opacity = '1'; // Make the content visible
+                content.style.maxHeight = '500px'; 
+                content.style.opacity = '1'; 
+                content.style.overflow = 'visible'; 
             } else {
-                content.style.maxHeight = '0'; // Hide content
-                content.style.opacity = '0'; // Fade out the content
+                closeMenu();
+            }
+        
+            event.stopPropagation(); 
+        });
+        
+
+        content.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+        
+
+        document.addEventListener('click', function () {
+            if (menuIcon.classList.contains('active')) {
+                closeMenu();
             }
         });
+        
+        function closeMenu() {
+            menuIcon.classList.remove('active'); 
+            content.style.maxHeight = '0'; 
+            content.style.opacity = '0';
+            content.style.overflow = 'hidden'; 
+        }
+        
     }
 }
 
