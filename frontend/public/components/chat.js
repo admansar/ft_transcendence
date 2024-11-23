@@ -1,5 +1,7 @@
 // import { getwebsocket } from "../services/Router.js";
 
+import { makeAuthRequest } from "../services/utils.js";
+
 // var chatSocket = getwebsocket()
 function socket_impel() {
     const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
@@ -42,18 +44,29 @@ function front_remove_user(user)
 
 function front_inject_user(user)
 {
-    const messengerList = document.querySelector('.messanger-list');
-    if (!document.querySelector(`#${user}`))
-    {
-        console.log('injecting user : ', user);
-        messengerList.insertAdjacentHTML('beforeend', `
-                <div class="friend-profile" id="${user}" style="background-image: url(&quot;https://robohash.org/${user}?set=set3&quot;); background-size: cover; background-position: center center;" >
-                    <div class="friend-profile-status" ></div>
-                </div>
-            `);
-        const ue = document.querySelector(`#${user} .friend-profile-status`)
-        ue.style.backgroundColor = 'green';
-    }
+    makeAuthRequest(`/api/auth/user/${user}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).then(async res => {
+        res = await res.json();
+        console.log(res);
+        let avatar = res.avatar;
+        console.log('avatar :', avatar);
+        const messengerList = document.querySelector('.messanger-list');
+        if (!document.querySelector(`#${user}`))
+        {
+            console.log('injecting user : ', user);
+            messengerList.insertAdjacentHTML('beforeend', `
+                    <div class="friend-profile" id="${user}" style="background-image: url(${avatar}); background-size: cover; background-position: center center;" >
+                        <div class="friend-profile-status" ></div>
+                    </div>
+                `);
+            const ue = document.querySelector(`#${user} .friend-profile-status`)
+            ue.style.backgroundColor = 'green';
+        }    
+    })
 }
 
 export function setupChat() {
@@ -62,7 +75,6 @@ export function setupChat() {
     const sms = document.querySelector('.messanger');
     const sms_icon = document.querySelector('.messanger-icon');
     const chat_messanger_user = document.querySelector('.chat-border');
-
     sms_icon.addEventListener('click', function () {
         sms.classList.toggle('active');
         sms_icon.classList.toggle('active');
@@ -77,7 +89,7 @@ export function setupChat() {
                 const div = document.createElement('div');
                 const chatform = `
             
-                <span class="chat-border" id="${UserDATA.id}-chat">
+                <span class="chat-border active" id="${UserDATA.id}-chat">
                     <span class="chat-topic" id="${UserDATA.id}-topic">
                         <span class="message" id="user1" style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">${UserDATA.id}</span>
                     </span>
