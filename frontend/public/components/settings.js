@@ -84,7 +84,7 @@ export class settings extends HTMLElement {
         }
     }
 
-    getNewUserData() {
+    async getNewUserData() {
         let new_first_name = document.getElementById('new_first-name').value;
         let new_last_name = document.getElementById('new_last-name').value;
         let new_pwd = document.getElementById('new_pwd').value;
@@ -100,6 +100,20 @@ export class settings extends HTMLElement {
                 'last_name': new_last_name,
             }
         } else if (securityInfoEl.classList.contains('active')) {
+            let staySign = document.getElementById('stay-sign').checked;
+            let updateOTP = await makeAuthRequest('/api/auth/update-otp/', {
+                'method': 'POST',
+                'headers': {
+                    'Content-Type': 'application/json',
+                },
+                'body': JSON.stringify({
+                    'is_2fa_enabled': staySign,
+                }),
+            })
+            let data = await updateOTP.json();
+            console.log('2FA updated successfully', data);
+            notifications.notify('2FA updated successfully', 'success', 1000);
+            await sleep(1000);
             if (new_pwd !== confirmed_new_pwd) {
                 notifications.notify('Passwords do not match', 'danger', 3000);
                 return {};
@@ -155,7 +169,7 @@ export class settings extends HTMLElement {
         // })
         document.querySelector('.modal_settings').addEventListener('click', async (event) => {
             if (event.target && event.target.classList.contains('Confirmed_change')) {
-                let newUserData = this.getNewUserData();
+                let newUserData = await this.getNewUserData();
                 console.log(Object.keys(newUserData), Object.keys(newUserData).length, newUserData);
                 if (Object.keys(newUserData).length > 0) {
                     await this.updateUserInfo(newUserData);

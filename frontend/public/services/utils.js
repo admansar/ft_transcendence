@@ -51,7 +51,6 @@ export async function getMe() {
 }
 
 export async function isAuth() {
-    // const response = await fetch('http://localhost:8000/api/accounts/me', {
     const response = await fetch('/api/auth/me', {
         method: 'POST',
         headers: {

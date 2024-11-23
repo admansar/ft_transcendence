@@ -34,8 +34,7 @@
             const user = data.user
             console.log (data);
             // Display received message
-            if (!data.type)
-                document.getElementById('messages').innerText += data.user +  ' : '  + data.message + '   ';
+            document.getElementById('messages').innerText += '   ' + data.ayoub;
         };
 
         chatSocket.onclose = function(e){

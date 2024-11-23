@@ -15,3 +15,10 @@ devide game and tournament by containers (optional)
 
 step 1: he sends to me msg tags<user, msg usr>
 step 2: i send to him msg (using his channel name) sending msg tags<msg usr, msg usr>
+
+
+
+
+{
+    "status": "UNFRIEND","user_id":"1"
+}

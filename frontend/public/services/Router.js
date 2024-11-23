@@ -66,14 +66,19 @@ export const Router = {
         }
 
         if (route.isAuth !== undefined && route.isAuth === false) {
-            const isUserAuth = await isAuth();
+            let isUserAuth = await isAuth();
             console.log('isUserAuth', isUserAuth);
             if (isUserAuth && (path === '/login' || path === '/register')) {
                 route = routes.find((el => el.path === '/'));
                 path = '/';
-            } else if (!isUserAuth && path !== '/login' && path !== '/register') {
+            } else if (!isUserAuth && path !== '/login' && path !== '/register' && path !== '/verify-otp') {
                 route = routes.find((el => el.path === '/login'));
                 path = '/login';
+            } else if (!isUserAuth && path === '/verify-otp') {
+                isUserAuth = true;
+                console.log('isUserAuth from verify-otp', isUserAuth);
+                route = routes.find((el => el.path === '/verify-otp'));
+                path = '/verify-otp';
             }
         }
 

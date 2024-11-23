@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, UntypedToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponseRedirect
@@ -21,6 +21,7 @@ from authentication_service import settings
 from django.core.mail import send_mail
 import secrets
 import string
+from jwt import DecodeError
 
 User = get_user_model()
 
@@ -35,6 +36,7 @@ class OTP:
 
     def verify_otp(self, user_otp):
         return self.otp == user_otp
+
 class GenerateOTPView(APIView):
     def post(self, request):
         to_email = request.data.get('email')
@@ -49,8 +51,10 @@ class GenerateOTPView(APIView):
         try:
             otp_handler = OTP()
             otp = otp_handler.generate_otp()
+            
+            print('Generated OTP:', otp)
 
-            subject = "Unlock Your Adventure! Here's Your OTP"
+            subject = "Your Pong OTP, don't share it with anyone"
             message = f'Your OTP is: {otp}'
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [to_email]
@@ -67,18 +71,29 @@ class GenerateOTPView(APIView):
                 recipient_list,
                 fail_silently=False,
             )
-            request.session['otp'] = otp
-            request.session['otp_email'] = to_email
+            # request.session['otp'] = otp
+            # request.session['otp_email'] = to_email
 
-            print(f"Session ID: {request.session.session_key}")
+            # print(f"Session ID: {request.session.session_key}")
 
-            print('request.session before', request.session.keys())
+            # print('request.session before', request.session.keys())
 
-            response.set_cookie(key='otp_email', value=to_email)
-            response.set_cookie(key='otp', value=otp)
+            # response.set_cookie(key='otp_email', value=to_email)
+            # response.set_cookie(key='otp', value=otp)
+            
+            # user = User.objects.get(email=to_email)
+            otp_token = RefreshToken()
+            payload = {
+                'email': to_email,
+                'otp': otp,
+                # 'user_id': user.id
+            }
+            otp_token.payload.update(payload)
+            print('payload', payload)
             
             response.data = {
-                'message': 'OTP sent successfully'
+                'message': 'OTP sent successfully',
+                'otp_token': str(otp_token)
             }
             return response
         except Exception as e:
@@ -86,30 +101,34 @@ class GenerateOTPView(APIView):
                 'error': 'An error occurred while sending the email. Please try again.'
             }
             return response
+
 class VerifyOTPView(APIView):
     def post(self, request):
         user_otp = request.data.get('otp')
         user_email = request.data.get('email')
-
-        print(f"Session ID: {request.session.session_key}")
-
-        print('request.session', request.session.keys())
-
-        stored_otp = request.COOKIES.get('otp')
-        stored_email = request.COOKIES.get('otp_email')
-
-        print(user_email)
-        print(user_otp)
-
-        print('stored_otp', stored_otp)
-        print('stored_email', stored_email)
-                
-        if not user_otp or not user_email:
+        otp_token = request.data.get('otp_token')
+        
+        print('user_otp', user_otp)
+        print('user_email', user_email)
+        print('otp_token', otp_token)
+        if not user_email or not otp_token:
             return Response(
                 {"error": "OTP and email are required"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
             
+        try:
+            decoded_token = UntypedToken(otp_token)
+        except DecodeError:
+            return Response(
+                {"error": "Invalid token"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        stored_otp = decoded_token.get('otp')
+        stored_email = decoded_token.get('email')
+        print('stored_otp', stored_otp)
+        print('stored_email', stored_email)
+        
         if user_email != stored_email:
             return Response(
                 {"error": "Email does not match"}, 
@@ -121,18 +140,38 @@ class VerifyOTPView(APIView):
                 {"error": "Invalid OTP"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        response = Response()
+        user = User.objects.get(email=user_email)
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+        response.set_cookie(key='access', value=str(access))
+        response.set_cookie(key='refresh', value=str(refresh))
+        response.data = {
+            'message': 'OTP verified successfully',
+            'access': str(access),
+            'refresh': str(refresh)
+        }
+        response.status_code = status.HTTP_200_OK
+        return response
 
-        request.COOKIES.pop('otp')
-        request.COOKIES.pop('otp_email')
+class OtpUpdate(APIView):
+    def post(self, request):
+        token = request.COOKIES.get('access')
+        if not token:
+            raise AuthenticationFailed('Unauthorized')
         
-        # del request.COOKIES['otp']
-        # del request.COOKIES['otp_email']
-        
-        return Response(
-            {"message": "OTP verified successfully"}, 
-            status=status.HTTP_200_OK
-        )
-    
+        is_2fa_enabled = request.data.get('is_2fa_enabled')
+        jwt = JWTAuthentication()
+        validated_token = jwt.get_validated_token(token)
+        user = jwt.get_user(validated_token)
+        if is_2fa_enabled:
+            user.is_2fa_enabled = True
+        else:
+            user.is_2fa_enabled = False
+        user.save()
+        return Response({'message': '2FA status updated successfully'})
+
 class Oauth42(APIView):
     def get(self, request):
         code = request.GET.get('code')
@@ -234,6 +273,18 @@ class Login(APIView):
             except Exception as e:
                 print ("Error: ", e)
                 return Response({'error': 'Error while generating token'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        is_2fa_enabled = user.is_2fa_enabled
+        if is_2fa_enabled:
+            response = Response()
+            response.data = {
+                'message': '2FA enabled',
+                'is_2fa_enabled': is_2fa_enabled,
+                'email': user.email
+            }
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return response
+        
         access = refresh.access_token
         response = Response()
         response.data = {
@@ -283,17 +334,6 @@ class UserView(APIView):
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=401)
-    # def post(self, request):
-    #     try:
-    #         username_or_email = request.data.get('username_or_email')
-    #         if not username_or_email:
-    #             return Response({"error": "Username or email is required"}, status=400)
-    #         if '@' in username_or_email:
-    #             user = User.objects.get(email=username_or_email)
-    #         else:
-    #             user = User.objects.get(username=username_or_email)
-    #         serializer = UserSerializer(user)
-
         
 class GetAllUsers(APIView):
     def get(self, request):
@@ -310,7 +350,7 @@ class Me(APIView):
         jwt = JWTAuthentication()
         validated_token = jwt.get_validated_token(token)
         user = jwt.get_user(validated_token)
-        return Response({'access': token, 'id': user.id, 'username': user.username, 'email': user.email})
+        return Response({'access': token, 'id': user.id, 'username': user.username, 'email': user.email, 'is_2fa_enabled': user.is_2fa_enabled})
 
 class Logout(APIView):
     def post(self, request):

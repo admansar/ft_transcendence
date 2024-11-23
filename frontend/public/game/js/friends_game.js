@@ -74,7 +74,7 @@ let breaker = false;
 
 
 let roomName = 'room_01'; // This should be dynamic based on matchmaking or user selection
-// token should be changed to room_id 
+// token should be changed to room_id
 let room_id = '12345'; // should be fetched from the server
 let gameSocket = new WebSocket(`ws://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
 console.log(`ws://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);

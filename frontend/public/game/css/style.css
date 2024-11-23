@@ -35,7 +35,7 @@ body {
   margin-bottom: 10px;
 }
 
-#game-container {
+/* #game-container {
   width: 800px;
   height: 600px;
   position: relative;
@@ -44,6 +44,32 @@ body {
   background-color: #222222;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+} */
+#game-container {
+  width: 800px;
+  height: 600px;
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  background-color: #222222;
+  border-radius: 10px;
+  box-shadow: 
+      0 4px 10px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(255, 0, 255, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.2);
+  animation: neonFlicker 5s infinite;
+}
+
+@keyframes neonFlicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      box-shadow: 
+          0 4px 10px rgba(0, 0, 0, 0.5),
+          0 0 20px rgba(255, 0, 255, 0.3),
+          0 0 40px rgba(0, 255, 255, 0.2);
+  }
+  20%, 22%, 24%, 55% {
+      box-shadow: none;
+  }
 }
 
 canvas {
@@ -263,42 +289,189 @@ canvas {
   text-align: center; 
 }
 
-#header {
+/* #header {
   width: 100%;
   text-align: center;
   padding: 10px;
   background-color: rgba(51, 51, 51, 0.8);
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+} */
+#header {
+  width: 100%;
+  text-align: center;
+  padding: 15px;
+  background: linear-gradient(
+      135deg,
+      rgba(51, 51, 51, 0.9),
+      rgba(34, 34, 34, 0.95)
+  );
+  border-radius: 12px;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(255, 0, 255, 0.2),
+      0 0 40px rgba(0, 255, 255, 0.1);
+  animation: headerGlow 5s infinite;
 }
 
+#header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+      90deg,
+      rgba(255, 0, 255, 0.2),
+      rgba(0, 255, 255, 0.2)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  pointer-events: none;
+}
+
+#header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      circle at 50% 0%, 
+      rgba(255, 255, 255, 0.1),
+      transparent 70%
+  );
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+@keyframes headerGlow {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      box-shadow: 
+          0 4px 20px rgba(0, 0, 0, 0.5),
+          0 0 20px rgba(255, 0, 255, 0.2),
+          0 0 40px rgba(0, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.1);
+  }
+  20%, 22%, 24%, 55% {
+      box-shadow: 
+          0 4px 10px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Animation pour le contenu du header */
+/* Styles pour le header */
+#header h1,
+#header h2,
+#header p {
+  position: relative;
+  margin: 10px 0;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* Scoreboard */
 #score-board {
-  font-size: 24px; 
-  margin-bottom: 10px;
+  font-size: 24px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between; 
-  width: 100%; 
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px; /* Limite pour le design responsive */
+  margin: 0 auto; /* Centrage */
 }
 
+/* Noms des joueurs */
 #player-names {
-  font-size: 24px; 
-  margin-bottom: 10px; 
+  font-size: 24px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-#player1-name, #player2-name {
-  margin: 0 20px; 
+/* #player1-name,
+#player2-name {
+  margin: 0 20px;
+  color: #ffffff;
+  font-weight: bold;
 }
 
-#score1, #score2 {
-  font-size: 48px; 
-  margin: 0 20px; 
+/* Scores */
+/* #score1,
+#score2 {
+  font-size: 48px;
+  margin: 0 20px;
+  color: #f1c40f; /* Couleur pour attirer l'attention */
+  /* font-weight: bold;
+} */ */
+
+/* Timer */
+/* #timer {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 32px;
+  text-align: center;
+  color: #ffffff;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+/* } */ 
+/* Player names */
+#player1-name,
+#player2-name {
+  margin: 0 10px;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: 24px; /* Taille légèrement augmentée pour une meilleure lisibilité */
 }
 
+/* Player section */
+#player1,
+#player2 {
+  display: flex;
+  align-items: center; /* Aligne le texte et l'image sur la même ligne */
+  justify-content: center;
+  margin-bottom: 10px; /* Ajoute un peu d'espace sous chaque section */
+}
+
+/* Player icons */
+.player-icon {
+  width: 100px; /* Taille augmentée */
+  height: 100px; /* Taille augmentée */
+  margin: 0 15px; /* Espacement supplémentaire pour équilibrer la disposition */
+  border-radius: 50%; /* Forme circulaire */
+  border: 3px solid #ffffff; /* Bordure plus épaisse pour mettre en évidence */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4); /* Effet d'ombre amélioré */
+}
+
+/* Scores */
+#score1,
+#score2 {
+  font-size: 56px; /* Texte plus grand pour correspondre à l'agrandissement des avatars */
+  margin: 0 15px; /* Ajuste l'espacement */
+  color: #f1c40f; /* Couleur qui attire l'attention */
+  font-weight: bold;
+}
+
+/* Timer */
 #timer {
-  background-color: rgba(255, 255, 255, 0.2); 
-  padding: 10px 20px; 
-  border-radius: 5px; 
-  font-size: 32px; 
-  text-align: center; 
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 15px 30px; /* Plus d'espace pour un effet visuel amélioré */
+  border-radius: 10px; /* Coins arrondis plus visibles */
+  font-size: 36px; /* Taille légèrement augmentée */
+  text-align: center;
+  color: #ffffff;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }

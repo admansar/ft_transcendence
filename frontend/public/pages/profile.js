@@ -1,14 +1,7 @@
 import { Router } from '../services/Router.js'
 import { makeAuthRequest } from '../services/utils.js'
 import { getMe } from '../services/utils.js'
-// import app from '../components/state.js';
 
-document.addEventListener('userDataReady', () => {
-    const userData = app.getUserData();
-    console.log('User data in other component:', userData);
-
-    // Use userData in your component logic
-});
 class Profile extends HTMLElement {
     constructor() {
         super();
@@ -125,14 +118,19 @@ class Profile extends HTMLElement {
 
         addFriendButton.addEventListener('click', async () => {
             console.log('Add friend clicked');
-            // addFriendButton.style.display = 'none';
-            // const response = await makeAuthRequest('/api/friends/methods/', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     }
-
-            // })
+            addFriendButton.style.display = 'none';
+            const response = await makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "ADD",
+                    "user_id": String(userData.id)
+                })
+            })
+            const data = await response.json();
+            console.log(data);
         })
     }
 
