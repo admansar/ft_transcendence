@@ -1,6 +1,8 @@
+import notifications from '../components/notifications.js';
 import { Router } from '../services/Router.js'
-import { makeAuthRequest } from '../services/utils.js'
+import { makeAuthRequest, sleep } from '../services/utils.js'
 import { getMe } from '../services/utils.js'
+import { getUserDataByID } from '../services/utils.js'
 
 class Profile extends HTMLElement {
     constructor() {
@@ -11,6 +13,7 @@ class Profile extends HTMLElement {
         const username = this.getAttribute('username');
         let userData = await getUserData(username);
         await this.render(username, userData);
+        this.checkFriendsStatus(userData);
         await this.renderProfile(userData);
     }
 
@@ -115,10 +118,8 @@ class Profile extends HTMLElement {
             let me = await getMe();
             console.log('me.username', me.username);
         }
-
         addFriendButton.addEventListener('click', async () => {
             console.log('Add friend clicked');
-            addFriendButton.style.display = 'none';
             const response = await makeAuthRequest('/api/friends/methods/', {
                 method: 'POST',
                 headers: {
@@ -130,13 +131,164 @@ class Profile extends HTMLElement {
                 })
             })
             const data = await response.json();
+            if (response.ok) {
+                notifications.notify(data.message, 'success', 1000, addFriendButton);
+                addFriendButton.style.display = 'none';
+            }
             console.log(data);
-        })
+        });
+    }
+
+    async checkFriendsStatus(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+
+        try {
+            const res = await makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }).then(res => res.json());
+
+            console.log('Checking pending requests', res);
+
+            if (res.Profile.waiting.includes(userData.id)) {
+                const data = await getUserDataByID(userData.id);
+                console.log('Friend request pending from', data.username);
+                addFriendButton.classList.add('active');
+            } else if (res.Profile.friends.includes(userData.id)) {
+                addFriendButton.classList.add('active');
+            } else if (res.Profile.block.includes(userData.id)) {
+                Router.findRoute('/404');
+                return;
+            }
+
+            return res; // Explicitly return the result
+        } catch (err) {
+            console.log(err);
+            notifications.notify('Error checking friends status', 'error', 1000, addFriendButton);
+            throw err; // Ensure the error propagates properly
+        }
+    }
+
+    async addFriend(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+        let notif = document.querySelector('.profile-status');
+        addFriendButton.addEventListener('click', async () => {
+            console.log('Add friend clicked');
+            const response = await makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "ADD",
+                    "user_id": String(userData.id)
+                })
+            })
+            const data = await response.json();
+            if (response.ok) {
+                notifications.notify(data.message, 'success', 1000, notif);
+                addFriendButton.style.display = 'none';
+            }
+            console.log(data);
+        });
+    }
+
+    async acceptFriendRequest(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+        let notif = document.querySelector('.profile-status');
+        addFriendButton.addEventListener('click', async () => {
+            makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "ACCEPT",
+                    "user_id": String(userData.id)
+                })
+            }).then(async res => {
+                if (res.ok) {
+                    notifications.notify('Friend request accepted', 'success', 1500, notif);
+                    addFriendButton.style.display = 'none';
+                }
+            })
+        });
+    }
+
+    async blockUser(userData) {
+        const blockUserButton = document.getElementById('block_that');
+        let notif = document.querySelector('.profile-status');
+        blockUserButton.addEventListener('click', async () => {
+            makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "BLOCK",
+                    "user_id": String(userData.id)
+                })
+            }).then(async res => {
+                if (res.ok) {
+                    notifications.notify('User blocked', 'success', 1500, notif);
+                    blockUserButton.style.display = 'none';
+                }
+            })
+        });
+    }
+
+    async rejectFriendRequest(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+        let notif = document.querySelector('.profile-status');
+        addFriendButton.addEventListener('click', async () => {
+            makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "REJECT",
+                    "user_id": String(userData.id)
+                })
+            }).then(async res => {
+                if (res.ok) {
+                    notifications.notify('Friend request rejected', 'success', 1500, notif);
+                    addFriendButton.style.display = 'none';
+                }
+            })
+        });
     }
 
     async renderProfile(userData) {
-        let profileData = await this.getProfileData(userData);
+        let me = null;
+        const addFriendButton = document.getElementById('add_friend');
+        const blockUserButton = document.getElementById('block_that');
+
+        if (!app.loggedUser) {
+            me = await getMe();
+            console.log('me.username', me.username);
+        } else {
+            console.log('app.loggedUser', app.loggedUser);
+        }
+        // console.log('me', app.loggedUser, me.username);
+        if (app.loggedUser === userData.username || me.username === userData.username) {
+            addFriendButton.style.display = 'none';
+            blockUserButton.style.display = 'none';
+        } else {
+            await this.checkFriendsStatus(userData); // Ensure it completes
+            console.log(addFriendButton.classList);
+
+            if (!addFriendButton.classList.contains('active')) {
+                await this.addFriend(userData);
+            } else {
+                await this.rejectFriendRequest(userData);
+            }
+            this.blockUser(userData);
+        }
     }
+
 
     async render(username, userData) {
         try {
@@ -295,7 +447,7 @@ class Profile extends HTMLElement {
             const hisBar = document.querySelector('.HISTORYdata');
             const rankBar = document.querySelector('.RANKYdata');
             const achBar = document.querySelector('.ACHIVEMENTSdata');
-            
+
             cata.forEach(button => {
                 button.addEventListener('click', function () {
                     // Remove 'active' class from all buttons
@@ -353,6 +505,8 @@ class Profile extends HTMLElement {
                 console.log('Share profile clicked');
                 let profileUrl = `http://localhost/profile/${username}`;
                 navigator.clipboard.writeText(profileUrl);
+                let shareProfile = document.querySelector('.profile-status');
+                notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
             });
 
         } catch (e) {

@@ -138,7 +138,7 @@ class Request_methods(APIView):
         if method == "ADD":
             return ADD_method(self, _user, s_user_id)
         elif method == "REJECT" or method == "BLOCK" or method == "ACCEPT" \
-                or method == "UNBLOCK" or method == "UNFRIEND":
+                or method == "UNBLOCK" or method == "UNFRIEND" or method == "CANCEL":
             if method == "ACCEPT":
                 try:
                     self.sender : friend_request = self.request_friend.get(sender=s_user, reciver=_user)
@@ -153,6 +153,12 @@ class Request_methods(APIView):
                 Unblock_user(P_user, s_user, s_user_id)
             elif method == "UNFRIEND":
                 return Unfriend(self, P_user, s_user_id, s_user, _user)
+            else:
+                try:
+                    print("am here")
+                    P_user.waiting.remove(s_user)
+                except Exception:
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
             if self.sender != None:
                 self.sender.delete()
         P_user.save()
