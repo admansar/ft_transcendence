@@ -20,6 +20,8 @@ canvas.height = gameContainer.clientHeight;
 
 let current_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
 let last_state = { 'self_name': '...', 'other_name': '...', 'player1': '...', 'player2': '...', 'score1': 0, 'score2': 0, 'timer': '0:00' };
+let self_avatar = '...';
+let other_avatar = '...';
 
 
 let game_end_locker = false;
@@ -37,6 +39,26 @@ let opponentName = '...';
 let playerName = '...';
 let fps_ratio = 1;
 let server_fps = 30;
+
+function update_avatar(user)
+{
+	let avatar = null;
+	makeAuthRequest(`/api/auth/user/${user}`, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json',
+		}
+	}).then(async res => {
+		res = await res.json();
+		console.log("the res is : ", res);
+		avatar = res.avatar;
+		const player1Image = document.querySelector("#player1 .player-icon");
+		player1Image.src = self_avatar;
+		player1Image.style.width = '128px';
+		player1Image.style.height = '128px';
+	});
+	return avatar
+}
 
 
 // Game state received from server
@@ -71,6 +93,9 @@ else
 {
   console.log('Error fetching user data');
 }
+
+
+
 let breaker = false;
 
 
@@ -109,6 +134,54 @@ gameSocket.onmessage = async function (e) {
 		current_state.player2 = opponentName;
 		current_state.score1 = gameState.score1;
 		current_state.score2 = gameState.score2;
+		if (data && playerName !== 'waiting...' && playerId === 1)
+		{
+			makeAuthRequest(`/api/auth/user/${playerName}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			}).then(async res => {
+				res = await res.json();
+				console.log("the res is : ", res);
+				self_avatar = res.avatar;
+				const player1Image = document.querySelector("#player1 .player-icon");
+				player1Image.src = self_avatar;
+				player1Image.style.width = '128px';
+				player1Image.style.height = '128px';
+			});
+		}
+		else if (data && opponentName !== 'waiting...' && playerId === 2)
+		{
+			makeAuthRequest(`/api/auth/user/${playerName}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			}).then(async res => {
+				res = await res.json();
+				console.log("the res is : ", res);
+				self_avatar = res.avatar;
+				const player1Image = document.querySelector("#player1 .player-icon");
+				player1Image.src = self_avatar;
+				player1Image.style.width = '128px';
+				player1Image.style.height = '128px';
+			});
+			makeAuthRequest(`/api/auth/user/${opponentName}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			}).then(async res => {
+				res = await res.json();
+				console.log("the res is : ", res);
+				self_avatar = res.avatar;
+				const player1Image = document.querySelector("#player2 .player-icon");
+				player1Image.src = self_avatar;
+				player1Image.style.width = '128px';
+				player1Image.style.height = '128px';
+			});
+		}
 		if (playerId === 1) {
 			user_data.username = playerName;
 			current_state.self_name = playerName;
@@ -201,6 +274,31 @@ gameSocket.onmessage = async function (e) {
 	else if (data.type === 'player_info') {
 		opponentName = data.opponent;
 		console.log(`Opponent: ${opponentName}`);
+		if (data)
+		{
+			makeAuthRequest(`/api/auth/user/${opponentName}`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				}
+			}).then(async res => {
+				res = await res.json();
+				console.log("the res is : ", res);
+				self_avatar = res.avatar;
+				const player1Image = document.querySelector("#player2 .player-icon");
+				player1Image.src = self_avatar;
+				player1Image.style.width = '128px';
+				player1Image.style.height = '128px';
+			});
+		}
+		if (data.avatar)
+		{
+			other_avatar = data.avatar;
+			const player2Image = document.querySelector("#player2 .player-icon");
+			player2Image.src = other_avatar;
+			player2Image.style.width = '128px';
+			player2Image.style.height = '128px';
+		}
 	}
 	else if (data.type === 'notification') {
 		show_notification(data.message);
