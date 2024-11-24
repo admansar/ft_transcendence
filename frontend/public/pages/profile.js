@@ -15,6 +15,7 @@ class Profile extends HTMLElement {
         await this.render(username, userData);
         this.checkFriendsStatus(userData);
         await this.renderProfile(userData);
+        document.title = `Profile - ${userData.username}`;
     }
 
     async renderScore(data) {

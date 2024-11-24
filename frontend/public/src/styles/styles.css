@@ -2354,13 +2354,26 @@ input[type=text-chat]{
     border-radius: 50%;
     background-color: #00000024;
 }
-.notification{
+.notification-container{
     width: 80px;
     height: 80px;
     background-image: url(../img/notification.svg);
     background-position: center;
     background-repeat: no-repeat;
     background-size: 50% 50%;
+}
+
+.notifications-container{
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
 }
 
 .menu-bar{

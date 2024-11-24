@@ -29,12 +29,14 @@ class Search extends HTMLElement {
 
     render() {
         console.log('Search component is rendered');
+
         let searchValue = document.getElementById('search');
+
         searchValue.addEventListener('keyup', async (e) => {
             let users = await this.getAllUsers(e.target.value);
             let searchResults = document.getElementById('search-results');
             searchResults.innerHTML = '';
-            if (e.target.value.length > 0) {
+            if (e.target.value.length > 0 && users.length > 0) {
                 for (let user of users) {
                     console.log(user);
                     searchResults.innerHTML += `
