@@ -35,7 +35,7 @@
             console.log (data);
             // Display received message
             if (data.type === 'send_message') {
-                document.getElementById('messages').innerText += '\n' + user + ' : ' + message;
+                document.getElementById('messages').innerHTML += user + ' : ' + message + "<br>";
             }
         };
 

@@ -24,6 +24,7 @@ def get_user_from_token(token):
     return _user
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    min_num = None
     client = Client.objects.all()
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -79,14 +80,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
     async def connect(self):
         try:
-            cookies = self.scope['cookies']
+            num = []
+            cookies =  self.scope['cookies']
             _user = await get_user_from_token(cookies['access'])
             self.scope["user"] = _user
             user = await self.Creat_client()
             for key in user:
-                json_string = await self.Parse_messgae_on_redis(key)
-                if (json_string != None):
-                    await self.trough_channel(self.channel_name, json_string)
+                len_key = await sync_to_async (len)(key)
+                num.append(key[key.find(":") + 1 : len_key])
+            len_num = await sync_to_async (len)(num)
+            while len_num > 1:
+                len_num = await sync_to_async (len)(num)
+                for key in user:
+                    self.min_num = await sync_to_async(min)(num)
+                    len_key = await sync_to_async (len)(key)
+                    if key[key.find(":") + 1 : len_key] == self.min_num:
+                        json_string = await self.Parse_messgae_on_redis(key)
+                        if (json_string != None):
+                            await self.trough_channel(self.channel_name, json_string)
+                        num.remove(self.min_num)
+                        break
         except Exception:
             await self.close(code=1008)
         await self.accept()
