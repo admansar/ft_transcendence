@@ -383,7 +383,7 @@ class UpdateUser(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-            
+
 class UpdateXpAndLevel(APIView):
     def post(self, request):
         print('XP and Level:', request.data)
@@ -405,27 +405,11 @@ class UpdateXpAndLevel(APIView):
 
         # Calculer la mise à jour des XP et du niveau
         if result == 'win':  # Pour une victoire
-            # Le taux de gain d'XP diminue avec le niveau
-            xp_multiplier = 0.10  # Valeur de base
-
-            # Ajuster le multiplicateur d'XP en fonction du niveau de l'utilisateur
-            if user.level >= 10:
-                xp_multiplier = 0.05  # 5% pour les niveaux plus élevés
-            elif user.level >= 5:
-                xp_multiplier = 0.07  # 7% pour les niveaux moyens
-
-            # Appliquer le multiplicateur à l'XP
-            user.xp += user.xp * xp_multiplier
+            # Augmenter de 10% les XP actuels
+            user.xp += user.xp * 0.10
         elif result == 'loss':  # Pour une défaite
-            # Si le niveau est élevé (niveau >= 10), diminuer de 10% les XP
-            xp_deduction = 0.05  # Valeur de base pour une défaite
-
-            # Si le niveau est supérieur ou égal à 10, la perte d'XP est de 10%
-            if user.level >= 10:
-                xp_deduction = 0.10  # 10% pour les niveaux élevés
-
-            # Diminuer les XP en fonction de la déduction
-            user.xp -= user.xp * xp_deduction
+            # Diminuer de 5% les XP actuels
+            user.xp -= user.xp * 0.05
 
         # Vérifier si l'XP dépasse 100 et passer au niveau suivant
         if user.xp >= 100:

@@ -8,7 +8,6 @@ let chatSocket = null;
 
 function front_receive_message(user, message)
 {
-    front_remove_user(user);
     const chatMessages = document.getElementById(`chatMessages-${user}`);
     if (chatMessages)
     {   
@@ -60,7 +59,7 @@ function front_inject_user(user)
                 const div = document.createElement('div');
                 const chatform = `
             
-                <span class="chat-border active" style="display:none" id="${user}-chat">
+                <span class="chat-border" style="display:none" id="${user}-chat">
                     <span class="chat-topic" id="${user}-topic">
                         <span class="message" id="user1" style="color: rgb(38, 38, 38); font-size: 20px; position: absolute;top: -6px; left: 20px;">${user}</span>
                     </span>
@@ -111,6 +110,7 @@ function front_inject_user(user)
                   });
                 document.querySelector(`#${user}-topic`).addEventListener('click', e => {
                     chat_messanger_user.classList.toggle('active');
+                    chat_messanger_user.classList.remove('recu'); 
                 });
                 function sendMessage() {
                     const messageText = document.getElementById(`textInput-${user}`).value;
@@ -240,12 +240,15 @@ function socket_impel() {
             console.log('receiving message');
             let user = data.user;
             let message = data.message;
-            console.log("iiiiiiiiiihereherehereiiiiiiiiiii")
             console.log(user)
             console.log(message)
-            console.log("iiiiiiiiiiiiihereherehereiiiiiiiii")
             front_inject_user(user);
             front_receive_message(user, message);
+            const chat_messanger_user = document.querySelector(`#${user}-chat`);
+            if(!chat_messanger_user.classList.contains('active'))
+                chat_messanger_user.classList.toggle('recu'); 
+            chat_messanger_user.style.display = 'flex'; 
+
         }
     }
 }
