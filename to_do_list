@@ -22,3 +22,8 @@ step 2: i send to him msg (using his channel name) sending msg tags<msg usr, msg
 {
     "status": "UNFRIEND","user_id":"1"
 }
+
+
+
+
+http://localhost/api/auth/update-xp-level > api dyal level
