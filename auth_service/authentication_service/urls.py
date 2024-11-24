@@ -19,6 +19,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from .views import getlevel
 from .views import UpdateXpAndLevel
 urlpatterns = [
     path('api/auth/login/', Login.as_view()),
@@ -40,7 +41,7 @@ urlpatterns = [
     path('api/auth/user/id/<int:id>/', UserView.as_view(), name='user_detail'),
     path('api/auth/users/', GetAllUsers.as_view(), name='get_all_users'),
     path('api/auth/update-xp-level', UpdateXpAndLevel.as_view(), name='update-xp-level'),
-
+    path('api/auth/get-level', getlevel.as_view(), name='get-level'),
     path('api/friends/', include('friends.urls')),
     path('chat/', include('chat.urls')),
 ]
