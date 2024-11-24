@@ -2363,19 +2363,6 @@ input[type=text-chat]{
     background-size: 50% 50%;
 }
 
-.notifications-container{
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-    justify-content: center;
-    align-items: center;
-}
-
 .menu-bar{
     display: flex;
     flex-direction: column;
@@ -2485,3 +2472,87 @@ input[type=text-chat]{
     border: 5px solid greenyellow;
     background-color: greenyellow;
 }
+
+.dropdown-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 400px;
+    height: 80px;
+    border-radius: 20px;
+}
+.dropdown-item:hover{
+    border: 2px solid #ffbb00;
+    background-color: #151515;
+}
+.dropdown-menu{
+    position: relative;
+    width: 400px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    background-color: #15151534;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(1px);  
+    left: 80px;
+    box-shadow: inset 0px 0px 100px #ffffff1f;
+    border: 1px solid #ffbb00;
+}
+
+.request-bar{
+    width: 200px;
+    display: flex;
+    justify-content: end;
+}
+
+.accept{
+    margin: 10px;
+    float: right;
+    display: flex;
+    align-items: center; 
+    justify-content: center;
+    font-size: 12;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: #2ea453;
+    border: 2px solid #2ea453;
+    width: 100px;
+    height: 30px;
+    border-radius: 15px;
+    background-color: #151515;
+    transition: all 0.2s ease-in-out;
+}
+
+.accept:hover{
+    color: #fff;
+    background-color: #2ea453;
+}
+
+.decline{
+    margin: 10px;
+    float: right;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: #a42e2e;
+    border: 2px solid #a42e2e;
+    background-color: #151515;
+    width: 100px;
+    height: 30px;
+    border-radius: 15px;
+    transition: all 0.2s ease-in-out;
+}
+
+.decline:hover{
+    color: #fff;
+    background-color: #a42e2e;
+}
+
+a {
+    text-decoration: none;
+    color: #ffbb00;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+  }
