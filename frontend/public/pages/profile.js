@@ -538,7 +538,7 @@ const getLevel = ()=>{
             console.log(res);
             const userExperienceBar = document.getElementById("userExperienceBar");
             const experienceCount = document.getElementById("experienceCount");
-            const userXp = 30; //res.userXp;
+            const userXp = res.userXp;
             const maxXp = 100;
             const userLevel = (userXp / maxXp) * 100;
             console.log(userLevel + "%")
