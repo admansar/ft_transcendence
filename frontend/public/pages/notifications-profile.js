@@ -85,7 +85,7 @@ class NotificationsProfile extends HTMLElement {
                 notificationList.appendChild(notifEl);
             }
 
-            if (notificationList.classList.contains('show'))
+            if (notificationList.classList.contains('show') || userNotifications.length === 0)
                 notificationList.classList.remove('show'); 
             else
                 notificationList.classList.add('show');

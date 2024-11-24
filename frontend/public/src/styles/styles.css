@@ -2482,8 +2482,8 @@ input[type=text-chat]{
     border-radius: 20px;
 }
 .dropdown-item:hover{
-    border: 2px solid #ffbb00;
-    background-color: #151515;
+    border: 0px solid #ffbb00;
+    background-color: #15151500;
 }
 .dropdown-menu{
     position: relative;
