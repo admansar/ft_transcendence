@@ -26,10 +26,8 @@ class initGame(APIView):
             player_b_id=players[1]['id'],
             player_c_id=players[2]['id'],
             player_d_id=players[3]['id'],
-            score_a=0,
-            score_b=0,
-            score_c=0,
-            score_d=0,
+            winner_one=None,
+            winner_two=None,
             status='In progress'
         )
         
@@ -64,6 +62,8 @@ class UpdateScore(APIView):
         player = get_user_from_api(username)
         tournament = get_object_or_404(Tournament, id=request.data.get('tournament_id'))
 
+        if tournament.player_a_id == player['id']:
+            pass
         tournament.save()
         return Response({'message': 'Score updated successfully'})
     

@@ -129,19 +129,6 @@ let gameState = {
 
 function updateScore(user_data) {
   console.log('Update Score from front: ', user_data);
-  // makeAuthRequest('/api/tournament/update-score/', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify(user_data),
-  // }).then( async res => {
-  //   res = await res.json();
-  //   console.log('response from update score: ', res);
-  //   return res;
-  // }).catch(err => {
-  //   console.log('Error updating score: ', err);
-  // })
   return new Promise((resolve, reject) => {
     makeAuthRequest('/api/tournament/update-score/', {
       method: 'POST',

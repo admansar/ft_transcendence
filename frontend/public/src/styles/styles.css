@@ -2470,4 +2470,5 @@ input[type=text-chat]{
 
 .chat-border.recu{
     border: 5px solid greenyellow;
+    background-color: greenyellow;
 }
