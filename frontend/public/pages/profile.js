@@ -112,62 +112,228 @@ class Profile extends HTMLElement {
         }
     }
 
-    async getProfileData(userData) {
-        const addFriendButton = document.getElementById('add_friend');
+    // async getProfileData(userData) {
+    //     const addFriendButton = document.getElementById('add_friend');
 
-        if (!app.loggedUser) {
-            let me = await getMe();
-            console.log('me.username', me.username);
-        }
-        addFriendButton.addEventListener('click', async () => {
-            console.log('Add friend clicked');
-            const response = await makeAuthRequest('/api/friends/methods/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    "status": "ADD",
-                    "user_id": String(userData.id)
-                })
-            })
-            const data = await response.json();
-            if (response.ok) {
-                notifications.notify(data.message, 'success', 1000, addFriendButton);
-                addFriendButton.style.display = 'none';
-            }
-            console.log(data);
-        });
-    }
+    //     if (!app.loggedUser) {
+    //         let me = await getMe();
+    //         console.log('me.username', me.username);
+    //     }
+    //     addFriendButton.addEventListener('click', async () => {
+    //         console.log('Add friend clicked');
+    //         const response = await makeAuthRequest('/api/friends/methods/', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 "status": "ADD",
+    //                 "user_id": String(userData.id)
+    //             })
+    //         })
+    //         const data = await response.json();
+    //         if (response.ok) {
+    //             notifications.notify(data.message, 'success', 1000, addFriendButton);
+    //             addFriendButton.style.display = 'none';
+    //         }
+    //         console.log(data);
+    //     });
+    // }
 
-    async checkFriendsStatus(userData) {
-        const addFriendButton = document.getElementById('add_friend');
-
-        try {
-            const res = await makeAuthRequest('/api/friends/profile/', {
+    async getPendingRequests(userData) {
+        return new Promise((resolve, reject) => {
+            makeAuthRequest('/api/friends/profile/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }).then(res => res.json());
+            }).then(res => res.json()).then(data => {
+                // console.log('Checking pending requests', data);
+                resolve(data.Profile.waiting);
+            }).catch(err => {
+                reject(err);
+            })
+        })
+    }
 
-            console.log('Checking pending requests', res);
+    async getBlockedUsers(userData) {
+        return new Promise((resolve, reject) => {
+            makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }).then(res => res.json()).then(data => {
+                // console.log('Checking blocked users', data);
+                resolve(data.Profile.block);
+            }).catch(err => {
+                reject(err);
+            })
+        })
+    }
 
-            if (res.Profile.waiting.includes(userData.id)) {
-                const data = await getUserDataByID(userData.id);
-                console.log('Friend request pending from', data.username);
-                addFriendButton.classList.add('active');
-            } else if (res.Profile.friends.includes(userData.id)) {
-                addFriendButton.classList.add('active');
-            } else if (res.Profile.block.includes(userData.id)) {
-                Router.findRoute('/404');
-                return;
-            }
+    async checkFriendsStatus(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+        const pendingListButton = document.getElementById('pending_list');
+        const blockListButton = document.getElementById('block_list');
+        const blockModal = document.querySelector('.block_modal_content');
+        const pendingModal = document.getElementById('pendingModal')
+        const modalContent = document.querySelector('.modal_content');
 
-            return res;
+        let pendings = [];
+        let blocked = [];
+        try {
+            pendingListButton.addEventListener('click', async () => {
+                let pendingRequests = await this.getPendingRequests(userData);
+                if (!pendingRequests.length) {
+                    pendingModal.style.display = 'flex';
+                    modalContent.style.margin = 'auto';
+                    modalContent.style.textAlign = 'center';
+                    modalContent.innerHTML = '<span class="message">No pending requests</span>';
+                    modalContent.firstChild.style.width = '100%';
+                    modalContent.firstChild.style.fontSize = '20px';
+                    return;
+                }
+                console.log('Checking pending requests', pendingRequests);
+                modalContent.innerHTML = '';
+                pendingModal.style.display = 'flex';
+                for (let i = 0; i < pendingRequests.length; i++) {
+                    pendings = await getUserDataByID(pendingRequests[i]);
+                    console.log('pendings', pendings);
+                    let pendingList = document.createElement('div');
+                    pendingList.classList.add('fr_request_list');
+                    pendingList.id = pendings.id;
+                    pendingList.style.maxWidth = '100%';
+                    pendingList.innerHTML = `
+                        <span class="fr_id">
+                            <span class="fr_avatar" style="background-image: url(${pendings.avatar})"></span>
+                            <span class="fr_name">${pendings.username}</span>
+                        </span>
+                        <span class="requesting">
+                            <span class="accept_fr">Accept</span>
+                            <span class="reject_fr">Reject</span>
+                        </span>
+                    `
+                    modalContent.appendChild(pendingList);
+                }
+                const acceptButtons = document.querySelectorAll('.accept_fr');
+                const rejectButtons = document.querySelectorAll('.reject_fr');
+                acceptButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        let pendingUser = button.parentElement.parentElement;
+                        let pendingID = button.parentElement.parentElement.id;
+                        makeAuthRequest('/api/friends/methods/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "status": "ACCEPT",
+                                "user_id": pendingID
+                            })
+                        }).then(async res => {
+                            if (res.ok) {
+                                notifications.notify('Friend request accepted', 'success', 1500, modalContent);
+                                pendingUser.style.display = 'none';
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                            notifications.notify('Error accepting friend request', 'error', 1000, modalContent);
+                        })
+                    })
+                })
+                rejectButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        let pendingUser = button.parentElement.parentElement;
+                        let pendingID = button.parentElement.parentElement.id;
+                        makeAuthRequest('/api/friends/methods/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "status": "REJECT",
+                                "user_id": pendingID
+                            })
+                        }).then(async res => {
+                            if (res.ok) {
+                                notifications.notify('Friend request rejected', 'success', 1500, modalContent);
+                                pendingUser.style.display = 'none';
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                            notifications.notify('Error rejecting friend request', 'error', 1000, modalContent);
+                        })
+                    })
+                })
+            });
         } catch (err) {
             console.log(err);
             notifications.notify('Error checking friends status', 'error', 1000, addFriendButton);
+            throw err;
+        }
+
+        try {
+            blocked = await this.getBlockedUsers(userData);
+            blockListButton.addEventListener('click', async () => {
+                if (!blocked.length) {
+                    blockModal.style.display = 'flex';
+                    blockModal.style.textAlign = 'center';
+                    blockModal.innerHTML = '<span class="message">No blocked users</span>';
+                    blockModal.style.margin = 'auto';
+                    blockModal.firstChild.style.width = '100%';
+                    blockModal.firstChild.style.fontSize = '20px';
+                    return;
+                }
+                blockModal.style.display = 'flex';
+                blockModal.innerHTML = '';
+                console.log('Checking blocked users', blocked);
+                for (let i = 0; i < blocked.length; i++) {
+                    let blockedUser = await getUserDataByID(blocked[i]);
+                    let blockedUserEl = document.createElement('div');
+                    blockedUserEl.classList.add('fr_request_list');
+                    blockedUserEl.id = blocked[i];
+                    blockedUserEl.style.maxWidth = '100%';
+                    blockedUserEl.innerHTML = `
+                        <span class="fr_id">
+                            <span class="fr_avatar" style="background-image: url(${blockedUser.avatar})"></span>
+                            <span class="fr_name">${blockedUser.username}</span>
+                        </span>
+                        <span class="requesting">
+                            <span class="unblock_fr">Unblock</span>
+                        </span>
+                    `
+                    blockModal.appendChild(blockedUserEl);
+                }
+                const unblockButtons = document.querySelectorAll('.unblock_fr');
+                unblockButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        let blockedUser = button.parentElement.parentElement;
+                        let blockedID = button.parentElement.parentElement.id;
+                        makeAuthRequest('/api/friends/methods/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                "status": "UNBLOCK",
+                                "user_id": blockedID
+                            })
+                        }).then(async res => {
+                            if (res.ok) {
+                                notifications.notify('User unblocked', 'success', 1500, blockModal);
+                                blockedUser.style.display = 'none';
+                            }
+                        }).catch(err => {
+                            console.log(err);
+                            notifications.notify('Error unblocking user', 'error', 1000, blockModal);
+                        })
+                    })
+                })
+            })
+        } catch (err) {
+            console.log(err);
+            notifications.notify('Error checking blocked users', 'error', 1000, addFriendButton);
             throw err;
         }
     }
@@ -268,6 +434,7 @@ class Profile extends HTMLElement {
         const blockUserButton = document.getElementById('block_that');
         const pendingListButton = document.getElementById('pending_list');
 
+        const blockListButton = document.getElementById('block_list');
         if (!app.loggedUser) {
             me = await getMe();
             console.log('me.username', me.username);
@@ -277,8 +444,10 @@ class Profile extends HTMLElement {
         if (app.loggedUser === userData.username || me.username === userData.username) {
             addFriendButton.style.display = 'none';
             blockUserButton.style.display = 'none';
-        } else {
-            await this.checkFriendsStatus(userData); 
+        } else { // If the user is not the owner of the profile
+            blockListButton.style.display = 'none';
+            pendingListButton.style.display = 'none';
+            await this.checkFriendsStatus(userData);
             console.log(addFriendButton.classList);
 
             if (!addFriendButton.classList.contains('active')) {
@@ -393,25 +562,6 @@ class Profile extends HTMLElement {
                     <div class="pending_friends_modal" id="pendingModal">
                         <div class="modal_content">
                             <span class="close_modal">&times;</span>
-                            <div class="fr_request_list" id="User">
-                                <span class="fr_id">
-                                    <span class="fr_avatar"></span>
-                                    <span class="fr_name">USER</span>
-                                </span>
-                                <span class="requesting">
-                                    <span class="accept_fr">Accept</span>
-                                    <span class="reject_fr">Reject</span>
-                                </span>
-                            </div>
-                            <div class="fr_request_list" id="User">
-                            <span class="fr_id">
-                                <span class="fr_avatar"></span>
-                                <span class="fr_name">USER</span>
-                            </span>
-                            <span class="requesting">
-                                <span class="accept_fr">Accept</span>
-                                <span class="reject_fr">Reject</span>
-                            </span>
                         </div>
                         </div>
                     </div>
@@ -479,9 +629,9 @@ class Profile extends HTMLElement {
                 add_remove.classList.add('active');
             });
 
-            pendingListButton.addEventListener('click', function () {
-                pendingModal.style.display = 'flex';
-            });
+            // pendingListButton.addEventListener('click', function () {
+            //     pendingModal.style.display = 'flex';
+            // });
 
             blockListButton.addEventListener('click', function () {
                 blockModal.style.display = 'flex';
@@ -526,17 +676,17 @@ export function attachDOM({ username }) {
     document.body.appendChild(page);
 }
 
-const getLevel = ()=>{
+const getLevel = () => {
     const x = window.location.pathname.split('/');
     if (x.length != 3) return;
     const username = x[2];
-    
-    fetch(`http://${window.location.host}/api/auth/get-level?username=${username}`, {method:"GET", credentials:"include"}).then(res=>{
-        if (res.status != 200){
+
+    fetch(`http://${window.location.host}/api/auth/get-level?username=${username}`, { method: "GET", credentials: "include" }).then(res => {
+        if (res.status != 200) {
             alert("Error")
             return;
         }
-        res.json().then(res=>{
+        res.json().then(res => {
             console.log(res);
             const userExperienceBar = document.getElementById("userExperienceBar");
             const experienceCount = document.getElementById("experienceCount");

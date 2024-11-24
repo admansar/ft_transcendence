@@ -152,7 +152,7 @@ class Request_methods(APIView):
             elif method == "UNBLOCK":
                 Unblock_user(P_user, s_user, s_user_id)
             elif method == "UNFRIEND":
-                return Unfriend(self, P_user, s_user_id, s_user, _user)
+                Unfriend(self, P_user, s_user_id, s_user, _user)
             elif method == "CANCEL":
                 try:
                     user_P : Profile = self.profile.get(user=s_user)
