@@ -5,6 +5,20 @@ import { makeAuthRequest } from "../services/utils.js";
 // var chatSocket = getwebsocket()
 let chatSocket = null;
 
+let self_user = null;
+
+makeAuthRequest('/api/auth/me', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+	},
+	credentials: 'include',
+}).then(async res => {
+    res = await res.json();
+    console.log("from me", res);
+    self_user = res.username;
+})
+
 
 function front_receive_message(user, message)
 {
@@ -227,7 +241,8 @@ function socket_impel() {
             for (let i = 0; i < users.length; i++)
             {
                 console.log('adding user :', users[i]);
-                front_inject_user(users[i]);
+                if (users[i] !== self_user)
+                    front_inject_user(users[i]);
             }
         }
         else if (data.type === 'remove_user')
