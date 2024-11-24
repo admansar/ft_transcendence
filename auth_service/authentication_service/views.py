@@ -384,6 +384,10 @@ class UpdateUser(APIView):
         serializer.save()
         return Response(serializer.data)
             
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db import models
+from .models import User
 class UpdateXpAndLevel(APIView):
     def post(self, request):
         print('XP and Level:', request.data)
@@ -401,37 +405,36 @@ class UpdateXpAndLevel(APIView):
         except User.DoesNotExist:
             return Response({'error': 'Utilisateur non trouvé'}, status=404)
 
+        # Initialiser level et xp à 1 s'ils ne sont pas encore définis
+        if user.xp is None:
+            user.xp = 1
+        if user.level is None:
+            user.level = 1
+
         print(f"XP actuel: {user.xp}, Niveau actuel: {user.level}")
 
-        # Calculer la mise à jour des XP et du niveau
+        # Calculer la mise à jour des XP en fonction du résultat
         if result == 'win':  # Pour une victoire
-            # Le taux de gain d'XP diminue avec le niveau
-            xp_multiplier = 0.10  # Valeur de base
+            user.xp += xp_change + (user.xp * 0.10)  # Augmenter l'XP de 10%
+            print(f"XP mis à jour après victoire: {user.xp}")
 
-            # Ajuster le multiplicateur d'XP en fonction du niveau de l'utilisateur
-            if user.level >= 10:
-                xp_multiplier = 0.05  # 5% pour les niveaux plus élevés
-            elif user.level >= 5:
-                xp_multiplier = 0.07  # 7% pour les niveaux moyens
-
-            # Appliquer le multiplicateur à l'XP
-            user.xp += user.xp * xp_multiplier
         elif result == 'loss':  # Pour une défaite
-            # Si le niveau est élevé (niveau >= 10), diminuer de 10% les XP
-            xp_deduction = 0.05  # Valeur de base pour une défaite
-
-            # Si le niveau est supérieur ou égal à 10, la perte d'XP est de 10%
-            if user.level >= 10:
-                xp_deduction = 0.10  # 10% pour les niveaux élevés
-
-            # Diminuer les XP en fonction de la déduction
-            user.xp -= user.xp * xp_deduction
+            user.xp -= xp_change + (user.xp * 0.05)  # Diminuer l'XP de 5%
+            # Si l'XP devient négatif, réinitialiser à 0
+            if user.xp < 0:
+                user.xp = 0
+            print(f"XP mis à jour après défaite: {user.xp}")
 
         # Vérifier si l'XP dépasse 100 et passer au niveau suivant
         if user.xp >= 100:
             user.xp = 0  # Réinitialiser l'XP à 0
             user.level += 1  # Augmenter le niveau
             print(f"L'utilisateur a monté de niveau! Nouveau niveau : {user.level}")
+        
+        # Si l'XP est trop faible, envisager de rétrograder le niveau
+        if user.xp < 0 and user.level > 1:
+            user.level -= 1  # Rétrograder le niveau si l'XP est 0
+            print(f"L'utilisateur a rétrogradé de niveau! Nouveau niveau : {user.level}")
 
         print(f"XP mis à jour : {user.xp}, Niveau mis à jour : {user.level}")
 
