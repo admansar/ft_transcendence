@@ -45,6 +45,7 @@ class Notifications extends HTMLElement {
         if (htmlElement) {
             htmlElement.appendChild(notification);
         } else {
+            console.log('appending to container', notification);
             this.container.appendChild(notification);
         }
 

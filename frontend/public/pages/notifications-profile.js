@@ -46,7 +46,7 @@ class NotificationsProfile extends HTMLElement {
     render() {
         console.log('NotificationsProfile component is rendered');
         let notificationEl = document.querySelector('.notification-container');
-        let notificationList = document.querySelector('.notifications');
+        let notificationList = document.querySelector('.notifications-dashboard-container');
 
         notificationEl.addEventListener('click', async () => {
             let userNotifications = await this.getAllNotifications();

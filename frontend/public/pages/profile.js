@@ -164,11 +164,11 @@ class Profile extends HTMLElement {
                 return;
             }
 
-            return res; // Explicitly return the result
+            return res;
         } catch (err) {
             console.log(err);
             notifications.notify('Error checking friends status', 'error', 1000, addFriendButton);
-            throw err; // Ensure the error propagates properly
+            throw err;
         }
     }
 
@@ -266,6 +266,7 @@ class Profile extends HTMLElement {
         let me = null;
         const addFriendButton = document.getElementById('add_friend');
         const blockUserButton = document.getElementById('block_that');
+        const pendingListButton = document.getElementById('pending_list');
 
         if (!app.loggedUser) {
             me = await getMe();
@@ -314,7 +315,7 @@ class Profile extends HTMLElement {
                                 </div>
                             </div>
                             <div class="tools_profile">
-                            <span style="display:none">
+                            <span style="display:contents">
                                 <span class="request_list pending_list" id="pending_list"></span>
                                 <span class="request_list block_list" id="block_list"></span>
                             </span>
