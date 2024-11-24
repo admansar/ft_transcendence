@@ -383,15 +383,6 @@ class UpdateUser(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-<<<<<<< HEAD
-            
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.db import models
-from .models import User
-=======
-
->>>>>>> 9b31d35aae7ad46034f62024cc3b6705830a0323
 class UpdateXpAndLevel(APIView):
     def post(self, request):
         print('XP and Level:', request.data)
@@ -419,7 +410,6 @@ class UpdateXpAndLevel(APIView):
 
         # Calculer la mise à jour des XP en fonction du résultat
         if result == 'win':  # Pour une victoire
-<<<<<<< HEAD
             user.xp += xp_change + (user.xp * 0.10)  # Augmenter l'XP de 10%
             print(f"XP mis à jour après victoire: {user.xp}")
 
@@ -429,13 +419,6 @@ class UpdateXpAndLevel(APIView):
             if user.xp < 0:
                 user.xp = 0
             print(f"XP mis à jour après défaite: {user.xp}")
-=======
-            # Augmenter de 10% les XP actuels
-            user.xp += user.xp * 0.10
-        elif result == 'loss':  # Pour une défaite
-            # Diminuer de 5% les XP actuels
-            user.xp -= user.xp * 0.05
->>>>>>> 9b31d35aae7ad46034f62024cc3b6705830a0323
 
         # Vérifier si l'XP dépasse 100 et passer au niveau suivant
         if user.xp >= 100:
