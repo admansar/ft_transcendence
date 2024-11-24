@@ -350,7 +350,13 @@ class Me(APIView):
         jwt = JWTAuthentication()
         validated_token = jwt.get_validated_token(token)
         user = jwt.get_user(validated_token)
-        return Response({'access': token, 'id': user.id, 'username': user.username, 'email': user.email, 'is_2fa_enabled': user.is_2fa_enabled})
+        return Response({'access': token,
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'is_2fa_enabled': user.is_2fa_enabled,
+                        'avatar': user.avatar,
+                    })
 
 class Logout(APIView):
     def post(self, request):
@@ -442,3 +448,21 @@ class UpdateXpAndLevel(APIView):
             'xp': user.xp,
             'level': user.level
         })
+    
+class getlevel(APIView):
+    def get(self, request):
+        
+        username = request.GET.get('username')
+        user = User.objects.get(username=username)
+        if not user:
+            return Response({'error': 'User not found'}, status=404)
+        xp = user.xp
+        level = user.level
+        return Response({"userLevel": level, "userXp": xp})
+        # token = request.COOKIES.get('access')
+        # if not token:
+        #     raise AuthenticationFailed('Unauthorized')
+        
+        # jwt = JWTAuthentication()
+        # validated_token = jwt.get_validated_token(token)
+        # user = jwt.get_user(validated_token)

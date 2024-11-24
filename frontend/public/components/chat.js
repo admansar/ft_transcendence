@@ -1,4 +1,5 @@
 // import { getwebsocket } from "../services/Router.js";
+import { Router } from "../services/Router.js";
 
 import { makeAuthRequest } from "../services/utils.js";
 
@@ -155,14 +156,38 @@ function front_inject_user(user)
                 const playWithWindow = document.getElementById(`play-with-${user}-window`);
                 document.getElementById(`play-with-${user}`).addEventListener('click', function () {
                     console.log("Invite triggered");
-
-                    playWithWindow.style.display = 'flex';
+                    let playwith = document.getElementById(`play-with-${user}`);
+                    playwith.style.backgroundColor = '#dc3545';
+                    chatSocket.send(JSON.stringify({
+                        'type': 'game_invite',
+                        'from': self_user,
+                        'to': user
+                    }));
+                    //playWithWindow.style.display = 'flex';
                 });
 
 
                 document.getElementById(`${user}-rjt`).addEventListener('click', function () {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'reject_game_invite',
+                        'from': self_user,
+                        'to': user
+                    }));
                     playWithWindow.style.display = 'none';
                 });
+
+                document.getElementById(`${user}-acp`).addEventListener('click', function () {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'accept_game_invite',
+                        'from': self_user,
+                        'to': user,
+                        'chat_id': user
+                    }));
+                    playWithWindow.style.display = 'none';
+                    chatSocket.close();
+                    Router.findRoute(`/game/friends`);
+                });
+
 
                 document.getElementById(`send-${user}`).addEventListener('click', function (event) {
                     sendMessage();
@@ -283,6 +308,23 @@ function socket_impel() {
                     chat_messanger_user.classList.toggle('recu');
                 chat_messanger_user.style.display = 'flex';
             }
+        }
+        else if (data.type === 'game_invite')
+        {
+            const playWithWindow = document.getElementById(`play-with-${data.from}-window`);
+            playWithWindow.style.display = 'flex';
+        }
+        else if (data.type === 'reject_game_invite')
+        {
+            console.log (`${data.from} rejected your invitation`);
+            const playwith = document.getElementById(`play-with-${data.from}`);
+            playwith.style.backgroundColor = '#00b100';
+        }
+        else if (data.type === 'accept_game_invite')
+        {
+            console.log (`${data.from} accepted your invitation`);
+            chatSocket.close();
+            Router.findRoute(`/game/friends`);
         }
     }
 }

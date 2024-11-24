@@ -38,12 +38,14 @@ class Notifications extends HTMLElement {
         notification.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)'; // Optional: Add shadow
         notification.style.borderRadius = '10px'; // Optional: Add rounded corners
         notification.style.width = '50%';
+        notification.style.maxWidth = '400px';    // Optional: Limit the width
         
         
 
         if (htmlElement) {
             htmlElement.appendChild(notification);
         } else {
+            console.log('appending to container', notification);
             this.container.appendChild(notification);
         }
 

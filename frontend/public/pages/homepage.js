@@ -5,6 +5,7 @@ import "../components/settings.js"
 import "../components/search.js";
 import "../components/menu.js"
 import "../components/achivement.js"
+import '../pages/notifications-profile.js';
 import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
 import { getMe } from "../services/utils.js";
 
@@ -17,18 +18,13 @@ export class HomePage extends HTMLElement {
 
     async connectedCallback() {
         let profile = document.querySelector('.profile');
-        let jwt = await getMe();
-        let userData = await getUserDataByID(jwt.id);
+        let userData = await getMe();
+
+        document.title = `Dashboard - ${userData.username}`;
         
         app.loggedUser = userData.username;
         console.log('app.loggedUser', app.loggedUser);
-        // let event = new CustomEvent('userDataReady', {
-        //     detail: {
-        //         userData
-        //     }
-        // });
-        // window.dispatchEvent(event);
-        
+
         profile.style.backgroundImage = `url(${userData.avatar})`;
         document.querySelector('.message').innerHTML = `${userData.username}`;
         profile.addEventListener('click', e => {
@@ -50,6 +46,9 @@ export class HomePage extends HTMLElement {
 
         const searchComponent = document.createElement('app-search');
         this.appendChild(searchComponent);
+
+        const notificationsProfile = document.createElement('app-notifications-profile');
+        this.appendChild(notificationsProfile);
 
         
     }

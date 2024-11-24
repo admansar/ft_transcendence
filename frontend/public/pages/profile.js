@@ -15,6 +15,7 @@ class Profile extends HTMLElement {
         await this.render(username, userData);
         this.checkFriendsStatus(userData);
         await this.renderProfile(userData);
+        document.title = `Profile - ${userData.username}`;
     }
 
     async renderScore(data) {
@@ -163,11 +164,11 @@ class Profile extends HTMLElement {
                 return;
             }
 
-            return res; // Explicitly return the result
+            return res;
         } catch (err) {
             console.log(err);
             notifications.notify('Error checking friends status', 'error', 1000, addFriendButton);
-            throw err; // Ensure the error propagates properly
+            throw err;
         }
     }
 
@@ -265,6 +266,7 @@ class Profile extends HTMLElement {
         let me = null;
         const addFriendButton = document.getElementById('add_friend');
         const blockUserButton = document.getElementById('block_that');
+        const pendingListButton = document.getElementById('pending_list');
 
         if (!app.loggedUser) {
             me = await getMe();
@@ -272,12 +274,11 @@ class Profile extends HTMLElement {
         } else {
             console.log('app.loggedUser', app.loggedUser);
         }
-        // console.log('me', app.loggedUser, me.username);
         if (app.loggedUser === userData.username || me.username === userData.username) {
             addFriendButton.style.display = 'none';
             blockUserButton.style.display = 'none';
         } else {
-            await this.checkFriendsStatus(userData); // Ensure it completes
+            await this.checkFriendsStatus(userData); 
             console.log(addFriendButton.classList);
 
             if (!addFriendButton.classList.contains('active')) {
@@ -314,7 +315,8 @@ class Profile extends HTMLElement {
                                 </div>
                             </div>
                             <div class="tools_profile">
-                            <span style="display:none">
+                            <span style="display:contents
+                            ">
                                 <span class="request_list pending_list" id="pending_list"></span>
                                 <span class="request_list block_list" id="block_list"></span>
                             </span>
@@ -329,10 +331,10 @@ class Profile extends HTMLElement {
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
                             <div class="username-profile-dashbord">${userData.username}</div>
-                            <div class="expbar-profile-dashbord">
-                                <span class="user_exp">
-                                    <span class="level">lvl 100</span>
-                                    <span class="Experience">80%</span>
+                            <div class="expbar-profile-dashbord" style="position:relative;">
+                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">lvl <span id="userLevel">100</span> </span>
+                                <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
+                                    <span class="Experience" id="experienceCount">80%</span>
                                 </span>
                             </div>
                         </div>
@@ -524,6 +526,32 @@ export function attachDOM({ username }) {
     document.body.appendChild(page);
 }
 
+const getLevel = ()=>{
+    const x = window.location.pathname.split('/');
+    if (x.length != 3) return;
+    const username = x[2];
+    
+    fetch(`http://${window.location.host}/api/auth/get-level?username=${username}`, {method:"GET", credentials:"include"}).then(res=>{
+        if (res.status != 200){
+            alert("Error")
+            return;
+        }
+        res.json().then(res=>{
+            console.log(res);
+            const userExperienceBar = document.getElementById("userExperienceBar");
+            const experienceCount = document.getElementById("experienceCount");
+            const userXp = res.userXp;
+            const maxXp = 100;
+            const userLevel = (userXp / maxXp) * 100;
+            console.log(userLevel + "%")
+            userExperienceBar.style.width = `${userLevel}%`
+            experienceCount.textContent = `${userLevel}%`
+
+            document.getElementById("userLevel").textContent = res.userLevel;
+        })
+    })
+}
+
 async function getUserData(username) {
     let options = {
         method: 'POST',
@@ -550,6 +578,7 @@ async function getUserData(username) {
     // console.log(games);
     data.games = games.games
     console.log('data', data);
+    getLevel()
 
     return data;
 }

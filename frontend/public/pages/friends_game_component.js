@@ -33,7 +33,7 @@ class Game_Friends extends HTMLElement {
         </div>
     
             <div id="waiting-overlay">
-            <div id="waiting-text">Waiting for opponent...</div>
+            <div id="waiting-text">Waiting for peer...</div>
                 <div id="waiting-bar">
               <div id="waiting-progress"></div>
             </div>

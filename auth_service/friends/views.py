@@ -7,7 +7,7 @@ from django.contrib import messages
 from .models import Profile, friend_request
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import Serializer_User, SerializerProfile
+from .serializers import Serializer_User, SerializerProfile, SerializerFriends
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from django.utils.decorators import method_decorator 
@@ -58,23 +58,25 @@ def Createfriend_rolation(_reciver : User, user_P : Profile, resiver_user_P : Pr
     if user_P.block.filter(id=_reciver.id).exists():
         content = {"error" : " You Can't add This User. "}
         return Response(content, status=status.HTTP_403_FORBIDDEN)
-    elif resiver_user_P.block.filter(id=_user.id).exists():
+    if resiver_user_P.block.filter(id=_user.id).exists():
         content = {"error" : " You Get Blocked From This User. "}
         return Response(content, status=status.HTTP_403_FORBIDDEN)
-    elif user_P.friends.filter(id=_reciver.id).exists():
+    if user_P.friends.filter(id=_reciver.id).exists():
         content = {"error" : " Already Have This User As Friend. "}
         return Response(content, status=status.HTTP_400_BAD_REQUEST) 
-    elif user_P.waiting.filter(id=_reciver.id).exists():
+    if user_P.waiting.filter(id=_reciver.id).exists():
         content = {"error" : " This User Alrady Invite You And Waiting Your Confirm. "}
         return Response(content, status=status.HTTP_409_CONFLICT)
-    elif resiver_user_P.waiting.filter(id=_user.id).exists():
+    if resiver_user_P.waiting.filter(id=_user.id).exists():
         content = {"error" : " You have allredy sent request wait for response. "}
         return Response(content, status=status.HTTP_409_CONFLICT)
-    else:
+    if not friend_request.objects.filter(sender=_user, reciver=_reciver).exists():
         friend = friend_request.objects.create(sender=_user, reciver=_reciver)
         friend.save()
         content = {"message" : " request send . "}
         return Response(content, status=status.HTTP_200_OK)
+    else:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 def  ADD_method(self, _user, _reciver_id):
     if self.user.filter(id=_reciver_id).exists():
@@ -96,6 +98,21 @@ class Userprofile(APIView):
             userprofile = Profile.objects.get(user=_user)
             Serializer = SerializerProfile(userprofile)
             return Response({"Profile" : Serializer.data})
+        except Exception as e:
+            print('e========>', e)
+            content = {"error" : "Please login"}
+            return Response(content, status=status.HTTP_401_UNAUTHORIZED)
+
+class Userfriends(APIView):
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            profile = Profile.objects.all()
+            _user = get_user_from_token(request)
+            userprofile = Profile.objects.get(user=_user)
+            Serializer = SerializerFriends(userprofile)
+            return Response({"Friends" : Serializer.data})
         except Exception as e:
             print('e========>', e)
             content = {"error" : "Please login"}
@@ -152,7 +169,7 @@ class Request_methods(APIView):
             elif method == "UNBLOCK":
                 Unblock_user(P_user, s_user, s_user_id)
             elif method == "UNFRIEND":
-                return Unfriend(self, P_user, s_user_id, s_user, _user)
+                Unfriend(self, P_user, s_user_id, s_user, _user)
             elif method == "CANCEL":
                 try:
                     user_P : Profile = self.profile.get(user=s_user)

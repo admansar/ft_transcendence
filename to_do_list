@@ -19,26 +19,11 @@ step 2: i send to him msg (using his channel name) sending msg tags<msg usr, msg
 
 
 
-    {
-        "status": "UNFRIEND","user_id":"1"
-    }
+        {
+            "status": "UNFRIEND","user_id":"1"
+        }
 
 
 
 
 http://localhost/api/auth/update-xp-level > api dyal level
- for key in user:
-            len_key = await sync_to_async (len)(key)
-            num.append(key[key.find(":") + 1 : len_key])
-        len_num = await sync_to_async (len)(num)
-        nim_num = await sync_to_async (min)(num)
-        while len_num > 1:
-            for key in user:
-                len_key = await sync_to_async (len)(key)
-                if key[key.find(":") + 1 : len_key] == nim_num:
-                    json_string = await self.Parse_messgae_on_redis(key)
-                    if (json_string != None):
-                        await self.trough_channel(self.channel_name, json_string)
-                    if nim_num:
-                    num.remove(nim_num)
-                    break
