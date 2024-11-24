@@ -19,9 +19,9 @@ step 2: i send to him msg (using his channel name) sending msg tags<msg usr, msg
 
 
 
-{
-    "status": "UNFRIEND","user_id":"1"
-}
+    {
+        "status": "UNFRIEND","user_id":"1"
+    }
 
 
 

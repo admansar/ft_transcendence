@@ -153,10 +153,10 @@ class Request_methods(APIView):
                 Unblock_user(P_user, s_user, s_user_id)
             elif method == "UNFRIEND":
                 return Unfriend(self, P_user, s_user_id, s_user, _user)
-            else:
+            elif method == "CANCEL":
                 try:
-                    print("am here")
-                    P_user.waiting.remove(s_user)
+                    user_p : Profile = self.profile.get(user=s_user)
+                    user_p.waiting.remove(_user)
                 except Exception:
                     return Response(status=status.HTTP_400_BAD_REQUEST)
             if self.sender != None:
