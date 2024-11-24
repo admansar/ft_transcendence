@@ -237,7 +237,12 @@ gameSocket.onmessage = async function (e) {
 			breaker = true;
 			setTimeout(function () { }, 1000)
 			gameSocket.close()
+			// document.head.innerHTML = '';
+			console.log('router: ', Router)
+			console.log('router: ', Router)
 			Router.findRoute('404');
+			Router.findRoute('/');
+			return;
 		}
 	}
 	else if (data.type === 'game_over' && !game_end_locker) {
@@ -266,7 +271,7 @@ gameSocket.onmessage = async function (e) {
 		setTimeout(function () { }, 1000)
 		gameSocket.close()
 		Router.findRoute('404');
-
+		Router.findRoute('/');
 	}
 	else if (data.type === 'broadcast_game_state') {
 		gameState.ball_speed = data.game_state.ball_speed;
@@ -525,12 +530,6 @@ function updateCountdown(txt = '') {
 
 
 export function game_2d() {
-	if (!token) {
-		show_notification('You must login first!');
-		gameSocket.close()
-		Router.findRoute('/login');
-		breaker = true
-	}
 	showWaitingOverlay()
 	game_loop();
 }
