@@ -105,6 +105,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data = await sync_to_async(json.loads)(text_data)
+        print ("text_data : ", text_data)
+        if text_data["type"] == "game_invite":
+            print ("username : ", self.scope["user"].username) 
+            for user in online_users:
+                if user.scope["user"].username == text_data["to"]:
+                    await user.send(json.dumps({
+                        'type': 'game_invite',
+                        'from': text_data["from"],
+                    }))
+            return
+        elif text_data["type"] == "reject_game_invite":
+            for user in online_users:
+                if user.scope["user"].username == text_data["to"]:
+                    await user.send(json.dumps({
+                        'type': 'reject_game_invite',
+                        'from': text_data["from"],
+                    }))
+            return 
+        elif text_data["type"] == "accept_game_invite":
+            for user in online_users:
+                if user.scope["user"].username == text_data["to"]:
+                    await user.send(json.dumps({
+                        'type': 'accept_game_invite',
+                        'from': text_data["from"],
+                    }))
+            pass
         try:
             my_client : Client = await sync_to_async(self.client.get)(username=text_data["user"])
         except Exception:
