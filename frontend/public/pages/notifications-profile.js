@@ -61,8 +61,10 @@ class NotificationsProfile extends HTMLElement {
                         <img src="${user.avatar}" alt="${user.username}'s avatar" class="user-avatar" />
                         ${user.username}
                     </a>
-                    <button class="accept">Accept</button>
-                    <button class="decline">Decline</button>
+                    <div class="request-bar">
+                        <button class="accept">Accept</button>
+                        <button class="decline">Decline</button>
+                    </div>
                 `
                 notifEl.querySelector('.accept').addEventListener('click', async (e) => {
                     e.stopPropagation();
@@ -82,8 +84,13 @@ class NotificationsProfile extends HTMLElement {
                 });
                 notificationList.appendChild(notifEl);
             }
-            notificationList.classList.add('show');
+
+            if (notificationList.classList.contains('show'))
+                notificationList.classList.remove('show'); 
+            else
+                notificationList.classList.add('show');
         })
+
     }
 }
 
