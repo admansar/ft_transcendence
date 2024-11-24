@@ -180,14 +180,6 @@ gameSocket.onmessage = async function (e) {
 
 		if (test === 0) {
 			test++;
-			// initGame = await fetch('/api/game/init-game', {
-			// 	method: 'POST',
-			// 	headers: {
-			// 		'Content-Type': 'application/json'
-			// 	},
-			// 	body: JSON.stringify(current_state)
-			// 	// body: JSON.stringify(user_data)
-			// })
 			initGame = await makeAuthRequest('/api/game/init-game', {
 				method: 'POST',
 				headers: {
