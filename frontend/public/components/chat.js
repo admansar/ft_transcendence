@@ -170,9 +170,10 @@ function front_inject_user(user)
             }
             else { document.querySelector(`#${user}-chat`).style.display = 'flex' }
     
-            profile_messanger.addEventListener('click', function () {
-                chat_messanger_user.style.display = 'flex';
-            });
+            // if (profile_messanger)
+            //     profile_messanger.addEventListener('click', function () {
+            //         chat_messanger_user.style.display = 'flex';
+            //     });
         }    
     })
 }
@@ -250,20 +251,38 @@ function socket_impel() {
             console.log('removing user :', data.user);
             front_remove_user(data.user);
         }
-        else if (data.type === 'send_message')
-        {
-            console.log('receiving message');
-            let user = data.user;
-            let message = data.message;
-            console.log(user)
-            console.log(message)
-            front_inject_user(user);
-            front_receive_message(user, message);
-            const chat_messanger_user = document.querySelector(`#${user}-chat`);
-            if(!chat_messanger_user.classList.contains('active'))
-                chat_messanger_user.classList.toggle('recu'); 
-            chat_messanger_user.style.display = 'flex'; 
-
+        else if (data.type === 'send_message') {
+            let msn_lst = document.querySelector('.friend-profile');
+            if (!msn_lst) {
+                console.log('ana hona');
+                (async () => {
+                    while (!msn_lst) {
+                        msn_lst = document.querySelector('.friend-profile');
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                    console.log('now the list is ready');
+                    console.log(data);
+                })().then(() => {
+                    front_inject_user(data.user);
+                    front_receive_message(data.user, data.message);
+                    const chat_messanger_user = document.querySelector(`#${data.user}-chat`);
+                    if (chat_messanger_user && !chat_messanger_user.classList.contains('active'))
+                        chat_messanger_user.classList.toggle('recu');
+                    chat_messanger_user.style.display = 'flex';
+                });
+            } else {
+                console.log('receiving message');
+                let user = data.user;
+                let message = data.message;
+                console.log(user);
+                console.log(message);
+                front_inject_user(user);
+                front_receive_message(user, message);
+                const chat_messanger_user = document.querySelector(`#${user}-chat`);
+                if (chat_messanger_user && !chat_messanger_user.classList.contains('active'))
+                    chat_messanger_user.classList.toggle('recu');
+                chat_messanger_user.style.display = 'flex';
+            }
         }
     }
 }
