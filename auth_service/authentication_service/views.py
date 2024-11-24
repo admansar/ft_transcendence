@@ -22,8 +22,6 @@ from django.core.mail import send_mail
 import secrets
 import string
 from jwt import DecodeError
-from friends.models import Profile
-
 User = get_user_model()
 
 
@@ -385,4 +383,79 @@ class UpdateUser(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+<<<<<<< HEAD
             
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.db import models
+from .models import User
+=======
+
+>>>>>>> 9b31d35aae7ad46034f62024cc3b6705830a0323
+class UpdateXpAndLevel(APIView):
+    def post(self, request):
+        print('XP and Level:', request.data)
+
+        username = request.data.get('username')
+        print('Username:', username)
+
+        xp_change = request.data.get('xp', 0)  # La valeur à ajouter ou soustraire des XP
+        level_change = request.data.get('level', 0)  # La valeur à ajouter au niveau
+        result = request.data.get('result')  # `win` ou `loss`
+
+        # Récupérer l'utilisateur à partir de la base de données
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'Utilisateur non trouvé'}, status=404)
+
+        # Initialiser level et xp à 1 s'ils ne sont pas encore définis
+        if user.xp is None:
+            user.xp = 1
+        if user.level is None:
+            user.level = 1
+
+        print(f"XP actuel: {user.xp}, Niveau actuel: {user.level}")
+
+        # Calculer la mise à jour des XP en fonction du résultat
+        if result == 'win':  # Pour une victoire
+<<<<<<< HEAD
+            user.xp += xp_change + (user.xp * 0.10)  # Augmenter l'XP de 10%
+            print(f"XP mis à jour après victoire: {user.xp}")
+
+        elif result == 'loss':  # Pour une défaite
+            user.xp -= xp_change + (user.xp * 0.05)  # Diminuer l'XP de 5%
+            # Si l'XP devient négatif, réinitialiser à 0
+            if user.xp < 0:
+                user.xp = 0
+            print(f"XP mis à jour après défaite: {user.xp}")
+=======
+            # Augmenter de 10% les XP actuels
+            user.xp += user.xp * 0.10
+        elif result == 'loss':  # Pour une défaite
+            # Diminuer de 5% les XP actuels
+            user.xp -= user.xp * 0.05
+>>>>>>> 9b31d35aae7ad46034f62024cc3b6705830a0323
+
+        # Vérifier si l'XP dépasse 100 et passer au niveau suivant
+        if user.xp >= 100:
+            user.xp = 0  # Réinitialiser l'XP à 0
+            user.level += 1  # Augmenter le niveau
+            print(f"L'utilisateur a monté de niveau! Nouveau niveau : {user.level}")
+        
+        # Si l'XP est trop faible, envisager de rétrograder le niveau
+        if user.xp < 0 and user.level > 1:
+            user.level -= 1  # Rétrograder le niveau si l'XP est 0
+            print(f"L'utilisateur a rétrogradé de niveau! Nouveau niveau : {user.level}")
+
+        print(f"XP mis à jour : {user.xp}, Niveau mis à jour : {user.level}")
+
+        # Sauvegarder les données mises à jour dans la base de données
+        user.save()
+
+        return Response({
+            'message': 'XP et Niveau mis à jour avec succès',
+            'username': user.username,
+            'xp': user.xp,
+            'level': user.level
+        })

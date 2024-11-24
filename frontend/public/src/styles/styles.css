@@ -2467,3 +2467,7 @@ input[type=text-chat]{
     font-size: 40px;
     color: #6fd4ff;
 }
+
+.chat-border.recu{
+    border: 5px solid greenyellow;
+}

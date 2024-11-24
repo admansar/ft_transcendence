@@ -10,9 +10,11 @@ from .models import GameScore
 from django.db.models import Q
 from .services import (
     get_user_from_api,
-    get_user_from_api_by_id
+    get_user_from_api_by_id,
+    get_all_users
 )
-
+from rest_framework import status
+import requests
 class CompleteGame(APIView):
     def post(self, request):
         print('COMPLETEEE', request.data)

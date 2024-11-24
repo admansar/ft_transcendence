@@ -4,7 +4,7 @@ from .views import (
     UpdateScore,
     initGame,
     CompleteGame,
-    GetGame
+    GetGame,
 )
 urlpatterns = [
     path('', select_game, name='select_game'),
