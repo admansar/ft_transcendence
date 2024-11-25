@@ -177,7 +177,7 @@ class Oauth42(APIView):
         if not code:
             raise AuthenticationFailed('No code provided')
 
-        api_url = 'https://api.intra.42.fr/oauth/token'
+        api_url = 'http://api.intra.42.fr/oauth/token'
         redirect_uri = 'http://localhost/api/auth/oauth42/'
 
         # Step 1: Get the access token

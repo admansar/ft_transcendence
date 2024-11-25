@@ -1,3 +1,5 @@
+import { makeAuthRequest } from "../services/utils.js";
+
 export class Menu extends HTMLElement {
     constructor() {
         super();
@@ -56,7 +58,23 @@ export class Menu extends HTMLElement {
 
         profile.addEventListener('click', e => {
             e.preventDefault();
-            app.router.findRoute(`/profile/${app.loggedUser}`);
+            makeAuthRequest('/api/auth/me', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            }).then(response => {
+                if (response.status === 200) {
+                    return response.json();
+                }
+                throw new Error('Failed to fetch user data');
+            }).then(data => {
+                app.loggedUser = data.username;
+                app.router.findRoute(`/profile/${data.username}`);
+            }).catch(error => {
+                console.error(error);
+            });
         })
 
         settings.addEventListener('click', e => {

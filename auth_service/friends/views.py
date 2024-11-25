@@ -15,6 +15,7 @@ from django.db.models import Q
 import json
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
+from .services import get_user_from_api_by_id
 
 def get_user_from_token(request):
     token = request.COOKIES.get('access')
@@ -134,7 +135,9 @@ class Userfriends(APIView):
             _user = get_user_from_token(request)
             userprofile = Profile.objects.get(user=_user)
             Serializer = SerializerFriends(userprofile)
-            return Response({"Friends" : Serializer.data})
+            ids: list = Serializer.data['friends']
+            return Response({"Friends" : [get_user_from_api_by_id(id)['username'] for id in ids]})
+
         except Exception as e:
             print('e========>', e)
             content = {"error" : "Please login"}

@@ -5,7 +5,7 @@ import { makeAuthRequest } from "../services/utils.js";
 
 // var chatSocket = getwebsocket()
 let chatSocket = null;
-
+let friend_list = null;
 let self_user = null;
 
 makeAuthRequest('/api/auth/me', {
@@ -20,6 +20,19 @@ makeAuthRequest('/api/auth/me', {
     self_user = res.username;
 })
 
+// /api/friends/ufriends/
+
+makeAuthRequest('/api/friends/ufriends/', {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+}).then(async res => {
+    res = await res.json();
+    console.log(res['Friends']);
+    friend_list = res['Friends'];
+})
 
 function front_receive_message(user, message)
 {
@@ -262,14 +275,19 @@ function socket_impel() {
 
         if (data.type === 'broadcast')
         {
-            console.log('broadcasting message');
-            let users = data.users;
-            for (let i = 0; i < users.length; i++)
-            {
-                console.log('adding user :', users[i]);
-                if (users[i] !== self_user)
-                    front_inject_user(users[i]);
-            }
+            setTimeout(() => {
+                console.log('broadcasting message');
+                let users = data.users;
+                console.log("online users: ", users);
+                console.log("friend list : ", friend_list);
+                console.log("me : ", self_user);
+                for (let i = 0; i < users.length; i++) {
+                    if (users[i] !== self_user && friend_list.includes(users[i])) {
+                        console.log('adding user :', users[i]);
+                        front_inject_user(users[i]);
+                    }
+                }
+            }, 100);
         }
         else if (data.type === 'remove_user')
         {
@@ -320,7 +338,7 @@ function socket_impel() {
                 console.log(`${data.from} rejected your invitation`);
                 const chatMessage = document.getElementById(`chatMessages-${data.from}`);
                 const newDiv = document.createElement('div');
-                newDiv.className = 'alert';
+                newDiv.className = 'alert-chat';
                 newDiv.textContent = `${data.from} rejected your invitation`;
                 chatMessage.appendChild(newDiv);
                 setTimeout(() => {
