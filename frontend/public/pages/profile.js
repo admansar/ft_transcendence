@@ -3,6 +3,7 @@ import { Router } from '../services/Router.js'
 import { makeAuthRequest, sleep } from '../services/utils.js'
 import { getMe } from '../services/utils.js'
 import { getUserDataByID } from '../services/utils.js'
+import '../components/header.js';
 
 class Profile extends HTMLElement {
     constructor() {
@@ -13,13 +14,16 @@ class Profile extends HTMLElement {
         const username = this.getAttribute('username');
         let userData = await getUserData(username);
         await this.render(username, userData);
-        this.checkFriendsStatus(userData);
+        const headerComponent = document.createElement('header-component');
+        this.appendChild(headerComponent);
+        await this.checkFriendsStatus(userData);
         await this.renderProfile(userData);
         document.title = `Profile - ${userData.username}`;
     }
 
     async renderScore(data) {
         if (!data.games) {
+            console.log('No games found');
             return `
                 <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
             `
@@ -179,6 +183,7 @@ class Profile extends HTMLElement {
         const blockModal = document.querySelector('.block_modal_content');
         const pendingModal = document.getElementById('pendingModal')
         const modalContent = document.querySelector('.modal_content');
+        const blockButton = document.getElementById('block_that');
 
         let pendings = [];
         let blocked = [];
@@ -275,6 +280,10 @@ class Profile extends HTMLElement {
 
         try {
             blocked = await this.getBlockedUsers(userData);
+            if (blocked.includes(userData.id)) {
+                blockButton.style.display = 'none';
+            }
+            console.log('Blocked users', blocked);
             blockListButton.addEventListener('click', async () => {
                 if (!blocked.length) {
                     blockModal.style.display = 'flex';
@@ -357,8 +366,10 @@ class Profile extends HTMLElement {
             if (response.ok) {
                 notifications.notify(data.message, 'success', 1000, notif);
                 addFriendButton.style.display = 'none';
+            } else {
+                console.log(data);
+                notifications.notify(data.error, 'error', 1000, notif);
             }
-            console.log(data);
         });
     }
 
@@ -427,6 +438,9 @@ class Profile extends HTMLElement {
             })
         });
     }
+
+    // async checkIfBlocked(userData) {
+    // }
 
     async renderProfile(userData) {
         let me = null;

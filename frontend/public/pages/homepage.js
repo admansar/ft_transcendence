@@ -1,3 +1,4 @@
+import "../components/header.js";
 import "../components/circleInteractions.js";
 import "../components/modal.js";
 import "../components/chat.js";
@@ -9,7 +10,6 @@ import '../pages/notifications-profile.js';
 import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
 import { getMe } from "../services/utils.js";
 
-
 export class HomePage extends HTMLElement {
     
     constructor() {
@@ -17,6 +17,8 @@ export class HomePage extends HTMLElement {
     }
 
     async connectedCallback() {
+        const headerComponent = document.createElement('header-component');
+        this.appendChild(headerComponent);
         let profile = document.querySelector('.profile');
         let userData = await getMe();
 
