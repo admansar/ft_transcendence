@@ -172,7 +172,7 @@ export async function tour_game(user_token) {
 
     console.log('the fucking token: ', user_token)
     let roomName = 'group_01'; // This should be dynamic based on matchmaking or user selection
-    let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament_game/${roomName}/?token=${user_token}`);
+    let gameSocket = new WebSocket(`wss://${window.location.host}/ws/tournament_game/${roomName}/?token=${user_token}`);
 
     // WebSocket event handlers
     gameSocket.onopen = function () {

@@ -47,7 +47,7 @@ else {
     console.log('Error fetching user data');
 }
 
-let gameSocket = new WebSocket(`ws://${window.location.host}/ws/tournament/?token=${token}`);
+let gameSocket = new WebSocket(`wss://${window.location.host}/ws/tournament/?token=${token}`);
 
 gameSocket.onopen = function () {
     console.log('Connection opened');

@@ -250,7 +250,7 @@ export class Chat extends HTMLElement {
 }
 
 function socket_impel() {
-    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+    chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
     chatSocket.onopen = function(e) {
         console.log('WebSocket connection established!');

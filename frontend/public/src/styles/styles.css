@@ -2567,7 +2567,7 @@ a {
     margin: auto;
     position: relative;
     width: 75%;
-    height: 15%;
+    height: 30%;
     animation: fadeOut 5s forwards; /* Fades out over 3 seconds */
   }
 
