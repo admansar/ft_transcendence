@@ -173,6 +173,7 @@ class OtpUpdate(APIView):
 
 class Oauth42(APIView):
     def get(self, request):
+        print('code ======>', request.GET.get('code'))
         code = request.GET.get('code')
         if not code:
             raise AuthenticationFailed('No code provided')
@@ -216,9 +217,16 @@ class Oauth42(APIView):
 
         user_info = response.json()
         print('user_info', user_info)
-        existing_user = get_object_or_404(User, username=user_info['login'])
-        if existing_user:
-            return Response({'error': 'User already exists'}, status=401)
+        try:
+            existing_user = get_object_or_404(User, username=user_info['login'])
+            if existing_user:
+                # return Response({'error': 'User already exists',
+                #                  'redirect_url': '/login'},
+                #                 status=401)
+                return redirect('/login?error=user_already_exists')
+        except Exception as e:
+            print('Error:', e)
+            pass
         try:
             user, created = User.objects.get_or_create(
                 email=user_info.get('email', ''),  # Use email instead of username
