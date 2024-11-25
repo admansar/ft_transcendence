@@ -23,8 +23,9 @@ authentication_classes = [JWTAuthentication]
 permission_classes = [IsAuthenticated]
 game_started = False
 champion = None
-tounament_finished = False
+no_ongoing_tournament = True
 g_id: int = 0
+disconnected_players = []
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     player_num = 4  # Total number of players in the tournament
@@ -33,6 +34,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     id: int = 0
 
     async def connect(self):
+        global no_ongoing_tournament
         # Authenticate and connect user
         try:
             print (f"Scope : {self.scope}")
@@ -67,15 +69,25 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         for player in players:
             await player.broadcast_usernames()
 
+        if not no_ongoing_tournament:
+            print ('the tournament has already started')
         # Start the game if enough players are in the room
-        if len(players) == self.player_num:  # self.player_num:
+        if len(players) == self.player_num and no_ongoing_tournament:  # self.player_num:
             for idx, player in enumerate(players):
                 player.opponent = players[idx + 1] if idx % 2 == 0 else players[idx - 1]
+            if self in players and not no_ongoing_tournament:
+                print ('kiked out')
+                disconnected_players.append(self)
+                self.disconnect(1000)
+                self.close()
             for idx, player in enumerate(players):
                 print (f"player: {player.user_name}, opponent: {player.opponent.user_name} idx : {idx}")
             print (f"starting match {self.user_name} : {self.opponent.user_name}")
             print ('starting match for ', self.user_name)
             await self.start_match(self, self.opponent)
+            await asyncio.sleep(4)
+            print ('closing the ongoing tournament, no more users allowed')
+            no_ongoing_tournament = False
             # creating a loop to check for the winners
 
         elif len(players) > self.player_num:
@@ -161,6 +173,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             winners.clear()
             players.clear()
             game_rooms.clear()
+            disconnected_players.clear()
+            global no_ongoing_tournament
+            no_ongoing_tournament = True
             global g_id
             g_id = 0
             print ('tournament ended')
@@ -256,6 +271,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             
 
     async def connect(self) -> None:
+        global no_ongoing_tournament
         # print (f"Scope : {self.scope}")
         try:
             self.user_name = await self.get_username_from_db() 
@@ -273,7 +289,11 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         await self.send_init_state()
         self.room = game_rooms[self.room_id]
-        if len(self.room.players) == 2 and not self.room.game_loop_task:
+        if self.user_name in [el.user_name for el in disconnected_players]:
+            print ('kicked out')
+            self.disconnect(1000)
+            self.close()
+        if len(self.room.players) == 2 and not self.room.game_loop_task and no_ongoing_tournament:
             other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
             await other_player.send_player_info(self.user_name)
             # await self.start_countdown(other_player)
@@ -410,6 +430,14 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             elif message_type == 'game_over':
                 print("the game is over my bro")
                 await self.disconnect(1000)
+            elif message_type == 'enemy_disconnected':
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'game_over',
+                        'winner': self.user_name
+                    }
+                )
         except Exception as e:
             print(f"Error in receive: {e}")
             print ('disconnecting ...')
@@ -579,7 +607,6 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 'type': 'game_over',
                 'winner': winner
             }
-            # GameScore.winner
         )
 
     async def game_over(self, event: Any) -> None:
@@ -595,6 +622,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 'player1': self.room.players[0].user_name,
                 'player2': self.room.players[1].user_name
             }
+            print (f"winner data : {winner_data}")
             # global counter
             # counter += 1
             if winner_data not in winners:

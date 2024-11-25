@@ -58,6 +58,12 @@ function front_remove_user(user)
     }
 }
 
+function remove_online_dot(user)
+{
+    const ue = document.querySelector(`#${user} .friend-profile-status`)
+    ue.style.backgroundColor = '#3a3a3a';
+}
+
 function front_inject_user(user)
 {
     makeAuthRequest(`/api/auth/user/${user}`, {
@@ -368,12 +374,12 @@ function front_inject_friends(user, every_online_user)
                 });
             }
             else { document.querySelector(`#${user}-chat`).style.display = 'flex' }
-    
-            // if (profile_messanger)
-            //     profile_messanger.addEventListener('click', function () {
-            //         chat_messanger_user.style.display = 'flex';
-            //     });
-        }    
+        }
+        else if (every_online_user.includes(user) && document.querySelector(`#${user}`))
+        {
+            const ue = document.querySelector(`#${user} .friend-profile-status`)
+            ue.style.backgroundColor = '#00b100';
+        }
     })
 }
 export function setupChat() {
@@ -448,7 +454,8 @@ function socket_impel() {
         }
         else if (data.type === 'remove_user') {
             console.log('removing user :', data.user);
-            front_remove_user(data.user);
+            //front_remove_user(data.user);
+            remove_online_dot(data.user);
         }
         else if (data.type === 'send_message') {
             let msn_lst = document.querySelector('.friend-profile');
