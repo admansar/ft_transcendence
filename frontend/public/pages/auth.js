@@ -87,11 +87,11 @@ function Oauth42() {
         }
     });
 
-    window.addEventListener('load', () => {
-        if (checkAuth() && window.location.pathname === '/') {
-            window.location.href = '/dashboard';
-        }
-    });
+    // window.addEventListener('load', () => {
+    //     if (checkAuth() && window.location.pathname === '/') {
+    //         window.location.href = '/dashboard';
+    //     }
+    // });
 }
 
 // Initialize when DOM is ready

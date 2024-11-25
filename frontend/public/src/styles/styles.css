@@ -2556,3 +2556,26 @@ a {
     display: flex;
     align-items: center;
   }
+
+  .alert {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #ffcccb;
+    color: #d8000c;
+    border: 1px solid #d8000c;
+    font-size: 16px;
+    margin: auto;
+    position: relative;
+    width: 75%;
+    height: 30%;
+    animation: fadeOut 5s forwards; /* Fades out over 3 seconds */
+  }
+
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }

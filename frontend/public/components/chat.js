@@ -250,7 +250,7 @@ export class Chat extends HTMLElement {
 }
 
 function socket_impel() {
-    chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+    chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
     chatSocket.onopen = function(e) {
         console.log('WebSocket connection established!');
@@ -314,9 +314,22 @@ function socket_impel() {
             const playWithWindow = document.getElementById(`play-with-${data.from}-window`);
             playWithWindow.style.display = 'flex';
         }
-        else if (data.type === 'reject_game_invite')
-        {
-            console.log (`${data.from} rejected your invitation`);
+        else if (data.type === 'reject_game_invite') {
+            let newDiv = null;
+            setTimeout(() => {
+                console.log(`${data.from} rejected your invitation`);
+                const chatMessage = document.getElementById(`chatMessages-${data.from}`);
+                const newDiv = document.createElement('div');
+                newDiv.className = 'alert';
+                newDiv.textContent = `${data.from} rejected your invitation`;
+                chatMessage.appendChild(newDiv);
+                setTimeout(() => {
+                    console.log('removing alert');
+                    newDiv.remove();
+                }, 3000); 
+            }, 1000);
+            
+
             const playwith = document.getElementById(`play-with-${data.from}`);
             playwith.style.backgroundColor = '#00b100';
         }

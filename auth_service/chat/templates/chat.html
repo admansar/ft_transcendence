@@ -22,7 +22,7 @@
         <script>
         // import sanitizeHtml from 'sanitize-html';
         // Connect to WebSocket
-        const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/');
+        const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
         chatSocket.onopen = function(e) {
             console.log('WebSocket connection established!');
