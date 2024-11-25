@@ -30,24 +30,42 @@ class Auth extends HTMLElement {
             login();
             Oauth42();
         }
-
-        document.addEventListener('click', (event) => {
+        
+        document.addEventListener('click', async (event) => {
             if (event.target && event.target.id === 'open-register') {
+                console.log('heeeere', event.target.id);
                 this.innerHTML = ''
                 this.appendChild(registerPage)
                 history.pushState(null, null, '/register');
                 register();
+                Oauth42();
             }
-
+            
             if (event.target && event.target.id === 'close-register') {
+                console.log('heeeere', event.target.id);
                 this.innerHTML = ''
                 this.appendChild(loginPage)
                 history.pushState(null, null, '/login');
                 login();
+                Oauth42();
             }
         });
     }
 }
+
+async function isUserExists(username) {
+    let response = await makeAuthRequest('/api/auth/user/' + username, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    if (response.ok) {
+        return true;
+    }
+    return false;
+}
+
 export function attachDOM(page) {
     const authPage = document.createElement('auth-page');
     authPage.setAttribute('data-page', page);
