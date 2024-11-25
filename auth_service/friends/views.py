@@ -15,7 +15,6 @@ from django.db.models import Q
 import json
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
-from .services import get_user_from_api_by_id
 
 def get_user_from_token(request):
     token = request.COOKIES.get('access')
@@ -110,19 +109,19 @@ class WhereUser(APIView):
     # permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
+            profile = Profile.objects.all()
             _user = get_user_from_token(request)
-            me = _user.id
             user_id = request.data.get("user_id")
-            userprofile = Profile.objects.get(id=user_id)
-            if userprofile.friends.filter(id=me).exists():
+            userprofile = Profile.objects.get(user=_user)
+            if userprofile.friends.filter(id=user_id).exists():
                 return Response({"status" : "Friend"}, status=status.HTTP_200_OK)
-            elif userprofile.waiting.filter(id=me).exists():
+            elif userprofile.waiting.filter(id=user_id).exists():
                 return Response({"status" : "Waiting"}, status=status.HTTP_200_OK)
-            elif userprofile.block.filter(id=me).exists():
+            elif userprofile.block.filter(id=user_id).exists():
                 return Response({"status" : "Block"}, status=status.HTTP_200_OK)
             else:
                 content = {"status" : "Not on list"}
-                return Response(content, status=status.HTTP_404_NOT_FOUND)
+                return Response(content, status=status.HTTP_401_UNAUTHORIZED)
         except Exception:
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 
@@ -135,9 +134,7 @@ class Userfriends(APIView):
             _user = get_user_from_token(request)
             userprofile = Profile.objects.get(user=_user)
             Serializer = SerializerFriends(userprofile)
-            ids: list = Serializer.data['friends']
-            return Response({"Friends" : [get_user_from_api_by_id(id)['username'] for id in ids]})
-
+            return Response({"Friends" : Serializer.data})
         except Exception as e:
             print('e========>', e)
             content = {"error" : "Please login"}

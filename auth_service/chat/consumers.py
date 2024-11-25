@@ -11,7 +11,6 @@ from .models import Client
 from friends.models import Profile
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-#from authentication_service.models import User
 import os
 
 online_users: list = []
@@ -69,13 +68,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def Parse_messgae_on_redis(self, key):
         user : str = key[0: key.find(":")] # see if the use have a backup message in redis server and parsing it 
         if self.scope["user"].username == user:
-            data = (self.redis_client.hgetall)(key)
-            data = (list)(data.items())
+            data = self.redis_client.hgetall(key)
+            data = list(data.items())
             data = [[item.decode('utf-8') for item in sublist] for sublist in data]
             data = {key: value for key, value in data}
-            json_string = (json.dumps)(data)
-            json_string = (json.loads)(json_string)
-            (self.redis_client.delete)(key)
+            json_string = json.dumps(data)
+            json_string = json.loads(json_string)
+            self.redis_client.delete(key)
             return json_string
             
     async def connect(self):
@@ -96,7 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     len_key = await sync_to_async (len)(key)
                     if key[key.find(":") + 1 : len_key] == self.min_num:
                         json_string = await self.Parse_messgae_on_redis(key)
-                        if (json_string != None):
+                        if json_string != None:
                             await self.trough_channel(self.channel_name, json_string)
                         num.remove(self.min_num)
                         break
