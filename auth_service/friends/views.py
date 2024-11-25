@@ -109,19 +109,19 @@ class WhereUser(APIView):
     # permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
-            profile = Profile.objects.all()
             _user = get_user_from_token(request)
+            me = _user.id
             user_id = request.data.get("user_id")
-            userprofile = Profile.objects.get(user=_user)
-            if userprofile.friends.filter(id=user_id).exists():
+            userprofile = Profile.objects.get(id=user_id)
+            if userprofile.friends.filter(id=me).exists():
                 return Response({"status" : "Friend"}, status=status.HTTP_200_OK)
-            elif userprofile.waiting.filter(id=user_id).exists():
+            elif userprofile.waiting.filter(id=me).exists():
                 return Response({"status" : "Waiting"}, status=status.HTTP_200_OK)
-            elif userprofile.block.filter(id=user_id).exists():
+            elif userprofile.block.filter(id=me).exists():
                 return Response({"status" : "Block"}, status=status.HTTP_200_OK)
             else:
                 content = {"status" : "Not on list"}
-                return Response(content, status=status.HTTP_401_UNAUTHORIZED)
+                return Response(content, status=status.HTTP_404_NOT_FOUND)
         except Exception:
             return Response(content, status=status.HTTP_400_BAD_REQUEST)
 

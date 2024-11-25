@@ -7,8 +7,25 @@ class Header extends HTMLElement {
         super();
     }
 
-    connectedCallback() {
-        this.render();
+    async connectedCallback() {
+        await this.render();
+        await this.getHeaderHtml();
+    }
+
+    async getHeaderHtml() {
+        const searchComponent = document.createElement('app-search');
+        const menu = document.createElement('app-menu');
+        this.appendChild(menu);
+        this.appendChild(searchComponent);
+
+        let profile = document.querySelector('.profile');
+        let userData = await getMe();
+        profile.style.backgroundImage = `url(${userData.avatar})`;
+        document.querySelector('.dashboard').innerHTML = `${userData.username}`;
+        profile.addEventListener('click', e => {
+            e.preventDefault();
+            app.router.findRoute(`/profile/${userData.username}`);
+        })
     }
 
     async render() {
@@ -48,20 +65,7 @@ class Header extends HTMLElement {
                 </div>
                 </div>
             </header>
-        `
-        let searchComponent = document.createElement('app-search');
-        const menu = document.createElement('app-menu');
-        this.appendChild(searchComponent);
-        this.appendChild(menu);
-
-        let profile = document.querySelector('.profile');
-        let userData = await getMe();
-        profile.style.backgroundImage = `url(${userData.avatar})`;
-        document.querySelector('.dashboard').innerHTML = `${userData.username}`;
-        profile.addEventListener('click', e => {
-            e.preventDefault();
-            app.router.findRoute(`/profile/${userData.username}`);
-        })
+        `;
     }
 }
 

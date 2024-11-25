@@ -51,8 +51,11 @@ export class HomePage extends HTMLElement {
 
         const notificationsProfile = document.createElement('app-notifications-profile');
         this.appendChild(notificationsProfile);
+    }
 
-        
+    disconnectedCallback() {
+        console.log('disconnected');
+        this.innerHTML = '';
     }
 }
 

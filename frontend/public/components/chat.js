@@ -238,7 +238,7 @@ export class Chat extends HTMLElement {
         this.innerHTML = `
         <div class="messanger">
         <div class="messanger-icon">
-            <img src="public/src/img/sms.png">
+            <img src="/public/src/img/sms.png">
         </div>
         <div class="messanger-list">
 

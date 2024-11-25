@@ -1,13 +1,5 @@
 import { isAuth } from '../services/utils.js';
 
-
-document.addEventListener('userDataReady', () => {
-    // const userData = app.state.loggedUser
-    console.log('User data in ROuter');
-
-});
-
-// var chatSocket = ""
 export const Router = {
     normalizeRoute(route) {
         if (route.endsWith('/') && route.length > 1) {
@@ -26,7 +18,6 @@ export const Router = {
 
         const params = {};
         for (let i = 0; i < patternSegments.length; i++) {
-            // params['path'] = routeSegments[0];
             if (patternSegments[i].startsWith(':')) {
                 const paramName = patternSegments[i].slice(1);
                 params[paramName] = routeSegments[i];
@@ -38,10 +29,6 @@ export const Router = {
         return params;
     },
     findRoute: (route) => {
-        // chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
-        // chatSocket.onopen = function(e) {
-        //     console.log('WebSocket connection established!');
-        // }
         route = Router.normalizeRoute(route);
         for (let i = 0; i < routes.length; i++) {
             const params = Router.matchRoute(route, routes[i].path);
@@ -84,8 +71,15 @@ export const Router = {
 
         console.log(`Navigating to ${path}`, params);
         if (addHistory) {
-            history.pushState(null, null, path);
+            console.log('window.location.pathname', window.location.pathname);
+            console.log('path', path);
+            if (window.location.pathname !== path) {
+                history.pushState(null, null, path);
+            }
         }
+        
+        app.root.innerHTML = '';
+        
         await route.component(params);
     }
 }
@@ -94,7 +88,9 @@ export const routes = [
     {
         path: '/',
         isAuth: false,
-        component: () => import('../pages/homepage.js').then(module => module.attachDOM())
+        component: () => import('../pages/homepage.js').then(async module => {
+            await module.attachDOM();
+        })
     },
     {
         path: '404',
@@ -176,7 +172,4 @@ function handleBackNavigation() {
     Router.findRoute(path);
 };
 
-// export function getwebsocket () {
-//     return chatSocket
-// }
 window.addEventListener('popstate', handleBackNavigation);

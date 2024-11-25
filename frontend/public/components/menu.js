@@ -43,6 +43,31 @@ export class Menu extends HTMLElement {
             content.style.opacity = '0';
             content.style.overflow = 'hidden'; 
         }
+
+        const home = document.querySelector('.home');
+        const profile = document.querySelector('.avatar');
+        const settings = document.querySelector('.setting');
+        const logout = document.querySelector('.exit');
+
+        home.addEventListener('click', e => {
+            // e.preventDefault();
+            app.router.findRoute('/');
+        })
+
+        profile.addEventListener('click', e => {
+            e.preventDefault();
+            app.router.findRoute(`/profile/${app.loggedUser}`);
+        })
+
+        settings.addEventListener('click', e => {
+            e.preventDefault();
+            app.router.findRoute('/settings');
+        })
+
+        logout.addEventListener('click', e => {
+            e.preventDefault();
+            app.router.findRoute('/logout');
+        })
         
     }
 }
