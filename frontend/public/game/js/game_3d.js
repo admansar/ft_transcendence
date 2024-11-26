@@ -5,9 +5,41 @@ import { Router } from '../../services/Router.js'
 // import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { makeAuthRequest } from '../../services/utils.js';
 
 const width = window.innerWidth
 const height = window.innerHeight
+
+// {
+// 	"username": "berrim",
+// 	"type": "2",
+// 	"userScore": 4,
+// 	"botScore": 5
+// }
+let data_to_send = {
+	username: "",
+	type: "3",
+	userScore: 0,
+	botScore: 0
+}
+
+let response = await makeAuthRequest('/api/auth/me', {
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json',
+	},
+	credentials: 'include',
+});
+
+if (response.ok) {
+	let data = await response.json();
+	console.log('full data: ', data)
+	data_to_send.username = data.username
+}
+else {
+	console.log('Error fetching user data');
+	Router.findRoute('/');
+}
 
 
 //Ball
@@ -579,6 +611,16 @@ function game_score ()
 		if (score1 === 11 || score2 === 11)
 		{
 			showPopupText("Game Over", { x: 0, y: 1, z: 0 }, 2000, 0xff0000);
+			data_to_send.userScore = score2
+			data_to_send.botScore = score1
+			makeAuthRequest('/api/auth/addGameBoot', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+				body: JSON.stringify(data_to_send)
+			});
 			// lets make the gravity of the world 0
 			world.gravity.set(0, 0, 0);
 			// make the ball invisible
