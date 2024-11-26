@@ -86,7 +86,7 @@ class GetGame(APIView):
             # Q(player_a=username) | Q(player_b=username),
             Q(player_a_id=username['id']) | Q(player_b_id=username['id']),
             status='Completed'
-        ).order_by('-date')[:9]
+        ).order_by('-date')[:len(GameScore.objects.all())]
         games = games.values()
         print('games', games)
         try:
@@ -147,8 +147,8 @@ class RankUser(APIView):
                         else:
                             self.loss += 1
                 score = self.win - self.loss
-                if score * 2.15 >= 0:
-                    score = score * 2.15
+                if score * 8 >= 0:
+                    score = score * 8
                 else:
                     score = 0
                 temp = {
@@ -156,7 +156,7 @@ class RankUser(APIView):
                     "win" : self.win,
                     "loss" : self.loss,
                     "score" : score,
-                    "achivements" : self.win - self.loss
+                    "achivements" : self.win
                 }
                 result.append(temp)
             self.loss = 0
