@@ -19,6 +19,8 @@ class Profile extends HTMLElement {
         let userData = await getUserData(username);
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
+        await this.checkIfWaitingOrFriends(userData, me);
+        await this.checkIfAlreadyBlocked(userData, me);
         await this.getProfileHtml(userData, username);
         this.appendChild(headerComponent);
         this.appendChild(chatComponent);
@@ -29,9 +31,7 @@ class Profile extends HTMLElement {
 
     async getProfileHtml(userData, username) {
         const avatar = document.querySelector('.profile-photo');
-        // const avatarMenu = document.querySelector('.profile');
         app.root.profilePicture = avatar.style.backgroundImage = `url(${userData.avatar})`;
-        // avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
 
         const pendingListButton = document.getElementById('pending_list');
         const blockListButton = document.getElementById('block_list');
@@ -204,64 +204,31 @@ class Profile extends HTMLElement {
         }
     }
 
-    // async getProfileData(userData) {
-    //     const addFriendButton = document.getElementById('add_friend');
-
-    //     if (!app.loggedUser) {
-    //         let me = await getMe();
-    //         console.log('me.username', me.username);
-    //     }
-    //     addFriendButton.addEventListener('click', async () => {
-    //         console.log('Add friend clicked');
-    //         const response = await makeAuthRequest('/api/friends/methods/', {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //             body: JSON.stringify({
-    //                 "status": "ADD",
-    //                 "user_id": String(userData.id)
-    //             })
-    //         })
-    //         const data = await response.json();
-    //         if (response.ok) {
-    //             notifications.notify(data.message, 'success', 1000, addFriendButton);
-    //             addFriendButton.style.display = 'none';
-    //         }
-    //         console.log(data);
-    //     });
-    // }
-
     async getPendingRequests(userData) {
-        return new Promise((resolve, reject) => {
-            makeAuthRequest('/api/friends/profile/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            }).then(res => res.json()).then(data => {
-                // console.log('Checking pending requests', data);
-                resolve(data.Profile.waiting);
-            }).catch(err => {
-                reject(err);
-            })
-        })
+        let response = await makeAuthRequest('/api/friends/profile/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        let data = await response.json();
+        return data.Profile.waiting
     }
 
     async getBlockedUsers(userData) {
-        return new Promise((resolve, reject) => {
-            makeAuthRequest('/api/friends/profile/', {
+        try {
+            let response = await makeAuthRequest('/api/friends/profile/', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            }).then(res => res.json()).then(data => {
-                // console.log('Checking blocked users', data);
-                resolve(data.Profile.block);
-            }).catch(err => {
-                reject(err);
-            })
-        })
+            });
+            let data = await response.json();
+            return data.Profile.block
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
     }
 
     async checkFriendsStatus(userData) {
@@ -530,8 +497,50 @@ class Profile extends HTMLElement {
         });
     }
 
-    async checkIfBlocked(userData, me) {
+    async checkIfAlreadyBlocked(userData, me) {
+        const blockUserButton = document.getElementById('block_that');
         const addFriendButton = document.getElementById('add_friend');
+        try {
+            let response = await makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            let data = await response.json();
+            if (data.Profile.block.includes(userData.id)) {
+                console.log('User is blocked');
+                blockUserButton.style.display = 'none';
+                addFriendButton.style.display = 'none';
+            }
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    async checkIfWaitingOrFriends(userData, me) {
+        const addFriendButton = document.getElementById('add_friend');
+        try {
+            let response = await makeAuthRequest('/api/friends/find/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "user_id": String(userData.id)
+                })
+            })
+            let data = await response.json();
+            if (data.status === 'Waiting' || data.status === 'Friend') {
+                addFriendButton.style.display = 'none';
+            }
+        } catch (e) {
+            console.log(e);
+            notifications.notify('Error checking friend status', 'error', 1000, addFriendButton);
+        }
+    }
+
+    async checkIfBlocked(userData, me) {
         let isBlockingMe = await makeAuthRequest('/api/friends/find/', {
             method: 'POST',
             headers: {
@@ -692,87 +701,6 @@ class Profile extends HTMLElement {
                     </div>
                 </div>
             `
-
-            // const avatar = document.querySelector('.profile-photo');
-            // // const avatarMenu = document.querySelector('.profile');
-            // app.root.profilePicture = avatar.style.backgroundImage = `url(${userData.avatar})`;
-            // // avatarMenu.style.backgroundImage = `url(${userData.avatar})`;
-
-            // const pendingListButton = document.getElementById('pending_list');
-            // const blockListButton = document.getElementById('block_list');
-            // const shareProfileButton = document.getElementById('share_profil');
-            // const pendingModal = document.getElementById('pendingModal');
-            // const blockModal = document.getElementById('blockModal');
-            // const closeModalButtons = document.querySelectorAll('.close_modal');
-
-            // const cata = document.querySelectorAll('.btn_static_click');
-            // const hisBar = document.querySelector('.HISTORYdata');
-            // const rankBar = document.querySelector('.RANKYdata');
-            // const achBar = document.querySelector('.ACHIVEMENTSdata');
-
-            // cata.forEach(button => {
-            //     button.addEventListener('click', function () {
-            //         // Remove 'active' class from all buttons
-            //         cata.forEach(btn => btn.classList.remove('active'));
-
-            //         // Add 'active' class to the clicked button
-            //         button.classList.add('active');
-
-            //         // Hide all sections
-            //         hisBar.classList.remove('active');
-            //         rankBar.classList.remove('active');
-            //         achBar.classList.remove('active');
-
-            //         // Show the relevant section based on the clicked button
-            //         if (button.id === 'history_bar') {
-            //             hisBar.classList.add('active');
-            //         } else if (button.id === 'achivements_bar') {
-            //             achBar.classList.add('active');
-            //         } else if (button.id === 'rank_bar') {
-            //             rankBar.classList.add('active');
-            //         }
-            //     });
-            // });
-            // const add_remove = document.querySelector('.request_list.adding_friend');
-
-            // add_remove.addEventListener('click', function () {
-            //     add_remove.classList.add('active');
-            // });
-
-            // // pendingListButton.addEventListener('click', function () {
-            // //     pendingModal.style.display = 'flex';
-            // // });
-
-            // blockListButton.addEventListener('click', function () {
-            //     blockModal.style.display = 'flex';
-            // });
-
-            // closeModalButtons.forEach(closeButton => {
-            //     closeButton.addEventListener('click', function () {
-            //         pendingModal.style.display = 'none';
-            //         blockModal.style.display = 'none';
-            //     });
-            // });
-
-            // window.addEventListener('click', function (event) {
-            //     if (event.target === pendingModal) {
-            //         pendingModal.style.display = 'none';
-            //     }
-            //     if (event.target === blockModal) {
-            //         blockModal.style.display = 'none';
-            //     }
-            // });
-
-            // shareProfileButton.addEventListener('click', function () {
-            //     console.log('Share profile clicked');
-            //     let profileUrl = `http://localhost/profile/${username}`;
-            //     navigator.clipboard.writeText(profileUrl);
-            //     let shareProfile = document.querySelector('.profile-status');
-            //     notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
-            // });
-
-            // await getLevel();
-
         } catch (e) {
             console.log(e);
             app.router.findRoute('404');
@@ -781,11 +709,12 @@ class Profile extends HTMLElement {
 }
 
 export function attachDOM({ username }) {
+    app.root.innerHTML = '';
+    document.body.style = '';
     console.log('username from profile.js', username);
-    document.body.innerHTML = '';
     const page = document.createElement('profile-page');
     page.setAttribute('username', username);
-    document.body.appendChild(page);
+    app.root.appendChild(page);
 }
 
 async function getLevel() {

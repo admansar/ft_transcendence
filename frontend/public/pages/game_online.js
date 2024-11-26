@@ -74,15 +74,19 @@ class Game_online extends HTMLElement {
     
       `
   }
+
+  disconnectedCallback() {
+    console.log('Game_online disconnected');
+    this.innerHTML = '';
+  }
 }
 
 export function attachDOM() {
-  document.body.innerHTML = '';
-  document.body.setAttribute('style', '');
-  document.head.innerHTML = ''
-  const page = document.createElement('game-page');
-  document.body.appendChild(page);
+  document.body.style = '';
+  app.root.innerHTML = '';
   import('../game/js/game.js').then(module => { module.game_2d(); })
+  const page = document.createElement('game-page');
+  app.root.appendChild(page);
 }
 customElements.define('game-page', Game_online);
 

@@ -26,15 +26,19 @@ class Game_Offline extends HTMLElement {
         </html>
         `
     }
+
+    disconnectedCallback() {
+        console.log('Game_Offline disconnected');
+        this.innerHTML = '';
+    }
 }
 
 export function attachDOM() {
-    document.body.innerHTML = '';
-    document.body.setAttribute('style', '');
-    document.head.innerHTML = ''
-    const page = document.createElement('game-page');
-    document.body.appendChild(page);
+    document.body.style = '';
+    app.root.innerHTML = '';
     import('../game/js/game_offline.js').then(module => { module.game_2d_offline(); })
+    const page = document.createElement('game-page');
+    app.root.appendChild(page);
     console.log('Gamee');
     
 }
