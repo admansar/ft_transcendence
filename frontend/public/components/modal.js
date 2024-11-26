@@ -66,11 +66,11 @@ export class Modals extends HTMLElement {
                         </div>
                         <div class="buttons-container">
                             <button class="mode-button" data-image="public/src/img/pingpong_playing.svg" id="online-btn">Play Online</button>
-                            <button class="mode-button" data-image="public/src/img/pong.jpg" id="player-vs-computer-btn">Player vs
-                                Computer</button>
+                            <button class="mode-button" data-image="public/src/img/local_play.jpg" id="local-btn">Play Local</button>
+                            <button class="mode-button" data-image="public/src/img/pong.jpg" id="player-vs-computer-btn">Player vs Computer</button>
                             <button class="mode-button" data-image="public/src/img/tournament.jpg" id="tournament-btn">Tournament</button>
-                            <button class="mode-button" data-image="public/src/img/3d_player.png" id="ping-pong-btn">3d ping pong game 
-                                (beta)</button>
+                            <button class="mode-button" data-image="public/src/img/3d_player.png" id="ping-pong-btn">3d ping pong game (beta)</button>
+                                
                         </div>
                         <div class="dimention-select">
                             <!-- <button class="small-button" id="switch-1" data-state="on">Play in 2D</button> -->
