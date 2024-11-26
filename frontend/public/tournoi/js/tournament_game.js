@@ -4,15 +4,15 @@ import { makeAuthRequest } from "../../services/utils.js";
 await new Promise(r => setTimeout(r, 1000));
 let breaker = 0;
 //document.head.innerHTML = ''
-document.head.innerHTML = `
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ping Pong Game</title>
-  <link rel="stylesheet" href="../public/tournoi/css/tournament.css"></link>
-  `
+//document.head.innerHTML = `
+//  <meta charset="UTF-8">
+//  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+//  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//  <title>Ping Pong Game</title>
+//  <link rel="stylesheet" href="../public/tournoi/css/tournament.css"></link>
+//  `
 
-document.body.innerHTML = `
+app.root.innerHTML = `
   <div id="header">
     <div id="score-board">
       <div>
@@ -94,78 +94,33 @@ let gameState = {
   direction: { x: 1, y: 0 },
 };
 
-// WebSocket connection
-// let token = null;
-
-// let response = await fetch('http://localhost:8000/api/accounts/me',
-//   {
-//     method: 'POST',
-//     headers: 
-//     {
-//       'Content-Type': 'application/json',
-//     },
-//     credentials: 'include',
-//   }
-// )
-// let response = await makeAuthRequest('http://localhost:8000/api/accounts/me', {
-// let data = null;
-// let response = await makeAuthRequest('api/auth/me', {
-//   method: 'POST',
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-//   credentials: 'include',
-// });
-
-// if (response.ok) {
-//   data = await response.json();
-//   // console.log ('full data: ', data)
-//   token = data.access;
-// }
-// else
-// {
-//   console.log('Error fetching user data');
-// }
-
 function updateScore(user_data) {
-  console.log('Update Score from front: ', user_data);
-  return new Promise((resolve, reject) => {
-    makeAuthRequest('/api/tournament/update-score/', {
+  (async () => {
+    await fetch('/api/game/update-score', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(user_data),
-    }).then(async res => {
-      res = await res.json();
-      console.log('response from update score: ', res);
-      resolve(res);
-    }).catch(err => {
-      console.log('Error updating score: ', err);
-      reject(err);
+      // body: JSON.stringify(current_state)
+      body: JSON.stringify(user_data)
     })
-  })
+  }
+  )();
 }
 
-function finishTournament(user_data) {
-  return new Promise((resolve, reject) => {
-    makeAuthRequest('/api/tournament/complete-tournament/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user_data),
-    }).then(async res => {
-      res = await res.json();
-      console.log('response from finish tournament: ', res);
-      resolve(res);
-    }).catch(err => {
-      console.log('Error finishing tournament: ', err);
-      reject(err);
-    })
+function finishGame(user_data) {
+  (async () => {
+	await fetch('/api/game/complete-game', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(user_data)
   })
+  })();
 }
 
+let test = 0;
 export async function tour_game(user_token) {
   return new Promise((resolve, reject) => {
 
@@ -268,19 +223,21 @@ export async function tour_game(user_token) {
           current_state.other_name = playerName;
         }
 
-        // if (test === 0) {
-        //   test++;
-        //   // initGame = await fetch('/api/game/init-game', {
-        //   //   method: 'POST',
-        //   //   headers: {
-        //   //     'Content-Type': 'application/json'
-        //   //   },
-        //   //   body: JSON.stringify(current_state)
-        //   //   // body: JSON.stringify(user_data)
-        //   // })
-        //   // game_id = await initGame.json();
-        //   // console.log('game_id from front', game_id);
-        // }
+        (async () => {
+         if (test === 0) {
+           test++;
+            initGame = await fetch('/api/game/init-game', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(current_state)
+              // body: JSON.stringify(user_data)
+            })
+            game_id = await initGame.json();
+            console.log('game_id from front', game_id);
+         }
+        }) ()
 
 
 
@@ -320,7 +277,7 @@ export async function tour_game(user_token) {
              * 
              */
             updateScore(user_data);
-            finishTournament(user_data);
+            finishGame(user_data);
 
             breaker = true;
             setTimeout(function () {
@@ -388,7 +345,7 @@ export async function tour_game(user_token) {
          * 
          */
         updateScore(user_data);
-        finishTournament(user_data);
+        finishGame(user_data);
 
         // winner = data.winner;
         // breaker = 1;
@@ -601,7 +558,7 @@ export async function tour_game(user_token) {
         resolve(winner);
         console.log('Winner ==========> ', user_data);
         // updateScore(user_data);
-        // finishTournament(user_data);
+        // finishGame(user_data);
         return;
       }
       if (isMovingDown || isMovingUp) {

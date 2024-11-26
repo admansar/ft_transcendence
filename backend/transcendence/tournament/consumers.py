@@ -26,6 +26,8 @@ champion = None
 no_ongoing_tournament = True
 g_id: int = 0
 disconnected_players = []
+peer_loock: list[bool] = [False, False, False, False]
+started_championship = False
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     player_num = 4  # Total number of players in the tournament
@@ -61,9 +63,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         self.room_id = await self.assign_room(self.user_name)
         await self.accept()
         global g_id
+        self.id = g_id 
         g_id += 1
-        self.id = g_id
-    
         print (f'{self.user_name} connected')
         players.append(self)
         for player in players:
@@ -139,6 +140,13 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def start_championship(self):
         await asyncio.sleep(1)
+        global started_championship
+        if started_championship:
+            return
+        global g_id
+        #if self.user_name in [el.user_name for el in winners_classes]:
+        if g_id == 3:
+            started_championship = True
         print ('starting the championship : ', winners)
         print (f'self: {self}')
         await self.send(text_data=json.dumps({
@@ -160,8 +168,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        if data['type'] == 'start_championship':
-            print (f'data : {data}')
         if data['type'] == 'match_result':
             await self.handle_match_result(data['winner'])
         if data['type'] == 'get_update':
@@ -170,7 +176,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             if self.user_name in [el.user_name for el in winners_classes]:
                 # game_started = True
                 print ('starting the championship')
+                print ('self : ', self.user_name)
                 await self.start_championship()
+                return
         if data['type'] == 'end_tournament':
             winners_classes.clear()
             winners.clear()
@@ -181,6 +189,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
             no_ongoing_tournament = True
             global g_id
             g_id = 0
+            global started_championship
+            started_championship = False
             print ('tournament ended')
             await asyncio.sleep(5)
             # await self.close()
@@ -273,12 +283,13 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
     # user: User | dict = None
     user_name: str = None
     breaker = False
+    id: int = 0
     # def get
             
 
     async def connect(self) -> None:
-        global no_ongoing_tournament
         # print (f"Scope : {self.scope}")
+        print ('welcome to our heros ', players)
         try:
             self.user_name = await self.get_username_from_db() 
         except Exception as e:
@@ -291,7 +302,10 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name,
         )
-
+        for player in players:
+            if player.user_name == self.user_name:
+                self.id = player.id
+                break
         await self.accept()
         await self.send_init_state()
         self.room = game_rooms[self.room_id]
@@ -300,15 +314,12 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             self.disconnect(1000)
             self.close() 
         if len(self.room.players) == 2 and not self.room.game_loop_task:
-            print ('--------starting game--------')
+            self.room.game_loop_task = True
             other_player = self.room.players[0] if self.room.players[1] == self else self.room.players[1]
             for i, player in enumerate(players):
                 print (f"player : {player.user_name}")
                 if player.user_name == self.user_name:
                     self.opponnet = players[i + 1] if i % 2 == 0 else players[i - 1]
-                    print ('--------opponent found--------')
-                    print (f"self : {self.user_name}, opponent : {self.opponnet.user_name}")
-                    print ('--------opponent found--------')
                     break
             await other_player.send_player_info(self.user_name)
             # await self.start_countdown(other_player)
@@ -383,6 +394,7 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, keycode) -> None:
         try:
+            peer_loock[self.id] = False
             self.breaker = True
             if self.room.game_loop_task:
                 self.room.game_loop_task.cancel()
@@ -446,36 +458,18 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 print("the game is over my bro")
                 await self.disconnect(1000)
             elif message_type == 'enemy_disconnected':
-                print ('<<=====enemy disconnected=====>>')
-                print (f'data : {data}')
-                print (f'players : {[player.user_name for player in players]}')
-                for i, player in enumerate(players):
-                    if player.user_name == self.user_name:
-                        try:
-                            self.opponnet = players[i + 1] if i % 2 == 0 else players[i - 1]
-                        except Exception:
-                            self.opponnet = None
-                        if self.opponnet:
-                            print (f"self : {self.user_name} <<<<<<>>>>>> opponent : {self.opponnet.user_name}")
-                        else:
-                            print (f"self : {self.user_name} <<<<<<>>>>>> opponent : None")
-                        break
-                winner_data: dict = {'winner': self.user_name, 'player1': self.opponnet.user_name, 'player2': self.user_name}
-                winners.append(winner_data)
-                print (f'message from {self.user_name}, the winner data is : {winner_data}')
-                await self.send(text_data=json.dumps({
-                    'type': 'game_over',
-                    'winner': self.user_name
-                }))
-                await self.opponnet.send(text_data=json.dumps({
-                    'type': 'game_over',
-                    'winner': self.user_name
-                }))
+                try:
+                    await self.channel_layer.group_send(
+                        self.room_group_name,
+                        {
+                            'type': 'game_over',
+                            'winner': self.user_name
+                        }
+                    )
+                except Exception as e:
+                    print (f"Error in enemy disconnected : {e}")
 
-                print ('<<============================>>')
 
-               # await self.disconnect(1000)
-               # await self.close()
 
         except Exception as e:
             print(f"Error in receive: {e}")

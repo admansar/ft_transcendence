@@ -64,7 +64,6 @@ class Profile extends HTMLElement {
                     document.querySelector('.medal.gold').style.backgroundColor = "#ffbb00a0";
                 }
             }
-
         }
     }
 
