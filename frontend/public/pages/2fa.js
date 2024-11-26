@@ -135,7 +135,12 @@ class TwoFactorAuth extends HTMLElement {
     checkOTPCompletion() {
         const inputs = this.otpInputContainer.querySelectorAll('input');
         const allFilled = Array.from(inputs).every(input => input.value !== '');
-
+        const test = {
+            "username": "berrim",
+            "type": '2',
+            "userScore": 4,
+            "botScore": 5
+        }
 
         this.verifyButton.disabled = !allFilled;
     }
