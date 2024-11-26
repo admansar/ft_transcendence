@@ -27,9 +27,34 @@ class Profile extends HTMLElement {
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
         await this.displayRank(me);
+        await this.offline_games(me);
         document.title = `Profile - ${userData.username}`;
     }
 
+    async offline_games(me) {
+        let response = await makeAuthRequest(`/api/auth/getGameBoot?username=${me.username}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        response = await response.json();
+        console.log ('game :: ', response.games)
+        const games = response.games;
+        let data_2d = [];
+        let data_3d = [];
+        for (let i = 0; i < games.length; i++)
+        {
+            if (games[i].type === '2')
+                data_2d.push(games[i])
+            else if (games[i].type === '3')
+                data_3d.push(games[i])
+        }
+        console.log ('2d games :: ', data_2d)
+        console.log ('3d games :: ', data_3d)
+        console.log ('waiting for a front for it');
+    }
+    
     async displayRank(me) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
