@@ -26,11 +26,11 @@ class Profile extends HTMLElement {
         this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank(userData, me);
+        // await this.displayRank();
         document.title = `Profile - ${userData.username}`;
     }
 
-    async displayRank(userData, me) {
+    async displayRank() {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
@@ -38,7 +38,7 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log('+++++++++++++++++++++', response);
+        return response
     }
 
     async getProfileHtml(userData, username) {
@@ -605,6 +605,8 @@ class Profile extends HTMLElement {
         try {
             console.log(userData);
             let userStats = await this.getUserStats(userData);
+            let data = await this.displayRank();
+            let lenuser = data.length
             this.innerHTML = `
                 <div class="dashbord-main">
                     <div class="right-side-dashbord">
@@ -682,18 +684,6 @@ class Profile extends HTMLElement {
                                     <div class="rank_wins">
                                         <div class="icons_wins"></div>
                                         <div class="numbers_wins">42</div>
-                                    </div>
-                                </div>
-
-                                <div class="rank_bar 2" id=USER>
-                                    <div class="rank_number"> 2 </div>
-                                    <div class="rank_info">
-                                        <div class="rank_profile"></div>
-                                        <div class="rank_name">USER 2</div>
-                                    </div>
-                                    <div class="rank_wins">
-                                        <div class="icons_wins"></div>
-                                        <div class="numbers_wins">2</div>
                                     </div>
                                 </div>
 
