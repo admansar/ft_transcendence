@@ -38,6 +38,7 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
+        document.querySelector('.RANKYdata').innerHTML = '';
         for (let i = 0; i < response.length; i++) {
             document.querySelector('.RANKYdata').innerHTML += `
             <div class="rank_bar" id="${response[i].username}">
@@ -51,7 +52,9 @@ class Profile extends HTMLElement {
                     <div class="numbers_wins">${response[i].score}</div>
                 </div>
             </div>
+        
         `;
+            // }
             if (response[i].username == me.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
                 if (response[i].achivements >= 5) {
