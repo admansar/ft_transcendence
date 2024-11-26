@@ -198,10 +198,6 @@ class Request_methods(APIView):
                     user_P : Profile = self.profile.get(user=s_user)  
                     if self.request_friend.filter(sender=_user, reciver=s_user).exists():  
                         self.sender : friend_request = self.request_friend.get(sender=_user, reciver=s_user)
-                    # print("==================")
-                    # print(user_P.user.username)
-                    # print("==================")
-                    # self.sender.delete()
                     user_P.waiting.remove(_user)
                 except Exception:
                     return Response(status=status.HTTP_400_BAD_REQUEST)

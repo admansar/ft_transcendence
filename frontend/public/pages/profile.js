@@ -26,11 +26,11 @@ class Profile extends HTMLElement {
         this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank();
+        await this.displayRank(me);
         document.title = `Profile - ${userData.username}`;
     }
 
-    async displayRank() {
+    async displayRank(me) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
@@ -38,12 +38,11 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', response);
         for (let i = 0; i < response.length; i++) {
             document.querySelector('.RANKYdata').innerHTML += `
-            <div class="rank_bar ${i + 1}" id="${response[i].username}">
-                <div class="rank_number">${i + 1}</div>
-                <div class="rank_info">
+            <div class="rank_bar" id="${response[i].username}">
+                <div class="rank_number ">${i + 1}</div>
+                <div class="rank_info" id="index_${i + 1}">
                     <div class="rank_profile"></div>
                     <div class="rank_name">${response[i].username}</div>
                 </div>
@@ -53,10 +52,19 @@ class Profile extends HTMLElement {
                 </div>
             </div>
         `;
-            // if (response[i].username == userData.username)
-            //     if (response[i].achivements >= 2)
-            //         document.querySelector('.medal_achivement_bar').innerHTML += `
-            // `;
+            if (response[i].username == me.username) {
+                document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
+                if (response[i].achivements >= 5) {
+                    document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
+                }
+                if (response[i].achivements >= 10) {
+                    document.querySelector('.medal.silver').style.backgroundColor = "#ffbb00a0";
+                }
+                if (response[i].achivements >= 20) {
+                    document.querySelector('.medal.gold').style.backgroundColor = "#ffbb00a0";
+                }
+            }
+
         }
     }
 

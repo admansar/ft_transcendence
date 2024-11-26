@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import GameScore
 from django.db.models import Q
+from operator import itemgetter
 from .services import (
     get_user_from_api,
     get_user_from_api_by_id,
@@ -146,23 +147,22 @@ class RankUser(APIView):
                         else:
                             self.loss += 1
                 score = self.win - self.loss
-                achivements = score
                 if score * 2.15 >= 0:
                     score = score * 2.15
                 else:
                     score = 0
-                    achivements = 0
                 temp = {
                     "username" : user,
                     "win" : self.win,
                     "loss" : self.loss,
                     "score" : score,
-                    "achivements" : achivements
+                    "achivements" : self.win - self.loss
                 }
                 result.append(temp)
             self.loss = 0
             self.win = 0
-        return  Response(result)
+        sort_result = sorted(result, key=itemgetter('score'), reverse=True)
+        return  Response(sort_result)
 
 
 @api_view(['GET'])
