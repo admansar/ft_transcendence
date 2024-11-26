@@ -4,3 +4,8 @@ delete console logs
 fix console errors
 upgrade backend tournament
 fix route('/')
+
+
+{
+    "status":"ADD" ,"user_id":"58"
+}

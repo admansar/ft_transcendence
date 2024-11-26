@@ -117,6 +117,7 @@ class RankUser(APIView):
         result = []
         _user = get_all_users()
         for key in _user:
+            score = 0
             user = key["username"]
             response = requests.post('http://localhost:8000/api/game/get-games',
                 json = {"username" : user},
@@ -127,6 +128,8 @@ class RankUser(APIView):
                     "username" : user,
                     "win" : 0,
                     "loss" : 0,
+                    "score" : 0,
+                    "achivements" : 0
                })
             else:
                 for key in data['games']:
@@ -142,10 +145,19 @@ class RankUser(APIView):
                             self.win += 1
                         else:
                             self.loss += 1
+                score = self.win - self.loss
+                achivements = score
+                if score * 2.15 >= 0:
+                    score = score * 2.15
+                else:
+                    score = 0
+                    achivements = 0
                 temp = {
                     "username" : user,
                     "win" : self.win,
                     "loss" : self.loss,
+                    "score" : score,
+                    "achivements" : achivements
                 }
                 result.append(temp)
             self.loss = 0

@@ -674,19 +674,6 @@ class Profile extends HTMLElement {
                                 </div>
                             </div>
                             <div class="RANKYdata">
-
-                                <div class="rank_bar 1" id=USER>
-                                    <div class="rank_number"> 1 </div>
-                                    <div class="rank_info">
-                                        <div class="rank_profile"></div>
-                                        <div class="rank_name">USER</div>
-                                    </div>
-                                    <div class="rank_wins">
-                                        <div class="icons_wins"></div>
-                                        <div class="numbers_wins">42</div>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
                     </div>
@@ -703,6 +690,26 @@ class Profile extends HTMLElement {
                     </div>
                 </div>
             `
+            for (let i = 0; i < lenuser; i++) {
+                document.querySelector('.RANKYdata').innerHTML += `
+                <div class="rank_bar ${i + 1}" id="${data[i].username}">
+                    <div class="rank_number">${i + 1}</div>
+                    <div class="rank_info">
+                        <div class="rank_profile"></div>
+                        <div class="rank_name">${data[i].username}</div>
+                    </div>
+                    <div class="rank_wins">
+                        <div class="icons_wins"></div>
+                        <div class="numbers_wins">${data[i].score}</div>
+                    </div>
+                </div>
+            `; 
+            if (data[i].username == userData.username)
+                if (data[i].achivements >= 2)
+                    document.querySelector('.medal_achivement_bar 5win').innerHTML += `
+                    
+                `;
+        }
         } catch (e) {
             console.log(e);
             app.router.findRoute('404');
