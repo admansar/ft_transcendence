@@ -11,6 +11,7 @@ class Tournament(models.Model):
     
     winner_one = models.CharField(max_length=20, null=True)
     winner_two = models.CharField(max_length=20, null=True)
+    
     # score_a = models.IntegerField(null=True)
     # score_b = models.IntegerField(null=True)
     # score_c = models.IntegerField(null=True)
@@ -53,3 +54,4 @@ class Tournament(models.Model):
             return response.json()
         else:
             return None
+        

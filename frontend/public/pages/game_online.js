@@ -81,12 +81,20 @@ class Game_online extends HTMLElement {
   }
 }
 
+let cleanup = null;
 export function attachDOM() {
+  if (cleanup) {
+    cleanup();
+    console.log('cleanup');
+    cleanup = null;
+  }
   document.body.style = '';
   app.root.innerHTML = '';
-  import('../game/js/game.js').then(module => { module.game_2d(); })
-  const page = document.createElement('game-page');
+  import(`../game/js/game.js?t=${Date.now()}`).then(module => {
+    cleanup = module.game_2d();
+  })
+  const page = document.createElement('game-online-page');
   app.root.appendChild(page);
 }
-customElements.define('game-page', Game_online);
+customElements.define('game-online-page', Game_online);
 

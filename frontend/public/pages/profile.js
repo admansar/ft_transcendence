@@ -365,7 +365,7 @@ class Profile extends HTMLElement {
                     addFriendButton.style.display = 'none';
                 }
                 // blockModal.style.display = 'flex';
-                // blockModal.innerHTML = '';
+                blockModal.innerHTML = '';
                 console.log('Checking blocked users', blocked);
                 for (let i = 0; i < blocked.length; i++) {
                     let blockedUser = await getUserDataByID(blocked[i]);
@@ -435,7 +435,8 @@ class Profile extends HTMLElement {
             const data = await response.json();
             if (response.ok) {
                 notifications.notify(data.message, 'success', 1000, notif);
-                addFriendButton.style.display = 'none';
+                // addFriendButton.style.display = 'none';
+                addFriendButton.classList.add('active');
             } else {
                 console.log(data);
                 notifications.notify(data.error, 'error', 1000, notif);
@@ -459,7 +460,7 @@ class Profile extends HTMLElement {
             }).then(async res => {
                 if (res.ok) {
                     notifications.notify('Friend request accepted', 'success', 1500, notif);
-                    addFriendButton.style.display = 'none';
+                    // addFriendButton.style.display = 'none';
                 }
             })
         });
@@ -544,7 +545,7 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.status === 'Waiting' || data.status === 'Friend') {
-                addFriendButton.style.display = 'none';
+                addFriendButton.classList.add('active');
             }
         } catch (e) {
             console.log(e);
@@ -553,6 +554,7 @@ class Profile extends HTMLElement {
     }
 
     async checkIfBlocked(userData, me) {
+        console.log('userData.id +++++++++++++++++++++++++++++ userData.username', userData.id, userData.username);
         let isBlockingMe = await makeAuthRequest('/api/friends/find/', {
             method: 'POST',
             headers: {
@@ -563,11 +565,34 @@ class Profile extends HTMLElement {
             })
         })
         isBlockingMe = await isBlockingMe.json();
+        console.log('isBlockingMe', isBlockingMe);
         if (isBlockingMe.status === 'Block') {
             Router.findRoute('/404');
             return;
         }
 
+    }
+
+    async cancelFriendRequest(userData) {
+        const addFriendButton = document.getElementById('add_friend');
+        addFriendButton.addEventListener('click', async () => {
+            let response = await makeAuthRequest('/api/friends/methods/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "status": "CANCEL",
+                    "user_id": String(userData.id)
+                })
+            })
+            if (response.ok) {
+                notifications.notify('Friend request cancelled', 'success', 1000, addFriendButton);
+                addFriendButton.classList.remove('active');
+            } else {
+                notifications.notify('Error cancelling friend request', 'error', 1000, addFriendButton);
+            }
+        });
     }
 
     async renderProfile(userData, me) {
@@ -592,9 +617,12 @@ class Profile extends HTMLElement {
             console.log(addFriendButton.classList);
 
             if (!addFriendButton.classList.contains('active')) {
+                console.log('??????????????????????????????????????');
                 await this.addFriend(userData);
             } else {
-                await this.rejectFriendRequest(userData);
+                // await this.rejectFriendRequest(userData);
+                await this.cancelFriendRequest(userData);
+                addFriendButton.classList.remove('active');
             }
             this.blockUser(userData);
         }

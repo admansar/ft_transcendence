@@ -586,7 +586,7 @@ function game_score ()
 			sleep(2000).then(() => {
 				//from '../../services/router.js' import { Router }
 
-				Router.findRoute('/404');
+				Router.findRoute('/');
 			});
 		}	
 		game_reset ()
@@ -735,7 +735,7 @@ miniMapRenderer.domElement.style.bottom = '10px';
 miniMapRenderer.domElement.style.left = '10px';
 miniMapRenderer.domElement.style.border = '1px solid white';
 
-document.body.appendChild(miniMapRenderer.domElement);
+app.root.appendChild(miniMapRenderer.domElement);
 
 const miniMapBall = new THREE.Mesh(
     new THREE.SphereGeometry(radius * 2, 8, 8),
@@ -890,8 +890,15 @@ document.addEventListener('mousemove', function(event)
 		paddleBody.position.z = -mouseY * paddleRangeZ;
 	});
 
-export async function game_3d()
+export function game_3d()
 {
-	await loadEnvironment()
+	loadEnvironment()
 	animate()
+	return () => {
+		console.log('Game 3D destroyed')
+		document.removeEventListener('keydown', hooks)
+		document.removeEventListener('mousemove', function(event) {})
+		paused = true
+		window.cancelAnimationFrame(animate)
+	}
 }

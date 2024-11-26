@@ -61,14 +61,23 @@ class Game_Friends extends HTMLElement {
     }
   }
   
-  export function attachDOM() {
-    document.body.innerHTML = '';
-    document.body.setAttribute('style', '');
-    document.head.innerHTML = ''
-    const page = document.createElement('game-page');
-    document.body.appendChild(page);
-    import('../game/js/friends_game.js').then(module => { module.game_2d(); })
+
+let cleanup = null;
+
+export function attachDOM() {
+  if (cleanup) {
+    cleanup();
+    console.log ('cleanup')
+    cleanup = null;
   }
-  customElements.define('game-page', Game_Friends);
-  
-  
+  document.body.innerHTML = '';
+  document.body.setAttribute('style', '');
+  document.head.innerHTML = ''
+  const page = document.createElement('friends-game-page');
+  document.body.appendChild(page);
+  import(`../game/js/friends_game.js?t=${Date.now()}`).then(module => {
+    cleanup = module.game_2d();
+  })
+}
+customElements.define('friends-game-page', Game_Friends);
+

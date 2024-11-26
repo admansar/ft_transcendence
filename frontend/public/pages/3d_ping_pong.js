@@ -37,15 +37,21 @@ class Game_3d  extends HTMLElement {
     }
 }
 
+let cleanup = null;
+
 export function attachDOM() {
-    setTimeout(() => {
-        document.body.innerHTML = '';
-        document.body.setAttribute('style', '');
-        document.head.innerHTML = ''
-        const page = document.createElement('game-page');
-        document.body.appendChild(page);
-        import('../game/js/game_3d.js').then(module => { module.game_3d(); })
-    }, 100)
+    if (cleanup) {
+        cleanup();
+        console.log('cleanup');
+        cleanup = null;
+    }
+    document.body.style = '';
+    app.root.innerHTML = '';
+    import(`../game/js/game_3d.js?t=${Date.now()}`).then(module => {
+        cleanup = module.game_3d();
+    })
+    const page = document.createElement('ping-pong-page');
+    app.root.appendChild(page);
 }
-customElements.define('game-page', Game_3d);
+customElements.define('ping-pong-page', Game_3d);
 

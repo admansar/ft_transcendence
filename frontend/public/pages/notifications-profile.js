@@ -85,10 +85,34 @@ class NotificationsProfile extends HTMLElement {
                 notificationList.appendChild(notifEl);
             }
 
-            if (notificationList.classList.contains('show') || userNotifications.length === 0)
+            if (userNotifications.length === 0){
+
+                const existingMessage = notificationList.querySelector('.message');
+                if (!existingMessage) {
+                    
+                    // Create a new div element with the "message" class and set its text
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message'; // Add the "message" class
+                    messageDiv.textContent = "No notifications found"; // Set the message text
+                    messageDiv.style.textAlign = 'center';
+                    notificationList.appendChild(messageDiv); // Append the new div to the notificationList
+    
+                }
+                else {
+                // Remove any existing message div when notifications are shown
+                const existingMessage = notificationList.querySelector('.message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+            }
+            }
+                // Check if a message div already exists
+            
+            if (notificationList.classList.contains('show'))
                 notificationList.classList.remove('show'); 
             else
                 notificationList.classList.add('show');
+            
         })
 
     }

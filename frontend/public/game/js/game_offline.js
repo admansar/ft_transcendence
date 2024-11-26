@@ -525,7 +525,12 @@ function game_loop()
 export function game_2d_offline()
 {
   game_loop()
+  return () => {
+    window.cancelAnimationFrame(game_loop)
+    this.paused = true
+    window.removeEventListener('keydown', hooks)
+    window.removeEventListener('keyup', function (e) {
+      keyPressed[e.keyCode] = false
+    })
+  }
 }
-
-
-
