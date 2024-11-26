@@ -26,7 +26,7 @@ class Profile extends HTMLElement {
         this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        // await this.displayRank();
+        await this.displayRank();
         document.title = `Profile - ${userData.username}`;
     }
 
@@ -38,8 +38,28 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        return response
+        console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%', response);
+        for (let i = 0; i < response.length; i++) {
+            document.querySelector('.RANKYdata').innerHTML += `
+            <div class="rank_bar ${i + 1}" id="${response[i].username}">
+                <div class="rank_number">${i + 1}</div>
+                <div class="rank_info">
+                    <div class="rank_profile"></div>
+                    <div class="rank_name">${response[i].username}</div>
+                </div>
+                <div class="rank_wins">
+                    <div class="icons_wins"></div>
+                    <div class="numbers_wins">${response[i].score}</div>
+                </div>
+            </div>
+        `;
+            // if (response[i].username == userData.username)
+            //     if (response[i].achivements >= 2)
+            //         document.querySelector('.medal_achivement_bar').innerHTML += `
+            // `;
+        }
     }
+
 
     async getProfileHtml(userData, username) {
         const avatar = document.querySelector('.profile-photo');
@@ -622,7 +642,7 @@ class Profile extends HTMLElement {
             } else {
                 // await this.rejectFriendRequest(userData);
                 await this.cancelFriendRequest(userData);
-                addFriendButton.classList.remove('active');
+                // addFriendButton.classList.remove('active');
             }
             this.blockUser(userData);
         }
@@ -633,8 +653,7 @@ class Profile extends HTMLElement {
         try {
             console.log(userData);
             let userStats = await this.getUserStats(userData);
-            let data = await this.displayRank();
-            let lenuser = data.length
+            // let data = await this.displayRank();
             this.innerHTML = `
                 <div class="dashbord-main">
                     <div class="right-side-dashbord">
@@ -718,26 +737,6 @@ class Profile extends HTMLElement {
                     </div>
                 </div>
             `
-            for (let i = 0; i < lenuser; i++) {
-                document.querySelector('.RANKYdata').innerHTML += `
-                <div class="rank_bar ${i + 1}" id="${data[i].username}">
-                    <div class="rank_number">${i + 1}</div>
-                    <div class="rank_info">
-                        <div class="rank_profile"></div>
-                        <div class="rank_name">${data[i].username}</div>
-                    </div>
-                    <div class="rank_wins">
-                        <div class="icons_wins"></div>
-                        <div class="numbers_wins">${data[i].score}</div>
-                    </div>
-                </div>
-            `; 
-            if (data[i].username == userData.username)
-                if (data[i].achivements >= 2)
-                    document.querySelector('.medal_achivement_bar 5win').innerHTML += `
-                    
-                `;
-        }
         } catch (e) {
             console.log(e);
             app.router.findRoute('404');

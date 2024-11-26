@@ -369,7 +369,8 @@ class Me(APIView):
 class Logout(APIView):
     def post(self, request):
         response = Response()
-        response.delete_cookie('jwt')
+        response.delete_cookie('access')
+        response.delete_cookie('refresh')
         response.data = {
             'message': 'success'
         }

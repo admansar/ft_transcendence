@@ -86,7 +86,17 @@ export class Menu extends HTMLElement {
 
         logout.addEventListener('click', e => {
             e.preventDefault();
-            app.router.findRoute('/logout');
+            makeAuthRequest('/api/auth/logout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            }).then(res => {
+                if (res.status === 200) {
+                    app.router.findRoute('/login');
+                }
+            }) 
         })
         
     }
