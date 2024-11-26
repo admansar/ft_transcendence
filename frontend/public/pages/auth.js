@@ -15,17 +15,30 @@ class Auth extends HTMLElement {
         this.render(page);
     }
 
+    cleanup() {
+        // Remove Register event listeners
+        if (handleRegisterKeyup) document.removeEventListener('keyup', handleRegisterKeyup);
+        if (handleRegisterClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleRegisterClick);
+        // Remove Login event listeners
+        if (handleLoginKeyup) document.removeEventListener('keyup', handleLoginKeyup);
+        if (handleLoginClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleLoginClick);
+    }
+
     render(page) {
         const registerPage = document.createElement('register-page');
         const loginPage = document.createElement('login-page');
         console.log(page);
 
         if (page === 'register') {
+            // this.innerHTML = ''
+            // this.removeEventListener('click', this);
             this.appendChild(registerPage)
             register();
             Oauth42();
         }
         else {
+            // this.innerHTML = ''
+            // this.removeEventListener('click', this);
             this.appendChild(loginPage)
             login();
             Oauth42();
@@ -33,8 +46,9 @@ class Auth extends HTMLElement {
 
         document.addEventListener('click', async (event) => {
             if (event.target && event.target.id === 'open-register') {
-                console.log('heeeere', event.target.id);
-                this.innerHTML = ''
+                // this.innerHTML = ''
+                this.cleanup();
+                this.removeChild(loginPage)
                 this.appendChild(registerPage)
                 history.pushState(null, null, '/register');
                 register();
@@ -42,8 +56,9 @@ class Auth extends HTMLElement {
             }
 
             if (event.target && event.target.id === 'close-register') {
-                console.log('heeeere', event.target.id);
-                this.innerHTML = ''
+                // this.innerHTML = ''
+                this.cleanup();
+                this.removeChild(registerPage)
                 this.appendChild(loginPage)
                 history.pushState(null, null, '/login');
                 login();
@@ -85,9 +100,21 @@ document.addEventListener('DOMContentLoaded', () => {
     Oauth42();
 });
 
+let handleRegisterKeyup;
+let handleRegisterClick;
+let handleLoginKeyup;
+let handleLoginClick;
+
 function register() {
     const btn = document.querySelector('button.submit-button');
-    btn.addEventListener('click', async () => {
+
+    handleRegisterKeyup = (e) => {
+        if (e.key === 'Enter') {
+            btn.click();
+        }
+    };
+
+    handleRegisterClick = async () => {
         const username = document.getElementById('username').value;
         const first_name = document.getElementById('fname').value;
         const last_name = document.getElementById('lname').value;
@@ -125,12 +152,19 @@ function register() {
             console.log('Error during registration');
             notifications.notify('Error during registration', 'danger');
         }
-    })
+    };
+    document.addEventListener('keyup', handleRegisterKeyup);
+    btn.addEventListener('click', handleRegisterClick);
 }
 
 function login() {
     const btn = document.querySelector('button.submit-button');
-    btn.addEventListener('click', async () => {
+    handleLoginKeyup = (e) => {
+        if (e.key === 'Enter') {
+            btn.click();
+        }
+    };
+    handleLoginClick = async () => {
         const username = document.getElementById('username').value;
         const password = document.getElementById('pwd').value;
 
@@ -188,7 +222,9 @@ function login() {
             console.log('Error logging in');
             // notifications.notify(data.error, 'danger');
         }
-    })
+    };
+    document.addEventListener('keyup', handleLoginKeyup);
+    btn.addEventListener('click', handleLoginClick);
 }
 
 customElements.define('auth-page', Auth)
