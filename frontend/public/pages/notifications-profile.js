@@ -85,8 +85,8 @@ class NotificationsProfile extends HTMLElement {
                 notificationList.appendChild(notifEl);
             }
 
+            if (userNotifications.length === 0){
 
-                // Check if a message div already exists
                 const existingMessage = notificationList.querySelector('.message');
                 if (!existingMessage) {
                     
@@ -96,7 +96,7 @@ class NotificationsProfile extends HTMLElement {
                     messageDiv.textContent = "No notifications found"; // Set the message text
                     messageDiv.style.textAlign = 'center';
                     notificationList.appendChild(messageDiv); // Append the new div to the notificationList
-
+    
                 }
                 else {
                 // Remove any existing message div when notifications are shown
@@ -105,11 +105,14 @@ class NotificationsProfile extends HTMLElement {
                     existingMessage.remove();
                 }
             }
+            }
+                // Check if a message div already exists
             
-            if (notificationList.classList.contains('show') && userNotifications.length === 0)
+            if (notificationList.classList.contains('show'))
                 notificationList.classList.remove('show'); 
             else
                 notificationList.classList.add('show');
+            
         })
 
     }
