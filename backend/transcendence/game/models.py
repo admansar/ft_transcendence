@@ -25,3 +25,4 @@ class GameScore(models.Model):
             return response.json()
         else:
             return None
+        

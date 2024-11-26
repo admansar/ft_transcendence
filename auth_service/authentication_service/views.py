@@ -19,9 +19,13 @@ import os
 from friends.models import Profile
 from authentication_service import settings
 from django.core.mail import send_mail
+from .models import GameBoot
 import secrets
 import string
 from jwt import DecodeError
+
+from .serializers import GameBootSeri
+
 User = get_user_model()
 
 
@@ -173,6 +177,7 @@ class OtpUpdate(APIView):
 
 class Oauth42(APIView):
     def get(self, request):
+        print('code ======>', request.GET.get('code'))
         code = request.GET.get('code')
         if not code:
             raise AuthenticationFailed('No code provided')
@@ -216,19 +221,22 @@ class Oauth42(APIView):
 
         user_info = response.json()
         print('user_info', user_info)
-        user, created = User.objects.get_or_create(
-            email=user_info.get('email', ''),  # Use email instead of username
-            defaults={
-                'username': user_info['login'],  # If you still need a username, set it here
-                'first_name': user_info.get('first_name', ''),
-                'last_name': user_info.get('last_name', ''),
-                'is_active': True,
-                'is_staff': False,
-                'is_superuser': False,
-                'avatar': user_info.get('image', {}).get('link', ''),
-            }
-        )
-        Profile.objects.get_or_create(user=user)
+        try:
+            user, created = User.objects.get_or_create(
+                email=user_info.get('email', ''),  # Use email instead of username
+                defaults={
+                    'username': user_info['login'],  # If you still need a username, set it here
+                    'first_name': user_info.get('first_name', ''),
+                    'last_name': user_info.get('last_name', ''),
+                    'is_active': True,
+                    'is_staff': False,
+                    'is_superuser': False,
+                    'avatar': user_info.get('image', {}).get('link', ''),
+                }
+            )
+            Profile.objects.get_or_create(user=user)
+        except Exception as e:
+            return redirect('/login?error=user_already_exists')
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)
@@ -389,6 +397,18 @@ class UpdateUser(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+class getlevel(APIView):
+    def get(self, request):
+        
+        username = request.GET.get('username')
+        user = User.objects.get(username=username)
+        if not user:
+            return Response({'error': 'User not found'}, status=404)
+        xp = user.xp
+        level = user.level
+        return Response({"userLevel": level, "userXp": xp})
+
 class UpdateXpAndLevel(APIView):
     def post(self, request):
         print('XP and Level:', request.data)
@@ -449,20 +469,52 @@ class UpdateXpAndLevel(APIView):
             'level': user.level
         })
     
-class getlevel(APIView):
-    def get(self, request):
-        
-        username = request.GET.get('username')
-        user = User.objects.get(username=username)
+class AddGameBootMatch(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        type = request.data.get("type")
+        userScore = request.data.get("userScore")
+        botScore = request.data.get("botScore")
+
+        user = User.objects.filter(username=username).first()
+
         if not user:
-            return Response({'error': 'User not found'}, status=404)
-        xp = user.xp
-        level = user.level
-        return Response({"userLevel": level, "userXp": xp})
-        # token = request.COOKIES.get('access')
-        # if not token:
-        #     raise AuthenticationFailed('Unauthorized')
-        
-        # jwt = JWTAuthentication()
-        # validated_token = jwt.get_validated_token(token)
-        # user = jwt.get_user(validated_token)
+            return Response({"error": "User not found"}, status=404)
+
+        try:
+            GameBoot.objects.create(
+                username=username,
+                type=type,
+                userScore=userScore,
+                botScore=botScore,
+                isWinner=userScore > botScore
+            )
+        except Exception as e:
+            return Response({"error": "Internal server error, try again later"}, status=500)
+    
+        return Response({"success":"Data saved successfully"}, status=201)
+    
+class GetGameBoot(APIView):
+    def get(self, request):
+        username = request.GET.get("username")
+        type = request.GET.get("type")
+
+        if not username:
+            return Response({"error": "Missing informations"}, status=400)
+
+        user = User.objects.filter(username=username).first()
+        if not user:
+            return Response({"error": "User not found"}, status=404)
+        if not type:
+            games = GameBoot.objects.filter(username=username)
+            seri = GameBootSeri(games, many=True)
+            return Response({"games": seri.data}, status=200)
+        games = GameBoot.objects.filter(username=username, type=type)
+        seri = GameBootSeri(games, many=True)
+        return Response({"games": seri.data}, status=200)
+
+        # print('username', username)
+        # print('type', type)
+        # print('userScore', userScore)
+        # print('botScore', botScore)
+        # return Response({"state":"Okey"})

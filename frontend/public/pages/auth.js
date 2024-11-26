@@ -31,70 +31,56 @@ class Auth extends HTMLElement {
             Oauth42();
         }
 
-        document.addEventListener('click', (event) => {
+        document.addEventListener('click', async (event) => {
             if (event.target && event.target.id === 'open-register') {
+                console.log('heeeere', event.target.id);
                 this.innerHTML = ''
                 this.appendChild(registerPage)
                 history.pushState(null, null, '/register');
                 register();
+                Oauth42();
             }
 
             if (event.target && event.target.id === 'close-register') {
+                console.log('heeeere', event.target.id);
                 this.innerHTML = ''
                 this.appendChild(loginPage)
                 history.pushState(null, null, '/login');
                 login();
+                Oauth42();
             }
         });
+
+        let urlParams = new URLSearchParams(window.location.search);
+        console.log('urlParams', urlParams);
+        if (urlParams.has('error')) {
+            notifications.notify(urlParams.get('error'), 'danger');
+            window.history.replaceState(null, null, window.location.pathname);
+        }
     }
 }
+
 export function attachDOM(page) {
+    document.body.style = '';
+    app.root.innerHTML = ''
     const authPage = document.createElement('auth-page');
     authPage.setAttribute('data-page', page);
-    app.root.innerHTML = ''
     app.root.appendChild(authPage);
 }
 
 function Oauth42() {
     const button = document.querySelector('.btn1');
 
-    // Check if user is already authenticated
-    const checkAuth = () => {
-        const accessToken = getCookie('access');
-        if (accessToken) {
-            window.location.href = '/dashboard';
-            return true;
-        }
-        return false;
-    };
-
-    const getCookie = (name) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-        return null;
-    };
-
     button.addEventListener('click', () => {
-        if (!checkAuth()) {
-            // Using encodeURIComponent to properly encode the redirect URI
-            const redirectUri = encodeURIComponent('http://localhost/api/auth/oauth42/');
+        const redirectUri = encodeURIComponent('http://localhost/api/auth/oauth42/');
 
-            window.location.href = 'https://api.intra.42.fr/oauth/authorize?' +
-                'client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&' +
-                `redirect_uri=${redirectUri}&` +
-                'response_type=code';
-        }
+        window.location.href = 'https://api.intra.42.fr/oauth/authorize?' +
+            'client_id=u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b&' +
+            `redirect_uri=${redirectUri}&` +
+            'response_type=code';
     });
-
-    // window.addEventListener('load', () => {
-    //     if (checkAuth() && window.location.pathname === '/') {
-    //         window.location.href = '/dashboard';
-    //     }
-    // });
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     Oauth42();
 });

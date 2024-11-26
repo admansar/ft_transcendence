@@ -12,6 +12,8 @@ from .views import (
     VerifyOTPView,
     OtpUpdate,
     GetAllUsers,
+    AddGameBootMatch,
+    GetGameBoot
 )
 
 from rest_framework_simplejwt.views import (
@@ -42,6 +44,8 @@ urlpatterns = [
     path('api/auth/users/', GetAllUsers.as_view(), name='get_all_users'),
     path('api/auth/update-xp-level', UpdateXpAndLevel.as_view(), name='update-xp-level'),
     path('api/auth/get-level', getlevel.as_view(), name='get-level'),
+    path('api/auth/addGameBoot', AddGameBootMatch.as_view(), name='addGameBoot'),
+    path('api/auth/getGameBoot', GetGameBoot.as_view(), name='getGameBoot'),
     path('api/friends/', include('friends.urls')),
     path('chat/', include('chat.urls')),
 ]

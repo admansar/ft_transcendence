@@ -1,4 +1,5 @@
 import { makeAuthRequest } from "../services/utils.js";
+import "../components/settings.js"
 
 export class Menu extends HTMLElement {
     constructor() {
@@ -12,7 +13,8 @@ export class Menu extends HTMLElement {
     render() {
         const menuIcon = document.getElementById('menu-icon');
         const content = document.querySelector('.menu-content');
-        
+        const SettingsComponent = document.createElement('app-settings');
+        this.appendChild(SettingsComponent);
         menuIcon.addEventListener('click', function (event) {
             menuIcon.classList.toggle('active'); 
         
@@ -50,6 +52,7 @@ export class Menu extends HTMLElement {
         const profile = document.querySelector('.avatar');
         const settings = document.querySelector('.setting');
         const logout = document.querySelector('.exit');
+        const setModal = document.querySelector('.modal_settings');
 
         home.addEventListener('click', e => {
             // e.preventDefault();
@@ -78,8 +81,7 @@ export class Menu extends HTMLElement {
         })
 
         settings.addEventListener('click', e => {
-            e.preventDefault();
-            app.router.findRoute('/settings');
+            setModal.style.display = 'flex';
         })
 
         logout.addEventListener('click', e => {
