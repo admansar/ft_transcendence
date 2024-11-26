@@ -61,7 +61,8 @@ function front_remove_user(user)
 function remove_online_dot(user)
 {
     const ue = document.querySelector(`#${user} .friend-profile-status`)
-    ue.style.backgroundColor = '#3a3a3a';
+    if (ue)
+        ue.style.backgroundColor = '#3a3a3a';
 }
 
 function front_inject_user(user)

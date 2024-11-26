@@ -18,6 +18,8 @@ let data = null;
 let room_name = "tour_room";
 let token = null;
 let locker = false;
+let super_locker = true;
+let self_username = null;
 
 // let response = await fetch('http://localhost:8000/api/accounts/me',
 //   {
@@ -42,6 +44,7 @@ if (response.ok) {
     data = await response.json();
     // console.log ('full data: ', data)
     token = data.access;
+    self_username = data.username;
 }
 else {
     console.log('Error fetching user data');
@@ -101,10 +104,6 @@ gameSocket.onmessage = function (e) {
                 });
             }
         }
-        // if (data.usernames.length === data.player_num)
-        // {
-        // try {document.getElementById("waiter").remove();}catch (e){console.log('No waiter');}
-        // }
     }
     else if (data.type === 'start_game') {
         console.log('lets start the game');
@@ -137,13 +136,24 @@ gameSocket.onmessage = function (e) {
                     gameSocket.send(JSON.stringify({ 'type': 'get_update' }));
                     console.log('Sent get_update after reopening');
                 });
+                console.log('my job is done here');
             }
-
             // console.log ('sent get_update');
         });
     }
     else if (data.type === 'winners') {
         console.log(data)
+        // if self is in winners, locker = false
+        for (let i = 0; i < data.winners.length; i++)
+        {
+            console.log (`data.winners[${i}].winner: `, data.winners[i].winner);
+            if (data.winners[i].winner === self_username)
+            {
+                console.log ('self is in winners');
+                super_locker = false;
+                break;
+            }
+        }
         for (let i = 0; i < data.winners.length; i++)
             if (i < winners.length)
                 if (data.winners[i].winner)
@@ -156,9 +166,11 @@ gameSocket.onmessage = function (e) {
             else
                 players[i].innerHTML = '...';
 
+        console.log('data.winners: ', data.winners)
         if (data.winners.length === 2 && !locker) {
-            locker = true;
-            // console.log('lets start the championship');
+            if (super_locker)
+                locker = true;
+            console.log('lets start the championship');
             gameSocket.send(JSON.stringify(
                 {
                     'type': 'start_championship',
@@ -190,6 +202,12 @@ gameSocket.onmessage = function (e) {
             //     setTimeout(resolve, 3000);
             // }).then(() => {console.log ('closing ...');gameSocket.close()});
         }
+        else
+        {
+            console.log ('waiting for the next round');
+            console.log ('data.winners: ', data.winners)
+            console.log ('the fucking locker: ', locker)
+        }
     }
     // else if (data.type === 'winner_winner_chicken_dinner')
     // {
@@ -213,5 +231,9 @@ export function tournament() {
         Router.findRoute('/login');
     }
     console.log('Tournament page loaded');
+    return () => {
+        console.log('tournament disconnected')
+        gameSocket.close();
+    };
 }
 

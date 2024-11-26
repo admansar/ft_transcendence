@@ -276,7 +276,7 @@ let bot_mode = true;
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
 const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
 
 
@@ -525,6 +525,15 @@ function game_loop()
 export function game_2d_offline()
 {
   game_loop()
+  return () => {
+    window.cancelAnimationFrame(game_loop)
+    paused = true
+    console.log('game 2d offline cleaned')
+    window.removeEventListener('keydown', hooks)
+    window.removeEventListener('keyup', function (e) {
+      keyPressed[e.keyCode] = false
+    })
+  }
 }
 
 

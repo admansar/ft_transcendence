@@ -240,7 +240,6 @@ gameSocket.onmessage = async function (e) {
 			// document.head.innerHTML = '';
 			console.log('router: ', Router)
 			console.log('router: ', Router)
-			Router.findRoute('404');
 			Router.findRoute('/');
 			return;
 		}
@@ -270,7 +269,6 @@ gameSocket.onmessage = async function (e) {
 		breaker = true
 		setTimeout(function () { }, 1000)
 		gameSocket.close()
-		Router.findRoute('404');
 		Router.findRoute('/');
 	}
 	else if (data.type === 'broadcast_game_state') {
@@ -532,6 +530,13 @@ function updateCountdown(txt = '') {
 export function game_2d() {
 	showWaitingOverlay()
 	game_loop();
+
+    return () => {
+		console.log ('game online disconnected')
+        //cancelAnimationFrame(animationFrame);
+        canvas.remove();
+		gameSocket.close();
+    };
 }
 
 

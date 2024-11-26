@@ -57,13 +57,34 @@ class initGame(APIView):
 
 class UpdateScore(APIView):
     def post(self, request):
-        print('UpdateScore', request.data)
+        winner_one_name: str = None
+        winner_two_name: str = None
+        print('UpdateScore ==> ', request.data)
         username = request.data.get('username')
+        data = request.data
         player = get_user_from_api(username)
+        print ('player :::::::> ', player)
         tournament = get_object_or_404(Tournament, id=request.data.get('tournament_id'))
-
-        if tournament.player_a_id == player['id']:
-            pass
+        if data['score'] == 5 and tournament.winner_one is None:
+            tournament.winner_one = player['id']
+            winner_one_name = player['username']
+            print ('----------------------')
+            print ('winner_one', tournament.winner_one)
+            print ('----------------------')
+            return Response({'message': 'Score updated successfully'})
+        elif data['score'] == 5 and tournament.winner_two is None and  winner_one_name != data['username']:
+            tournament.winner_two = player['id']
+            winner_two_name = player['username']
+            print ('----------------------')
+            print ('winner_two', tournament.winner_two)
+            print ('----------------------')
+            tournament.winner_two = data['username']
+            return Response({'message': 'Score updated successfully'})
+        
+        # print all the tournament data
+        for key, value in tournament.__dict__.items():
+            print(f'{key}: {value}')
+        
         tournament.save()
         return Response({'message': 'Score updated successfully'})
     
