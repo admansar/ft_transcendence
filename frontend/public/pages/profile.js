@@ -26,11 +26,11 @@ class Profile extends HTMLElement {
         this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank();
+        await this.displayRank(me);
         document.title = `Profile - ${userData.username}`;
     }
 
-    async displayRank() {
+    async displayRank(me) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
