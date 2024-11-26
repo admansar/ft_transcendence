@@ -134,8 +134,8 @@ class RankUser(APIView):
                })
             else:
                 for key in data['games']:
-                    usera = key["player_a_id"]
-                    userb = key['player_b_id']
+                    usera = key["score_a"]
+                    userb = key['score_b']
                     if key["player_a"] == user:
                         if (usera > userb):
                             self.win += 1
