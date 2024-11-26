@@ -114,7 +114,7 @@ export const routes = [
     },
     {
         path: '/profile/:username',
-        isAuth: false,
+        // path: '/profile',
         component: async ({ username }) => import('../pages/profile.js').then(module => {
             module.attachDOM({ username });
         })
@@ -130,13 +130,6 @@ export const routes = [
         path: '/game/online',
         isAuth: false,
         component: () => import('../pages/game_online.js').then(module => {
-            module.attachDOM();
-        })
-    },
-    {
-        path: '/game/localgame',
-        isAuth: false,
-        component: () => import('../pages/game_offline_local.js').then(module => {
             module.attachDOM();
         })
     },
