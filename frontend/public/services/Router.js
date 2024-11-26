@@ -134,6 +134,13 @@ export const routes = [
         })
     },
     {
+        path: '/game/localgame',
+        isAuth: false,
+        component: () => import('../pages/game_offline_local.js').then(module => {
+            module.attachDOM();
+        })
+    },
+    {
         path: '/game/3d',
         isAuth: false,
         component: () => import('../pages/3d_ping_pong.js').then(module => {

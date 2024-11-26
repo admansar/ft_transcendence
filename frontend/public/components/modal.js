@@ -14,6 +14,9 @@ export function setupModal() {
     const offline3D = document.getElementById('ping-pong-btn');
     offline3D.addEventListener('click', () => Router.findRoute('/game/3d'));
 
+    const local_game = document.getElementById('local-btn');
+    local_game.addEventListener('click', () => Router.findRoute('/game/localgame'));
+
     const tournament = document.getElementById('tournament-btn');
     tournament.addEventListener('click', () => Router.findRoute('/game/tournament'));
     closeModalBtn.addEventListener('click', () => {
