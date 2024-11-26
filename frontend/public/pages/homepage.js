@@ -16,7 +16,6 @@ export class HomePage extends HTMLElement {
     }
 
     async connectedCallback() {
-        console.log('connected=========================>');
         const headerComponent = document.createElement('header-component');
         this.appendChild(headerComponent);
         let profile = document.querySelector('.profile');
@@ -64,15 +63,6 @@ export async function attachDOM() {
     const page = document.createElement('home-page');
     app.root.innerHTML = ''
     app.root.appendChild(page);
-    if (app.first) {
-        app.first = false;
-        console.log(app.root.innerHTML);
-    }
-    // console.log('app.root===============>', app.root);
-    // if (!app.root.innerHTML.nextSibling) {
-    //     console.log('Debuggin home-page');
-    //     await page.connectedCallback();
-    // }
 }
 
 customElements.define('home-page', HomePage)

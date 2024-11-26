@@ -1,4 +1,5 @@
 import { makeAuthRequest } from "../services/utils.js";
+import "../components/settings.js"
 
 export class Menu extends HTMLElement {
     constructor() {
@@ -12,45 +13,46 @@ export class Menu extends HTMLElement {
     render() {
         const menuIcon = document.getElementById('menu-icon');
         const content = document.querySelector('.menu-content');
-
+        const SettingsComponent = document.createElement('app-settings');
+        this.appendChild(SettingsComponent);
         menuIcon.addEventListener('click', function (event) {
-            console.log('Menu component is rendered');
-            menuIcon.classList.toggle('active');
-
+            menuIcon.classList.toggle('active'); 
+        
             if (menuIcon.classList.contains('active')) {
-                content.style.maxHeight = '500px';
-                content.style.opacity = '1';
-                content.style.overflow = 'visible';
+                content.style.maxHeight = '500px'; 
+                content.style.opacity = '1'; 
+                content.style.overflow = 'visible'; 
             } else {
                 closeMenu();
             }
-
-            event.stopPropagation();
+        
+            event.stopPropagation(); 
         });
-
+        
 
         content.addEventListener('click', function (event) {
             event.stopPropagation();
         });
-
+        
 
         document.addEventListener('click', function () {
             if (menuIcon.classList.contains('active')) {
                 closeMenu();
             }
         });
-
+        
         function closeMenu() {
-            menuIcon.classList.remove('active');
-            content.style.maxHeight = '0';
+            menuIcon.classList.remove('active'); 
+            content.style.maxHeight = '0'; 
             content.style.opacity = '0';
-            content.style.overflow = 'hidden';
+            content.style.overflow = 'hidden'; 
         }
 
         const home = document.querySelector('.home');
         const profile = document.querySelector('.avatar');
         const settings = document.querySelector('.setting');
         const logout = document.querySelector('.exit');
+        const setModal = document.querySelector('.modal_settings');
 
         home.addEventListener('click', e => {
             // e.preventDefault();
@@ -79,19 +81,14 @@ export class Menu extends HTMLElement {
         })
 
         settings.addEventListener('click', e => {
-            e.preventDefault();
-            app.router.findRoute('/settings');
+            setModal.style.display = 'flex';
         })
 
         logout.addEventListener('click', e => {
             e.preventDefault();
             app.router.findRoute('/logout');
         })
-
-    }
-
-    disconnectedCallback() {
-        this.innerHTML = '';
+        
     }
 }
 

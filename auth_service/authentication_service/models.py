@@ -30,3 +30,11 @@ class User(AbstractUser):
 
 class Enable2FASerializer(serializers.Serializer):
     otp_code = serializers.CharField(max_length=6)
+
+
+class GameBoot(models.Model):
+    username = models.CharField(max_length=100, null=False)
+    type = models.CharField(max_length=1, null=False) # 2D or 3D
+    isWinner = models.BooleanField(null=False)
+    userScore = models.IntegerField(null=False)
+    botScore = models.IntegerField(null=False)
