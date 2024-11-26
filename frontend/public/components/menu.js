@@ -1,5 +1,6 @@
-import { makeAuthRequest } from "../services/utils.js";
+import { makeAuthRequest, sleep } from "../services/utils.js";
 import "../components/settings.js"
+import notifications from "./notifications.js";
 
 export class Menu extends HTMLElement {
     constructor() {
@@ -92,8 +93,10 @@ export class Menu extends HTMLElement {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-            }).then(res => {
+            }).then(async res => {
                 if (res.status === 200) {
+                    notifications.notify('You have been logged out', 'success', 1500);
+                    await sleep(1500);
                     app.router.findRoute('/login');
                 }
             }) 
