@@ -4,7 +4,6 @@ import "../components/modal.js";
 import "../components/chat.js";
 import "../components/settings.js"
 import "../components/search.js";
-import "../components/menu.js"
 import "../components/achivement.js"
 import '../pages/notifications-profile.js';
 import { getUserDataByID, makeAuthRequest } from "../services/utils.js";
@@ -37,9 +36,7 @@ export class HomePage extends HTMLElement {
         const modalsComponent = document.createElement('app-modals');
         const ChatComponent = document.createElement('app-chat');
         const SettingsComponent = document.createElement('app-settings');
-        const menu = document.createElement('app-menu');
         const achievements = document.createElement('app-achievements');
-        this.appendChild(menu);
         this.appendChild(achievements);
         this.appendChild(SettingsComponent);
         this.appendChild(circlesComponent);
@@ -51,6 +48,9 @@ export class HomePage extends HTMLElement {
 
         const notificationsProfile = document.createElement('app-notifications-profile');
         this.appendChild(notificationsProfile);
+
+
+        app.first = true;
     }
 
     disconnectedCallback() {
