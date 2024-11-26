@@ -308,27 +308,32 @@ export async function tour_game(user_token) {
           }
           console.log('last states: ', user_data);
 
-          gameSocket.send(JSON.stringify({
-            'type': 'enemy_disconnected',
-          }));
-          /**
-           * 
-           * 
-           * TOURNAMENT API CALL
-           * 
-           * 
-           */
-          updateScore(user_data);
-          finishTournament(user_data);
+          (async () => {
+            gameSocket.send(JSON.stringify({
+              'type': 'enemy_disconnected',
+            }));
+            /**
+             * 
+             * 
+             * TOURNAMENT API CALL
+             * 
+             * 
+             */
+            updateScore(user_data);
+            finishTournament(user_data);
 
-          breaker = true;
-          setTimeout(function () { }, 1000)
-          gameSocket.close()
+            breaker = true;
+            setTimeout(function () {
+              gameSocket.close();
+              return;
+            }, 1000)
+          })();
 
         }
         // navigate('/')
       }
       else if (data.type === 'game_over' && !game_end_locker) {
+        console.log ('game over data : ', data)
         game_end_locker = true;
         show_notification(`${data.winner} wins the game!`);
         last_state = current_state;

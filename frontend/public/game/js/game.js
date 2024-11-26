@@ -40,26 +40,6 @@ let playerName = '...';
 let fps_ratio = 1;
 let server_fps = 30;
 
-function update_avatar(user)
-{
-	let avatar = null;
-	makeAuthRequest(`/api/auth/user/${user}`, {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-		}
-	}).then(async res => {
-		res = await res.json();
-		console.log("the res is : ", res);
-		avatar = res.avatar;
-		const player1Image = document.querySelector("#player1 .player-icon");
-		player1Image.src = self_avatar;
-		player1Image.style.width = '128px';
-		player1Image.style.height = '128px';
-	});
-	return avatar
-}
-
 
 // Game state received from server
 let gameState = {
@@ -324,9 +304,11 @@ gameSocket.onmessage = async function (e) {
 			// salim send last data here
 			// send here data to db
 			breaker = true;
-			setTimeout(function () { }, 1000)
-			gameSocket.close()
-			Router.findRoute('/');
+			setTimeout(function () {
+				gameSocket.close()
+				Router.findRoute('/');
+			}, 1000)
+
 			return
 		}
 	}
@@ -353,9 +335,10 @@ gameSocket.onmessage = async function (e) {
 		await finishGame(user_data);
 
 		breaker = true
-		setTimeout(function () { }, 1000)
-		gameSocket.close()
-		Router.findRoute('/');
+		setTimeout(function () {
+			gameSocket.close()
+			Router.findRoute('/');
+		}, 1000)
 		return
 
 	}
@@ -624,6 +607,12 @@ export function game_2d() {
 	}
 	showWaitingOverlay()
 	game_loop();
+    return () => {
+		console.log ('game online disconnected')
+		gameSocket.close();
+        // window.cancelAnimationFrame(animationFrame);
+        canvas.remove();
+    };
 }
 
 

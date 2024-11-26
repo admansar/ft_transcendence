@@ -33,14 +33,23 @@ class Game_Offline extends HTMLElement {
     }
 }
 
+let cleanup = null;
+
 export function attachDOM() {
+    if (cleanup) {
+        cleanup();
+        console.log('cleanup');
+        cleanup = null;
+    }
     document.body.style = '';
     app.root.innerHTML = '';
-    import('../game/js/game_offline.js').then(module => { module.game_2d_offline(); })
-    const page = document.createElement('game-page');
+    import(`../game/js/game_offline.js?t=${Date.now()}`).then(module => { 
+        cleanup = module.game_2d_offline();
+    })
+    const page = document.createElement('game-offline-page');
     app.root.appendChild(page);
     console.log('Gamee');
     
 }
-customElements.define('game-page', Game_Offline);
+customElements.define('game-offline-page', Game_Offline);
 

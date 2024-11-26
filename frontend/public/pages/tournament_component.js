@@ -191,16 +191,21 @@ class TournamentComponent extends HTMLElement {
     }
 }
 
-customElements.define('game-page', TournamentComponent);
+customElements.define('tour-game-page', TournamentComponent);
+
+let cleanup = null;
 
 export function attachDOM() {
-    setTimeout(() => {
-        document.body.innerHTML = '';
-        const page = document.createElement('game-page');
-        document.body.appendChild(page);
-        // Load the script after the component is added to the DOM
-        import('../tournoi/js/tournament.js').then(module => { 
-            module.tournament(); 
-        }).catch(err => console.error('Error loading the tournament script:', err));
-    }, 100);
+    if (cleanup) {
+        cleanup();
+        console.log('cleanup');
+        cleanup = null;
+    }
+    document.body.style = '';
+    app.root.innerHTML = '';
+    import(`../tournoi/js/tournament.js?t=${Date.now()}`).then(module => {
+        cleanup = module.tournament();
+    }).catch(err => console.error('Error loading the tournament script:', err));
+    const page = document.createElement('tour-game-page');
+    app.root.appendChild(page);
 }

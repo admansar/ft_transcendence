@@ -161,6 +161,13 @@ export const routes = [
             module.attachDOM();
         })
     },
+    {
+        path: '/game/localgame',
+        isAuth: false,
+        component: () => import('../pages/game_offline_local.js').then(module => {
+            module.attachDOM();
+        })
+    }
 ]
 
 
