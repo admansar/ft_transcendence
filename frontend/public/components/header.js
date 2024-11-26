@@ -1,6 +1,7 @@
 import { getMe } from '../services/utils.js';
 import "../components/search.js";
 import "../components/menu.js";
+import "../pages/notifications-profile.js";
 
 class Header extends HTMLElement {
     constructor() {
@@ -15,6 +16,8 @@ class Header extends HTMLElement {
     async getHeaderHtml() {
         const searchComponent = document.createElement('app-search');
         const menu = document.createElement('app-menu');
+        const notificationsProfile = document.createElement('app-notifications-profile');
+        this.appendChild(notificationsProfile);
         this.appendChild(menu);
         this.appendChild(searchComponent);
 
