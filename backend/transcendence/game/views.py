@@ -136,17 +136,19 @@ class RankUser(APIView):
                 for key in data['games']:
                     usera = key["score_a"]
                     userb = key['score_b']
+                    score = 0
                     if key["player_a"] == user:
                         if (usera > userb):
                             self.win += 1
                         else:
                             self.loss += 1
+                        score = key["score_a"]
                     if key["player_b"] == user:
                         if (userb > usera):
                             self.win += 1
                         else:
                             self.loss += 1
-                score = self.win - self.loss
+                        score = key["score_b"]
                 if score * 8 >= 0:
                     score = score * 8
                 else:
