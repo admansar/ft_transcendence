@@ -308,6 +308,9 @@ export async function tour_game(user_token) {
           }
           console.log('last states: ', user_data);
 
+          gameSocket.send(JSON.stringify({
+            'type': 'enemy_disconnected',
+          }));
           /**
            * 
            * 

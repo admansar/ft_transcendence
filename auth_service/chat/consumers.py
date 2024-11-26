@@ -1,3 +1,5 @@
+import django
+django.setup()
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
@@ -5,13 +7,11 @@ from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from django.utils.html import strip_tags
 import redis
-import django
-django.setup()
 from .models import Client
 from friends.models import Profile
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-from authentication_service.models import User
+#from authentication_service.models import User
 import os
 
 online_users: list = []

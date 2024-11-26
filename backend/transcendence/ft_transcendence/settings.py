@@ -58,7 +58,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mrberrim@gmail.com'
-EMAIL_HOST_PASSWORD = 'mdri nanb whnz eqkn'  # App password si vous utilisez Gmail
+EMAIL_HOST_PASSWORD = 'mdri nanb whnz eqkn'
 
 
 INSTALLED_APPS = [

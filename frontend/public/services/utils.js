@@ -56,17 +56,19 @@ export async function getMe() {
 }
 
 export async function isAuth() {
-    const response = await fetch('/api/auth/me', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-    });
-    if (response.ok) {
-        return true;
+    try {
+        const response = await fetch('/api/auth/me', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+        });
+        return response.ok;
     }
-    return false;
+    catch (e) {
+        return false;
+    }
 }
 
 export async function getUserDataByID(id) {

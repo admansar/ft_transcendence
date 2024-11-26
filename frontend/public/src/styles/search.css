@@ -84,10 +84,10 @@ search-results {
 }
 
 /* Link styling */
-#search-results a {
+#search-results span {
     text-decoration: none;
     color: white;
-    display: block;
+    /* display: block; */
 }
 
 /* Smooth transition for visibility */

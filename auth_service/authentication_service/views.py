@@ -173,6 +173,7 @@ class OtpUpdate(APIView):
 
 class Oauth42(APIView):
     def get(self, request):
+        print('code ======>', request.GET.get('code'))
         code = request.GET.get('code')
         if not code:
             raise AuthenticationFailed('No code provided')
@@ -216,19 +217,32 @@ class Oauth42(APIView):
 
         user_info = response.json()
         print('user_info', user_info)
-        user, created = User.objects.get_or_create(
-            email=user_info.get('email', ''),  # Use email instead of username
-            defaults={
-                'username': user_info['login'],  # If you still need a username, set it here
-                'first_name': user_info.get('first_name', ''),
-                'last_name': user_info.get('last_name', ''),
-                'is_active': True,
-                'is_staff': False,
-                'is_superuser': False,
-                'avatar': user_info.get('image', {}).get('link', ''),
-            }
-        )
-        Profile.objects.get_or_create(user=user)
+        try:
+            existing_user = get_object_or_404(User, username=user_info['login'])
+            if existing_user:
+                # return Response({'error': 'User already exists',
+                #                  'redirect_url': '/login'},
+                #                 status=401)
+                return redirect('/login?error=user_already_exists')
+        except Exception as e:
+            print('Error:', e)
+            pass
+        try:
+            user, created = User.objects.get_or_create(
+                email=user_info.get('email', ''),  # Use email instead of username
+                defaults={
+                    'username': user_info['login'],  # If you still need a username, set it here
+                    'first_name': user_info.get('first_name', ''),
+                    'last_name': user_info.get('last_name', ''),
+                    'is_active': True,
+                    'is_staff': False,
+                    'is_superuser': False,
+                    'avatar': user_info.get('image', {}).get('link', ''),
+                }
+            )
+            Profile.objects.get_or_create(user=user)
+        except Exception as e:
+            return Response({'error': str(e)}, status=401)
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)
