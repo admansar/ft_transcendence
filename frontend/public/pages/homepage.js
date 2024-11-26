@@ -46,8 +46,6 @@ export class HomePage extends HTMLElement {
         const searchComponent = document.createElement('app-search');
         this.appendChild(searchComponent);
 
-        const notificationsProfile = document.createElement('app-notifications-profile');
-        this.appendChild(notificationsProfile);
 
 
         app.first = true;
