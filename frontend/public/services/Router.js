@@ -114,7 +114,7 @@ export const routes = [
     },
     {
         path: '/profile/:username',
-        // path: '/profile',
+        isAuth: false,
         component: async ({ username }) => import('../pages/profile.js').then(module => {
             module.attachDOM({ username });
         })

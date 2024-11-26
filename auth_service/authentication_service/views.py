@@ -218,16 +218,6 @@ class Oauth42(APIView):
         user_info = response.json()
         print('user_info', user_info)
         try:
-            existing_user = get_object_or_404(User, username=user_info['login'])
-            if existing_user:
-                # return Response({'error': 'User already exists',
-                #                  'redirect_url': '/login'},
-                #                 status=401)
-                return redirect('/login?error=user_already_exists')
-        except Exception as e:
-            print('Error:', e)
-            pass
-        try:
             user, created = User.objects.get_or_create(
                 email=user_info.get('email', ''),  # Use email instead of username
                 defaults={
@@ -242,7 +232,7 @@ class Oauth42(APIView):
             )
             Profile.objects.get_or_create(user=user)
         except Exception as e:
-            return Response({'error': str(e)}, status=401)
+            return redirect('/login?error=user_already_exists')
         if created:
             user.save()
         refresh = RefreshToken.for_user(user)
