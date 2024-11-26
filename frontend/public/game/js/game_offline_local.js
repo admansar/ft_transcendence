@@ -27,7 +27,7 @@ let racket2_pos = {x: canvas.width - racket_width - racket1_pos.x, y: canvas.hei
 /*  config or settings  */
 
 
-let animation = false
+let animation = true
 let debug = false
 
 
@@ -506,7 +506,7 @@ function fps_counter() {
     if (elapsed >= 1)
     {
         gameLoopSpeed = frameCount;
-        console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
+        //console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
         frameCount = 0;
         lastTime = currentTime;
     }

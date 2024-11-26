@@ -111,17 +111,21 @@ gameSocket.onmessage = function (e) {
         console.log('lets start the game');
         console.log('data received: ', data);
         (async () => {
-            let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
+            const tge = document.querySelector('tour-game-page').innerHTML;
+            const head = document.head.innerHTML;
+            // document.querySelector('tour-game-page').innerHTML = '';
+            //let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
             console.log('game started');
             const module = await import(`./tournament_game.js?t=${Date.now()}`);
             console.log('le token: ', token)
             await module.tour_game(token);
             game_started = false;
-
+            document.querySelector('tour-game-page').innerHTML = tge;
             // await new Promise((resolve) => {setTimeout(resolve, 5000);});
             console.log('lets continue the tournament');
-            document.head.innerHTML = doc_save.head;
-            document.body.innerHTML = doc_save.body;
+            document.head.innerHTML = head;
+            //document.head.innerHTML = doc_save.head;
+            //document.body.innerHTML = doc_save.body;
             try { document.getElementById("waiter").remove(); } catch (e) { console.log('No waiter'); }
             for (let i = 0; i < players.length; i++)
                 players[i] = document.querySelector('.player' + (i + 1));

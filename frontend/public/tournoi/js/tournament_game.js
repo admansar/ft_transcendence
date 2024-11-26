@@ -3,16 +3,19 @@ import { makeAuthRequest } from "../../services/utils.js";
 
 await new Promise(r => setTimeout(r, 1000));
 let breaker = 0;
-//document.head.innerHTML = ''
-//document.head.innerHTML = `
-//  <meta charset="UTF-8">
-//  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-//  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//  <title>Ping Pong Game</title>
-//  <link rel="stylesheet" href="../public/tournoi/css/tournament.css"></link>
-//  `
+document.head.innerHTML = ''
+document.head.innerHTML = `
+ <meta charset="UTF-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Ping Pong Game</title>
+ <link rel="stylesheet" href="../public/tournoi/css/tournament.css"></link>
+ `
 
-app.root.innerHTML = `
+const tge = document.querySelector('tour-game-page')
+
+tge.innerHTML = ''
+tge.innerHTML = `
   <div id="header">
     <div id="score-board">
       <div>
@@ -81,6 +84,7 @@ let opponentName = '...';
 let playerName = '...';
 let fps_ratio = 1;
 let server_fps = 30;
+let initGame = null;
 
 
 // Game state received from server
@@ -94,22 +98,18 @@ let gameState = {
   direction: { x: 1, y: 0 },
 };
 
-function updateScore(user_data) {
-  (async () => {
-    await fetch('/api/game/update-score', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      // body: JSON.stringify(current_state)
-      body: JSON.stringify(user_data)
-    })
-  }
-  )();
+async function updateScore(user_data) {
+	await fetch('/api/game/update-score', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		// body: JSON.stringify(current_state)
+		body: JSON.stringify(user_data)
+	})
 }
 
-function finishGame(user_data) {
-  (async () => {
+async function finishGame(user_data) {
 	await fetch('/api/game/complete-game', {
 		method: 'POST',
 		headers: {
@@ -117,7 +117,6 @@ function finishGame(user_data) {
 		},
 		body: JSON.stringify(user_data)
   })
-  })();
 }
 
 let test = 0;
@@ -209,8 +208,10 @@ export async function tour_game(user_token) {
            * TOURNAMENT API CALL
            */
           console.log('Tournament ID =========>', app.tournament_id);
-          user_data.tournament_id = app.tournament_id;
-          updateScore(user_data);
+          (async () => {
+            user_data.tournament_id = app.tournament_id;
+            await updateScore(user_data);
+          })()
         }
 
 
@@ -276,8 +277,8 @@ export async function tour_game(user_token) {
              * 
              * 
              */
-            updateScore(user_data);
-            finishGame(user_data);
+            await updateScore(user_data);
+            await finishGame(user_data);
 
             breaker = true;
             setTimeout(function () {
@@ -344,9 +345,10 @@ export async function tour_game(user_token) {
          * 
          * 
          */
-        updateScore(user_data);
-        finishGame(user_data);
-
+        (async () => {
+        await updateScore(user_data);
+        await finishGame(user_data);
+        })()
         // winner = data.winner;
         // breaker = 1;
         // gameSocket.close();

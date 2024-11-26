@@ -1,3 +1,6 @@
+import { makeAuthRequest } from '../../services/utils.js';
+import { Router } from '../../services/Router.js';
+
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
@@ -5,7 +8,29 @@ const ctx = canvas.getContext('2d')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
+let data_to_send = {
+	username: "",
+	type: "2",
+	userScore: 0,
+	botScore: 0
+}
 
+let response = await makeAuthRequest('/api/auth/me', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  credentials: 'include',
+});
+
+if (response.ok) {
+  let data = await response.json();
+  data_to_send.username = data.username
+}
+else {
+  console.log('Error fetching user data');
+  Router.findRoute('/');
+}
 /* ball details */
 
 let ball_pos = {x : canvas.width / 2, y : canvas.height / 2}
@@ -475,11 +500,28 @@ function game_draw()
 
 function game_over()
 {
+  if (racket1.score == MAX_SCORE || racket2.score == MAX_SCORE)
+  {
+    (async () => {
+    data_to_send.userScore = racket1.score
+    data_to_send.botScore = racket2.score
+    makeAuthRequest('/api/auth/addGameBoot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(data_to_send)
+    });
+    setTimeout(() => { Router.findRoute('/') }, 1000);
+  })()
+  }
   if (racket1.score == MAX_SCORE)
   {
     ball.ray = 0
     game_draw()
     draw_string(100, "#ffffff", "player 2 win", canvas.width / 2, canvas.height / 2)
+    // hona
     return (1)
   }
   if (racket2.score == MAX_SCORE)
@@ -506,7 +548,7 @@ function fps_counter() {
     if (elapsed >= 1)
     {
         gameLoopSpeed = frameCount;
-        console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
+        //console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
         frameCount = 0;
         lastTime = currentTime;
     }
@@ -527,7 +569,7 @@ export function game_2d_offline()
   game_loop()
   return () => {
     window.cancelAnimationFrame(game_loop)
-    this.paused = true
+    paused = true
     window.removeEventListener('keydown', hooks)
     window.removeEventListener('keyup', function (e) {
       keyPressed[e.keyCode] = false
