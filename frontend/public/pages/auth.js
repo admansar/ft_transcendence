@@ -16,10 +16,8 @@ class Auth extends HTMLElement {
     }
 
     cleanup() {
-        // Remove Register event listeners
         if (handleRegisterKeyup) document.removeEventListener('keyup', handleRegisterKeyup);
         if (handleRegisterClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleRegisterClick);
-        // Remove Login event listeners
         if (handleLoginKeyup) document.removeEventListener('keyup', handleLoginKeyup);
         if (handleLoginClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleLoginClick);
     }
@@ -30,15 +28,11 @@ class Auth extends HTMLElement {
         console.log(page);
 
         if (page === 'register') {
-            // this.innerHTML = ''
-            // this.removeEventListener('click', this);
             this.appendChild(registerPage)
             register();
             Oauth42();
         }
         else {
-            // this.innerHTML = ''
-            // this.removeEventListener('click', this);
             this.appendChild(loginPage)
             login();
             Oauth42();
@@ -46,7 +40,6 @@ class Auth extends HTMLElement {
 
         document.addEventListener('click', async (event) => {
             if (event.target && event.target.id === 'open-register') {
-                // this.innerHTML = ''
                 this.cleanup();
                 this.removeChild(loginPage)
                 this.appendChild(registerPage)
@@ -56,7 +49,6 @@ class Auth extends HTMLElement {
             }
 
             if (event.target && event.target.id === 'close-register') {
-                // this.innerHTML = ''
                 this.cleanup();
                 this.removeChild(registerPage)
                 this.appendChild(loginPage)

@@ -2,7 +2,6 @@ import notifications from "../components/notifications.js";
 import { Router } from "./Router.js";
 
 async function verifyToken(token) {
-    // const response = await fetch('http://localhost:8000/api/token/verify/', {
     
     const response = await fetch('/api/auth/token/verify/', {
         method: 'POST',
@@ -13,7 +12,6 @@ async function verifyToken(token) {
         
         body: JSON.stringify({ token }),
     })
-    console.log('verifyToken', response.ok);
     return response.ok;
 }
 
@@ -22,7 +20,6 @@ export async function makeAuthRequest(url, options = {}) {
     options.credentials = 'include';
 
     let token = await getMe();
-    console.log('token', token.access);
     let response = await verifyToken(token.access);
     if (!response) {
         // const refreshRes = await fetch('http://localhost:8000/api/auth/refresh/', {

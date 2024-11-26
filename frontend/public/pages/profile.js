@@ -575,7 +575,7 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.status === 'Waiting' || data.status === 'Friend') {
-                addFriendButton.classList.add('active');
+                addFriendButton.style.display = 'none';
             }
         } catch (e) {
             console.log(e);
@@ -649,6 +649,7 @@ class Profile extends HTMLElement {
             if (!addFriendButton.classList.contains('active')) {
                 console.log('??????????????????????????????????????');
                 await this.addFriend(userData);
+                return;
             } else {
                 // await this.rejectFriendRequest(userData);
                 await this.cancelFriendRequest(userData);
