@@ -20,6 +20,7 @@ let token = null;
 let locker = false;
 let super_locker = true;
 let self_username = null;
+let game_started = false;
 
 // let response = await fetch('http://localhost:8000/api/accounts/me',
 //   {
@@ -105,16 +106,17 @@ gameSocket.onmessage = function (e) {
             }
         }
     }
-    else if (data.type === 'start_game') {
+    else if (data.type === 'start_game' && !game_started) {
+        game_started = true;
         console.log('lets start the game');
         console.log('data received: ', data);
         (async () => {
             let doc_save = { 'head': document.head.innerHTML, 'body': document.body.innerHTML };
             console.log('game started');
-
             const module = await import(`./tournament_game.js?t=${Date.now()}`);
             console.log('le token: ', token)
             await module.tour_game(token);
+            game_started = false;
 
             // await new Promise((resolve) => {setTimeout(resolve, 5000);});
             console.log('lets continue the tournament');
