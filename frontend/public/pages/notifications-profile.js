@@ -1,6 +1,7 @@
 import { makeAuthRequest } from "../services/utils.js";
 import { getUserDataByID } from "../services/utils.js";
 import notifications from "./../components/notifications.js";
+import { front_inject_user } from "../components/chat.js"; 
 
 class NotificationsProfile extends HTMLElement {
     constructor() {
@@ -103,6 +104,8 @@ class NotificationsProfile extends HTMLElement {
                     try {
                         await this.acceptFriendRequest(user.id);
                         notifications.notify('Friend request accepted', 'success', 1000, notificationEl);
+                        front_inject_user(user.username);
+                        //hone
                         notifEl.remove();
                     } catch (e) {
                         console.error(e);

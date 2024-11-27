@@ -65,7 +65,7 @@ function remove_online_dot(user)
         ue.style.backgroundColor = '#a30000';
 }
 
-function front_inject_user(user)
+export function front_inject_user(user)
 {
     makeAuthRequest(`/api/auth/user/${user}`, {
         method: 'GET',
@@ -235,8 +235,14 @@ function front_inject_friends(user, every_online_user)
         console.log(res);
         let avatar = res.avatar;
         console.log('avatar :', avatar);
-        const messengerList = document.querySelector('.messanger-list');
         const chat = document.getElementById('chat');
+        const messengerList = document.querySelector('.messanger-list');
+        for (let i = 0; i < 5; i++) {
+            console.log('waiting for the list to be ready');
+            setTimeout(() => {
+                messengerList = document.querySelector('.messanger-list');
+            }, 1000);
+        }
         if (!document.querySelector(`#${user}`))
         {
             console.log('injecting user : ', user);
@@ -273,7 +279,7 @@ function front_inject_friends(user, every_online_user)
                 <div class="play-with-moba" id="play-with-${user}-window">
                     <div class="play-with-moba-bar">
                         <div class="message-notif">You are invited to Play with ${user}</div>
-                        <div class="profile-pic-play-with"></div>
+                        <div class="profile-pic-play-with" style="background-image: url(${avatar}); background-size: cover; background-position: center center;"></div>
                         <div class="requeat-play-with">
                             <span class="request accepted" id="${user}-acp">ACCEPT</span>
                             <span class="request rejected" id="${user}-rjt">REJECT</span>
@@ -284,6 +290,8 @@ function front_inject_friends(user, every_online_user)
     
                 div.innerHTML = chatform;
                 chat.appendChild(div);
+                const pppw = document.querySelector(`#play-with-${user}`);
+                pppw.style.backgroundColor = '#00b100';
                 const chat_messanger_user = document.querySelector(`#${user}-chat`);
                 const chat_messanger_user_close_btn = document.querySelector(`#${user}-btn`);
     
@@ -379,7 +387,7 @@ function front_inject_friends(user, every_online_user)
         else if (every_online_user.includes(user) && document.querySelector(`#${user}`))
         {
             const ue = document.querySelector(`#${user} .friend-profile-status`)
-            if (ue)
+            //if (ue)
                 ue.style.backgroundColor = '#00b100';
         }
     })
@@ -464,8 +472,10 @@ export function socket_impel() {
             if (!msn_lst) {
                 console.log('ana hona');
                 (async () => {
-                    while (!msn_lst) {
+                    for (let i = 0; i < 5; i++) {
                         msn_lst = document.querySelector('.friend-profile');
+                        if (msn_lst)
+                            break;
                         await new Promise(r => setTimeout(r, 1000));
                     }
                     console.log('now the list is ready');

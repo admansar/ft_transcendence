@@ -20,18 +20,18 @@ class Profile extends HTMLElement {
         let userData = await getUserData(username);
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
+        this.appendChild(headerComponent);
+        this.appendChild(chatComponent);
         await this.checkIfWaitingOrFriends(userData, me);
         await this.checkIfAlreadyBlocked(userData, me);
         await this.getProfileHtml(userData, username);
-        this.appendChild(headerComponent);
-        this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
         await this.displayRank(me);
         await this.offline_games(me);
         document.title = `Profile - ${userData.username}`;
 
-        socket_impel();
+        //socket_impel();
     }
 
     async offline_games(me) {
@@ -236,7 +236,7 @@ class Profile extends HTMLElement {
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
@@ -247,7 +247,7 @@ class Profile extends HTMLElement {
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                 </div>
             `
