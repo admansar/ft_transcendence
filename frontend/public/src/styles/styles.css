@@ -1188,10 +1188,9 @@ input[type=text-chat] {
 }
 
 .username-profile-dashbord {
-    color: #141414;
+    color: #0904049e;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 65px;
-    width: 95%;
     height: 45%;
     text-shadow: 0px 10px 5px #00000033;
 }
@@ -1211,6 +1210,7 @@ input[type=text-chat] {
     border-radius: 20px;
     width: 95%;
     height: 20%;
+    background: #6d6d6d;
 }
 
 .user_exp {
@@ -1222,18 +1222,18 @@ input[type=text-chat] {
     align-items: center;
     padding-right: 5px;
     padding-left: 10px;
-    background-color: #2376cf;
+    background-color: #e3b842;
     border-radius: 20px;
-    width: 80%;
+    width: 15%;
     height: 100%;
 }
 
 .level {
-    color: #ffcc02;
+    color: #000000ba;
 }
 
 .Experience {
-    font-size: 15px;
+    font-size: 18px;
     color: #ffffff;
 }
 
@@ -1751,7 +1751,7 @@ input[type=text-chat] {
     justify-content: center;
     align-items: center;
     text-align: center;
-    background-color: #323232;
+    background-color: #323232ab;
     height: 60px;
     width: 200px;
     border-top-left-radius: 15px;
@@ -1766,8 +1766,9 @@ input[type=text-chat] {
 }
 
 .btn_static_click.active {
-    color: #1b1b1b;
-    background-color: #fabc13;
+    color: #303030;
+    background-color: #e3b842;
+    font-size: 22px;
 }
 
 .btn_static {
@@ -2374,7 +2375,7 @@ input[type=text-chat] {
 .HISTORYdata {
     position: relative;
     border: 2px solid #ffbb00;
-    background-color: #2e2e2e;
+    background-color: #2e2e2ec9;
     display: none;
     flex-direction: column;
     align-items: center;
@@ -2389,7 +2390,7 @@ input[type=text-chat] {
 .ACHIVEMENTSdata {
     position: relative;
     border: 2px solid #ffbb00;
-    background-color: #2e2e2e;
+    background-color: #2e2e2ec9;
     display: none;
     flex-direction: row;
     justify-content: center;
@@ -2404,7 +2405,7 @@ input[type=text-chat] {
 .RANKYdata {
     position: relative;
     border: 2px solid #ffbb00;
-    background-color: #2e2e2e;
+    background-color: #2e2e2ec9;
     display: none;
     flex-direction: column;
     align-items: center;
