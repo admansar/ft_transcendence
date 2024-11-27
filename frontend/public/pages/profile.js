@@ -131,9 +131,13 @@ class Profile extends HTMLElement {
             </div>
         
         `;
-            if (response[i].username == me.username) {
+            if (response[i].username == userData.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
-                if (response[i].achivements >= 5) {
+                document.querySelector('.user_exp').style.width = `${response[i].exp % 100}%`;
+                document.getElementById(`userLevel`).innerHTML = response[i].level;
+                document.getElementById(`experienceCount`).innerHTML = `${response[i].exp % 100}%`;
+                console.log("HIHIHIHI", document.getElementById(`experienceCount`));
+                if (response[i].achivements >= 5) { 
                     document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
                 }
                 if (response[i].achivements >= 10) {
@@ -825,7 +829,8 @@ class Profile extends HTMLElement {
             let userStats = await this.getUserStats(userData);
             // let data = await this.displayRank();
             this.innerHTML = `
-                <div class="dashbord-main">
+            <div class="dashbord-main">
+                    <div class="image"></div>
                     <div class="right-side-dashbord">
                         <div class="profile-avatar">
                             <div class="pingpong-avatar-bar">
@@ -861,9 +866,9 @@ class Profile extends HTMLElement {
                         <div class="profile-dashbord">
                             <div class="username-profile-dashbord">${userData.username}</div><hr>
                             <div class="expbar-profile-dashbord" style="position:relative;">
-                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">lvl <span id="userLevel">100</span> </span>
+                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">Level <span id="userLevel">1</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
-                                    <span class="Experience" id="experienceCount">80%</span>
+                                    <span class="Experience" id="experienceCount">15%</span>
                                 </span>
                             </div>
                         </div>
