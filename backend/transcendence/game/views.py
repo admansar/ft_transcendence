@@ -116,6 +116,8 @@ class RankUser(APIView):
     loss = 0
     def get(self, request):
         result = []
+        ex = 15
+        level = 1
         _user = get_all_users()
         for key in _user:
             score = 0
@@ -130,7 +132,9 @@ class RankUser(APIView):
                     "win" : 0,
                     "loss" : 0,
                     "score" : 0,
-                    "achivements" : 0
+                    "achivements" : 0,
+                    "exp" : 15,
+                    "level" : 1,
                })
             else:
                 for key in data['games']:
@@ -140,12 +144,14 @@ class RankUser(APIView):
                     if key["player_a"] == user:
                         if (usera > userb):
                             self.win += 1
+                            ex += 10
                         else:
                             self.loss += 1
                         score = key["score_a"]
                     if key["player_b"] == user:
                         if (userb > usera):
                             self.win += 1
+                            ex += 10
                         else:
                             self.loss += 1
                         score = key["score_b"]
@@ -153,12 +159,17 @@ class RankUser(APIView):
                     score = score * 8
                 else:
                     score = 0
+                if ex >= 100:
+                    level += 1
+                    ex = 15
                 temp = {
                     "username" : user,
                     "win" : self.win,
                     "loss" : self.loss,
                     "score" : score,
-                    "achivements" : self.win
+                    "achivements" : self.win,
+                    "exp" : ex,
+                    "level" : level,
                 }
                 result.append(temp)
             self.loss = 0
