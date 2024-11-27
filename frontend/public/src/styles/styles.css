@@ -1209,6 +1209,7 @@ input[type=text-chat] {
     font-size: 65px;
     height: 45%;
     text-shadow: 0px 10px 5px #00000033;
+    font-weight: bold;
 }
 
 .lvl-profile-dashbord {
@@ -1238,7 +1239,7 @@ input[type=text-chat] {
     align-items: center;
     padding-right: 5px;
     padding-left: 10px;
-    background-color: #e3b842;
+    background-color: #388fff;
     border-radius: 20px;
     width: 15%;
     height: 100%;
@@ -1246,6 +1247,8 @@ input[type=text-chat] {
 
 .level {
     color: #000000ba;
+    font-style: italic;
+    font-weight: bold;
 }
 
 .Experience {
