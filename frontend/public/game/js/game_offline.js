@@ -301,7 +301,7 @@ let bot_mode = true;
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#fff", bot_mode=false)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#fff", bot_mode=true)
 const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#fabc13", bot_mode=false)
 
 

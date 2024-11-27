@@ -40,7 +40,6 @@ class Header extends HTMLElement {
                             <div class="menu-content">
                                 <div class="menu_bnt home"></div>
                                 <div class="menu_bnt avatar"></div>
-                                <br>
                                 <div class="menu_bnt setting"></div>
                                 <div class="menu_bnt exit"></div>
                             </div>

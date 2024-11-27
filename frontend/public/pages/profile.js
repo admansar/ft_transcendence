@@ -27,14 +27,14 @@ class Profile extends HTMLElement {
         this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank(me);
-        await this.offline_games(me);
+        await this.displayRank(me, userData);
+        await this.offline_games(me, userData);
         document.title = `Profile - ${userData.username}`;
 
         socket_impel();
     }
 
-    async offline_games(me) {
+    async offline_games(me, other) {
         let response = await makeAuthRequest(`/api/auth/getGameBoot?username=${me.username}`, {
             method: 'GET',
             headers: {
@@ -42,7 +42,8 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log('game :: ', response.games)
+        if (response.games && me.username !== other.username)
+            return;
         const games = response.games;
         let data_2d = [];
         let data_3d = [];
@@ -55,9 +56,58 @@ class Profile extends HTMLElement {
         console.log('2d games :: ', data_2d)
         console.log('3d games :: ', data_3d)
         console.log('waiting for a front for it');
+        for (let i = 0; i < data_3d.length; i++) {
+            // getting avatar of the user
+            let gameStatus = data_3d[i];
+            let newdiv = document.createElement('div');
+            newdiv.className = "history-bar";
+            newdiv.innerHTML = `
+            <div class="history-bar">
+            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
+                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
+                <span class="score_main">${gameStatus.userScore}</span>
+                <span class="status">
+                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">3D GAME</div>
+                    <div style="text-align: center;"> WIN</div>
+                </span>
+                <span class="score_guest">${gameStatus.botScore}</span>
+            </span>
+            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
+                <img src="/public/game/images/bot3d.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+        </div>    `
+            document.querySelector('.HISTORYdata').appendChild(newdiv);
+        }
+
+        for (let i = 0; i < data_2d.length; i++) {
+            // getting avatar of the user
+            let gameStatus = data_2d[i];
+            let newdiv = document.createElement('div');
+            newdiv.className = "history-bar";
+            newdiv.innerHTML = `
+            <div class="history-bar">
+            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
+                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
+                <span class="score_main">${gameStatus.userScore}</span>
+                <span class="status">
+                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">2D GAME</div>
+                    <div style="text-align: center;"> WIN</div>
+                </span>
+                <span class="score_guest">${gameStatus.botScore}</span>
+            </span>
+            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
+                <img src="/public/game/images/bot2d.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+        </div>    `
+            document.querySelector('.HISTORYdata').appendChild(newdiv);
+        }
     }
 
-    async displayRank(me) {
+    async displayRank(me, userData) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
