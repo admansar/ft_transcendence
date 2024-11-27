@@ -51,13 +51,13 @@ class initGame(APIView):
             print('existing_game', existing_game.id, existing_game.player_a_id, existing_game.player_b_id)
             return Response({
                 'game_id': existing_game.id,
-                'player_a': player['first_name'],
-                'player_b': opponent['first_name'],
+                'player_a': player['username'],
+                'player_b': opponent['username'],
                 'status': 'In progress',
                 })
         else:
             print('game', game.id, game.player_a_id, game.player_b_player_a_id)
-        return Response({'game_id': game.id, 'player_a': player.first_name, 'player_b': opponent.first_name})
+        return Response({'game_id': game.id, 'player_a': player.username, 'player_b': opponent.username})
     
 class UpdateScore(APIView):
     def post(self, request):
@@ -105,8 +105,8 @@ class GetGame(APIView):
         for game in games:
             game['avatar_a'] = avatar_a
             game['avatar_b'] = avatar_b
-            game['player_a'] = player_a.get('first_name')
-            game['player_b'] = player_b.get('first_name')
+            game['player_a'] = player_a.get('username')
+            game['player_b'] = player_b.get('username')
         
         return Response({'message': 'Games fetched successfully', 'games': games})
 
@@ -120,7 +120,7 @@ class RankUser(APIView):
         level = 1
         _user = get_all_users()
         for key in _user:
-            ex = 15
+            ex = 1
             user = key["username"]
             response = requests.post('http://localhost:8000/api/game/get-games',
                 json = {"username" : user},
@@ -133,8 +133,8 @@ class RankUser(APIView):
                     "loss" : 0,
                     "score" : 0,
                     "achivements" : 0,
-                    "exp" : 15,
-                    "level" : 1,
+                    "exp" : ex,
+                    "level" : 0,
                })
             else:
                 for key in data['games']:

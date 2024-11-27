@@ -1241,12 +1241,13 @@ input[type=text-chat] {
     padding-left: 10px;
     background-color: #388fff;
     border-radius: 20px;
-    width: 15%;
+    /* width: 15%; */
     height: 100%;
+    opacity: 0%;
 }
 
 .level {
-    color: #000000ba;
+    color: #ffe492;
     font-style: italic;
     font-weight: bold;
 }
@@ -2860,3 +2861,9 @@ a {
         opacity: 0;
     }
 }
+
+#experienceCount {
+    display: flex;
+    position: absolute;
+    right: 50%;
+  }

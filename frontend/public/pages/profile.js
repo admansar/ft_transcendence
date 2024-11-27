@@ -21,17 +21,17 @@ class Profile extends HTMLElement {
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
         await this.checkIfWaitingOrFriends(userData, me);
-        this.appendChild(headerComponent);
-        this.appendChild(chatComponent);
         await this.checkIfAlreadyBlocked(userData, me);
         await this.getProfileHtml(userData, username);
+        this.appendChild(headerComponent);
+        this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
         await this.displayRank(me, userData);
         await this.offline_games(me, userData);
         document.title = `Profile - ${userData.username}`;
 
-        //socket_impel();
+        socket_impel();
     }
 
     async offline_games(me, other) {
@@ -70,7 +70,7 @@ class Profile extends HTMLElement {
                 <span class="score_main">${gameStatus.userScore}</span>
                 <span class="status">
                     <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">3D GAME</div>
-                    <div style="text-align: center;">${gameStatus.isWinner ? 'VICTORY': 'DEFEAT'}</div>
+                    <div style="text-align: center;"> WIN</div>
                 </span>
                 <span class="score_guest">${gameStatus.botScore}</span>
             </span>
@@ -95,7 +95,7 @@ class Profile extends HTMLElement {
                 <span class="score_main">${gameStatus.userScore}</span>
                 <span class="status">
                     <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">2D GAME</div>
-                    <div style="text-align: center;">${gameStatus.isWinner ? 'VICTORY': 'DEFEAT'}</div>
+                    <div style="text-align: center;"> WIN</div>
                 </span>
                 <span class="score_guest">${gameStatus.botScore}</span>
             </span>
@@ -134,10 +134,13 @@ class Profile extends HTMLElement {
             if (response[i].username == userData.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
                 document.querySelector('.user_exp').style.width = `${response[i].exp % 100}%`;
-                document.getElementById(`userLevel`).innerHTML = response[i].level;
+                console.log ("current player xp : ", response[i].exp);
+                if ((response[i].exp % 100) >= 5)
+                    document.querySelector('.user_exp').style.opacity = 100;
+                document.getElementById(`userLevel`).innerHTML = "Level " + response[i].level;
                 document.getElementById(`experienceCount`).innerHTML = `${response[i].exp % 100}%`;
                 console.log("HIHIHIHI", document.getElementById(`experienceCount`));
-                if (response[i].achivements >= 5) { 
+                if (response[i].achivements >= 5) {
                     document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
                 }
                 if (response[i].achivements >= 10) {
@@ -234,7 +237,7 @@ class Profile extends HTMLElement {
             notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
         });
 
-        await getLevel();
+        // await getLevel();
     }
 
     async renderScore(data) {
@@ -290,7 +293,7 @@ class Profile extends HTMLElement {
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${gameStatus.avatar}"  style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
@@ -298,7 +301,7 @@ class Profile extends HTMLElement {
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${gameStatus.opponent_avatar}"  style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
                 </div>
             `
@@ -307,6 +310,7 @@ class Profile extends HTMLElement {
     }
 
     async getUserStats(userData) {
+        console.log('************************************', userData);
         if (userData.games && userData.username === userData.games[0].player_a) {
             return {
                 'wins': userData.games.filter(game => game.score_a > game.score_b).length,
@@ -322,6 +326,7 @@ class Profile extends HTMLElement {
                 'score': userData.games.reduce((acc, game) => acc + game.score_b, 0),
             }
         }
+        console.log('2************************************', userData);
         return {
             'wins': 0,
             'loses': 0,
@@ -866,10 +871,10 @@ class Profile extends HTMLElement {
                         <div class="profile-dashbord">
                             <div class="username-profile-dashbord">${userData.username}</div><hr>
                             <div class="expbar-profile-dashbord" style="position:relative;">
-                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">Level <span id="userLevel">1</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
-                                    <span class="Experience" id="experienceCount">15%</span>
+                                <span class="Experience" id="experienceCount"></span>
                                 </span>
+                            <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px"> <span id="userLevel"></span> </span>
                             </div>
                         </div>
                         <div class="match-history-bar">
