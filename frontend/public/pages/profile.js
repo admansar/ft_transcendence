@@ -81,7 +81,6 @@ class Profile extends HTMLElement {
             </div>
         
         `;
-            // }
             if (response[i].username == me.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
                 if (response[i].achivements >= 5) {
@@ -95,6 +94,13 @@ class Profile extends HTMLElement {
                 }
             }
         }
+        let ranks = document.querySelectorAll('.RANKYdata');
+        ranks.forEach(rank => {
+            rank.addEventListener('click', e => {
+                let username = e.target.parentElement.querySelector('.rank_name').textContent;
+                app.router.findRoute(`/profile/${username}`);
+            })
+        })
     }
 
 
@@ -168,7 +174,6 @@ class Profile extends HTMLElement {
         });
 
         shareProfileButton.addEventListener('click', function () {
-            console.log('Share profile clicked');
             let profileUrl = `http://localhost/profile/${username}`;
             navigator.clipboard.writeText(profileUrl);
             let shareProfile = document.querySelector('.profile-status');
@@ -180,7 +185,6 @@ class Profile extends HTMLElement {
 
     async renderScore(data) {
         if (!data.games) {
-            console.log('No games found');
             return `
                 <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
             `
@@ -189,7 +193,6 @@ class Profile extends HTMLElement {
             let matchResult;
             if (username === currentGame.player_a) {
                 matchResult = winOrLose(currentGame.score_a, currentGame.score_b);
-                // console.log(matchResult);
                 return {
                     'avatar': currentGame.avatar_a,
                     'score': currentGame.score_a,
@@ -349,9 +352,7 @@ class Profile extends HTMLElement {
                 modalContent.appendChild(friendEl);
             }
             const removeButtons = document.querySelectorAll('.remove_fr');
-            console.log('Remove buttons', removeButtons);
             removeButtons.forEach(button => {
-                console.log('Remove button clicked', button);
                 button.addEventListener('click', async () => {
                     let friend = button.parentElement.parentElement;
                     let friendID = friend.id;
@@ -395,12 +396,10 @@ class Profile extends HTMLElement {
                     await displayFriends(modalContent);
                     return;
                 }
-                console.log('Checking pending requests', pendingRequests);
                 modalContent.innerHTML = '';
                 pendingModal.style.display = 'flex';
                 for (let i = 0; i < pendingRequests.length; i++) {
                     pendings = await getUserDataByID(pendingRequests[i]);
-                    console.log('pendings', pendings);
                     let pendingList = document.createElement('div');
                     pendingList.classList.add('fr_request_list');
                     pendingList.id = pendings.id;
@@ -422,7 +421,6 @@ class Profile extends HTMLElement {
                 const rejectButtons = document.querySelectorAll('.reject_fr');
                 acceptButtons.forEach(button => {
                     button.addEventListener('click', async () => {
-                        console.log('Accept button clicked', button);
                         let pendingUser = button.parentElement.parentElement;
                         let pendingID = button.parentElement.parentElement.id;
                         makeAuthRequest('/api/friends/methods/', {
@@ -480,7 +478,6 @@ class Profile extends HTMLElement {
             blockListButton.addEventListener('click', async () => {
                 blocked = await this.getBlockedUsers(userData);
                 if (!blocked.length) {
-                    console.log('Blocked users', blocked);
                     blockModal.style.display = 'flex';
                     blockModal.style.textAlign = 'center';
                     blockModal.innerHTML = '<span class="message">No blocked users</span>';
@@ -495,7 +492,6 @@ class Profile extends HTMLElement {
                 }
                 // blockModal.style.display = 'flex';
                 blockModal.innerHTML = '';
-                console.log('Checking blocked users', blocked);
                 for (let i = 0; i < blocked.length; i++) {
                     let blockedUser = await getUserDataByID(blocked[i]);
                     let blockedUserEl = document.createElement('div');
@@ -550,7 +546,6 @@ class Profile extends HTMLElement {
         const addFriendButton = document.getElementById('add_friend');
         let notif = document.querySelector('.profile-status');
         addFriendButton.addEventListener('click', async () => {
-            console.log('Add friend clicked');
             const response = await makeAuthRequest('/api/friends/methods/', {
                 method: 'POST',
                 headers: {
@@ -566,6 +561,8 @@ class Profile extends HTMLElement {
                 notifications.notify(data.message, 'success', 1000, notif);
                 // addFriendButton.style.display = 'none';
                 addFriendButton.classList.add('active');
+                await sleep(1000);
+                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 console.log(data);
                 notifications.notify(data.error, 'error', 1000, notif);
@@ -651,7 +648,6 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.Profile.block.includes(userData.id)) {
-                console.log('User is blocked');
                 blockUserButton.style.display = 'none';
                 addFriendButton.style.display = 'none';
             }
@@ -674,7 +670,8 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.status === 'Waiting' || data.status === 'Friend') {
-                addFriendButton.style.display = 'none';
+                // addFriendButton.style.display = 'none';
+                addFriendButton.classList.add('active');
             }
         } catch (e) {
             console.log(e);
@@ -683,7 +680,6 @@ class Profile extends HTMLElement {
     }
 
     async checkIfBlocked(userData, me) {
-        console.log('userData.id +++++++++++++++++++++++++++++ userData.username', userData.id, userData.username);
         let isBlockingMe = await makeAuthRequest('/api/friends/find/', {
             method: 'POST',
             headers: {
@@ -694,7 +690,6 @@ class Profile extends HTMLElement {
             })
         })
         isBlockingMe = await isBlockingMe.json();
-        console.log('isBlockingMe', isBlockingMe);
         if (isBlockingMe.status === 'Block') {
             Router.findRoute('/404');
             return;
@@ -718,6 +713,8 @@ class Profile extends HTMLElement {
             if (response.ok) {
                 notifications.notify('Friend request cancelled', 'success', 1000, addFriendButton);
                 addFriendButton.classList.remove('active');
+                await sleep(1000);
+                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 notifications.notify('Error cancelling friend request', 'error', 1000, addFriendButton);
             }
@@ -748,13 +745,12 @@ class Profile extends HTMLElement {
             if (!addFriendButton.classList.contains('active')) {
                 console.log('??????????????????????????????????????');
                 await this.addFriend(userData);
-                return;
             } else {
                 // await this.rejectFriendRequest(userData);
                 await this.cancelFriendRequest(userData);
                 // addFriendButton.classList.remove('active');
             }
-            this.blockUser(userData);
+            await this.blockUser(userData);
         }
     }
 
@@ -799,7 +795,7 @@ class Profile extends HTMLElement {
                     </div>
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
-                            <div class="username-profile-dashbord">${userData.username}</div>
+                            <div class="username-profile-dashbord">${userData.username}</div><hr>
                             <div class="expbar-profile-dashbord" style="position:relative;">
                                 <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">lvl <span id="userLevel">100</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
@@ -857,7 +853,6 @@ class Profile extends HTMLElement {
 export function attachDOM({ username }) {
     app.root.innerHTML = '';
     document.body.style = '';
-    console.log('username from profile.js', username);
     const page = document.createElement('profile-page');
     page.setAttribute('username', username);
     app.root.appendChild(page);

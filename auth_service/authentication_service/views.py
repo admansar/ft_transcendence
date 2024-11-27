@@ -417,7 +417,7 @@ class UpdateXpAndLevel(APIView):
         username = request.data.get('username')
         print('Username:', username)
 
-        xp_change = request.data.get('xp', 0)  # La valeur à ajouter ou soustraire des XP
+        xp_change = request.data.get('xp', 1)  # La valeur à ajouter ou soustraire des XP
         level_change = request.data.get('level', 0)  # La valeur à ajouter au niveau
         result = request.data.get('result')  # `win` ou `loss`
 

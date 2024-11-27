@@ -5,6 +5,7 @@ export class Login extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        document.title = 'Login';
     }
 
     render() {

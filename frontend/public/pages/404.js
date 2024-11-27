@@ -40,7 +40,7 @@ class PageNotFound extends HTMLElement {
                   color: #fff;
             }
     
-            a {
+            .go-home {
                 display: inline-block;
                 margin-top: 20px;
                 padding: 10px 20px;
@@ -49,6 +49,7 @@ class PageNotFound extends HTMLElement {
                 color: white;
                 font-size: 1.2em;
                 border-radius: 5px;
+                cursor: pointer;
             }
     
             a:hover {
@@ -61,7 +62,7 @@ class PageNotFound extends HTMLElement {
         <div class="container">
             <h1>404</h1>
             <p>Oops! The page you're looking for doesn't exist.</p>
-            <a href="/">Go Back Home</a>
+            <div class="go-home" onclick="app.router.findRoute('/');">Go Back Home</div>
         </div>
     </body>
         `

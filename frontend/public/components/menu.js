@@ -101,7 +101,10 @@ export class Menu extends HTMLElement {
                 }
             }) 
         })
-        
+    }
+
+    disconnectedCallback() {
+        app.root.innerHtml = '';
     }
 }
 

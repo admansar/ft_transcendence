@@ -20,6 +20,7 @@ class Auth extends HTMLElement {
         if (handleRegisterClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleRegisterClick);
         if (handleLoginKeyup) document.removeEventListener('keyup', handleLoginKeyup);
         if (handleLoginClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleLoginClick);
+        app.root.innerHTML = '';
     }
 
     render(page) {
@@ -28,11 +29,13 @@ class Auth extends HTMLElement {
         console.log(page);
 
         if (page === 'register') {
+            // this.cleanup();
             this.appendChild(registerPage)
             register();
             Oauth42();
         }
         else {
+            // this.cleanup();
             this.appendChild(loginPage)
             login();
             Oauth42();
@@ -40,7 +43,9 @@ class Auth extends HTMLElement {
 
         document.addEventListener('click', async (event) => {
             if (event.target && event.target.id === 'open-register') {
-                this.cleanup();
+                // this.cleanup();
+                if (handleLoginKeyup) document.removeEventListener('keyup', handleLoginKeyup);
+                if (handleLoginClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleLoginClick);
                 this.removeChild(loginPage)
                 this.appendChild(registerPage)
                 history.pushState(null, null, '/register');
@@ -49,7 +54,9 @@ class Auth extends HTMLElement {
             }
 
             if (event.target && event.target.id === 'close-register') {
-                this.cleanup();
+                // this.cleanup();
+                if (handleRegisterKeyup) document.removeEventListener('keyup', handleRegisterKeyup);
+                if (handleRegisterClick) document.querySelector('button.submit-button')?.removeEventListener('click', handleRegisterClick);
                 this.removeChild(registerPage)
                 this.appendChild(loginPage)
                 history.pushState(null, null, '/login');
@@ -64,6 +71,10 @@ class Auth extends HTMLElement {
             notifications.notify(urlParams.get('error'), 'danger');
             window.history.replaceState(null, null, window.location.pathname);
         }
+    }
+
+    disconnectedCallback() {
+        this.cleanup();
     }
 }
 

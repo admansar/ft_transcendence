@@ -1127,6 +1127,7 @@ input[type=text-chat] {
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
+    cursor: pointer;
 }
 
 .dashbord-main {
@@ -2472,6 +2473,7 @@ input[type=text-chat] {
     height: 80px;
     border-radius: 50px;
     gap: 10px;
+    cursor: pointer;
 }
 
 .rank_profile {
@@ -2579,7 +2581,9 @@ input[type=text-chat] {
     background-position: center;
     background-repeat: no-repeat;
     background-size: 50% 50%;
+    cursor: pointer;
 }
+
 
 .menu-bar {
     display: flex;
@@ -2741,6 +2745,10 @@ hr {
     left: 80px;
     box-shadow: inset 0px 0px 100px #ffffff1f;
     border: 1px solid #ffbb00;
+}
+
+#rank_bar, #achivements_bar, #history_bar, .logo {
+    cursor: pointer;
 }
 
 .request-bar {

@@ -378,6 +378,16 @@ async function finishGame(user_data) {
 	})
 }
 
+async function updateXP(user_data) {
+	await makeAuthRequest('/api/auth/update-xp-level', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(user_data)
+	})
+}
+
 gameSocket.onclose = function () {
 	console.log('Disconnected from the game server.');
 };

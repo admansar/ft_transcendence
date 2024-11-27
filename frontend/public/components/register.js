@@ -5,6 +5,7 @@ export class Register extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        document.title = 'Register';
     }
 
     render() {

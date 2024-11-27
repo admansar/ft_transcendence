@@ -121,10 +121,9 @@ class WhereUser(APIView):
             elif userprofile.block.filter(id=me).exists():
                 return Response({"status" : "Block"}, status=status.HTTP_200_OK)
             else:
-                content = {"status" : "Not on list"}
-                return Response(content, status=status.HTTP_404_NOT_FOUND)
+                return Response({"status" : "Not on list"}, status=status.HTTP_404_NOT_FOUND)
         except Exception:
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"status" : "Not on list"}, status=status.HTTP_400_BAD_REQUEST)
 
 class Userfriends(APIView):
     # authentication_classes = [JWTAuthentication]

@@ -181,6 +181,11 @@ class TwoFactorAuth extends HTMLElement {
         this.messageElement.textContent = text;
         this.messageElement.style.color = color;
     }
+
+    disconnectedCallback() {
+        this.verifyButton.removeEventListener('click', this.verifyOTP);
+        app.root.innerHTML = '';
+    }
 }
 export function attachDOM() {
     if (!app.email || !app.otp) {

@@ -46,7 +46,7 @@ class Header extends HTMLElement {
                             </div>
                         </div>
                         <div style="width: 80px;"></div>
-                        <div href="/profile" class="profile"></div>
+                        <div class="profile"></div>
                         <div class="message dashboard" style="font-size: 35px;"></div>
                         <div class="notification-container dropdown">
                             <ul class="dropdown-menu notifications-dashboard-container" aria-labelledby="notificationDropdown">
@@ -55,7 +55,7 @@ class Header extends HTMLElement {
 
                     </div>
                     <div class="menu-bar mid">
-                        <div class="logo">
+                        <div class="logo" onclick="app.router.findRoute('/')">
                             <img src="/public/src/img/pingpong-logo.png" alt="LOGO" class="logo-img">
                         </div>
                     </div>
