@@ -62,7 +62,7 @@ function remove_online_dot(user)
 {
     const ue = document.querySelector(`#${user} .friend-profile-status`)
     if (ue)
-        ue.style.backgroundColor = '#3a3a3a';
+        ue.style.backgroundColor = '#a30000';
 }
 
 function front_inject_user(user)
@@ -379,7 +379,8 @@ function front_inject_friends(user, every_online_user)
         else if (every_online_user.includes(user) && document.querySelector(`#${user}`))
         {
             const ue = document.querySelector(`#${user} .friend-profile-status`)
-            ue.style.backgroundColor = '#00b100';
+            if (ue)
+                ue.style.backgroundColor = '#00b100';
         }
     })
 }
@@ -429,7 +430,7 @@ export class Chat extends HTMLElement {
     }
 }
 
-function socket_impel() {
+export function socket_impel() {
     chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
     chatSocket.onopen = function(e) {

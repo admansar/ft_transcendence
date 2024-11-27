@@ -5,6 +5,7 @@ import { getMe } from '../services/utils.js'
 import { getUserDataByID } from '../services/utils.js'
 import '../components/header.js';
 import "../components/chat.js";
+import { socket_impel } from '../components/chat.js';
 
 class Profile extends HTMLElement {
     constructor() {
@@ -29,6 +30,8 @@ class Profile extends HTMLElement {
         await this.displayRank(me);
         await this.offline_games(me);
         document.title = `Profile - ${userData.username}`;
+
+        socket_impel();
     }
 
     async offline_games(me) {
@@ -39,22 +42,21 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log ('game :: ', response.games)
+        console.log('game :: ', response.games)
         const games = response.games;
         let data_2d = [];
         let data_3d = [];
-        for (let i = 0; i < games.length; i++)
-        {
+        for (let i = 0; i < games.length; i++) {
             if (games[i].type === '2')
                 data_2d.push(games[i])
             else if (games[i].type === '3')
                 data_3d.push(games[i])
         }
-        console.log ('2d games :: ', data_2d)
-        console.log ('3d games :: ', data_3d)
-        console.log ('waiting for a front for it');
+        console.log('2d games :: ', data_2d)
+        console.log('3d games :: ', data_3d)
+        console.log('waiting for a front for it');
     }
-    
+
     async displayRank(me) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
@@ -298,6 +300,22 @@ class Profile extends HTMLElement {
         }
     }
 
+    async getAllFriends(me, userData) {
+        try {
+            let response = await makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            let data = await response.json();
+            return data.Profile.friends
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+    }
+
     async checkFriendsStatus(userData) {
         const addFriendButton = document.getElementById('add_friend');
         const pendingListButton = document.getElementById('pending_list');
@@ -309,18 +327,72 @@ class Profile extends HTMLElement {
 
         const blockModal2 = document.getElementById('blockModal');
 
+        async function displayFriends(modalContent) {
+            if (friends.length) {
+                modalContent.innerHTML += '<span class="message" style="width: 100%; font-size: 20px;">Friends</span>';
+            }
+            for (let i = 0; i < friends.length; i++) {
+                let friend = await getUserDataByID(friends[i]);
+                let friendEl = document.createElement('div');
+                friendEl.classList.add('fr_request_list');
+                friendEl.id = friends[i];
+                friendEl.style.maxWidth = '100%';
+                friendEl.innerHTML = `
+                    <span class="fr_id">
+                        <span class="fr_avatar" style="background-image: url(${friend.avatar})"></span>
+                        <span class="fr_name">${friend.username}</span>
+                    </span>
+                    <span class="requesting">
+                        <span class="remove_fr">Remove</span>
+                    </span>
+                `
+                modalContent.appendChild(friendEl);
+            }
+            const removeButtons = document.querySelectorAll('.remove_fr');
+            console.log('Remove buttons', removeButtons);
+            removeButtons.forEach(button => {
+                console.log('Remove button clicked', button);
+                button.addEventListener('click', async () => {
+                    let friend = button.parentElement.parentElement;
+                    let friendID = friend.id;
+                    makeAuthRequest('/api/friends/methods/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            "status": "UNFRIEND",
+                            "user_id": friendID
+                        })
+                    }).then(async res => {
+                        if (res.ok) {
+                            notifications.notify('Friend removed', 'success', 1500, modalContent);
+                            modalContent.removeChild(friend);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                        notifications.notify('Error removing friend', 'error', 1000, modalContent);
+                    })
+                })
+            })
+        }
+
         let pendings = [];
         let blocked = [];
+        let friends = [];
         try {
             pendingListButton.addEventListener('click', async () => {
                 let pendingRequests = await this.getPendingRequests(userData);
+                friends = await this.getAllFriends(userData);
                 if (!pendingRequests.length) {
                     pendingModal.style.display = 'flex';
                     modalContent.style.margin = 'auto';
                     modalContent.style.textAlign = 'center';
-                    modalContent.innerHTML = '<span class="message">No pending requests</span>';
+                    modalContent.innerHTML = '<span class="message">No pending requests</span><hr>';
                     modalContent.firstChild.style.width = '100%';
                     modalContent.firstChild.style.fontSize = '20px';
+
+                    await displayFriends(modalContent);
                     return;
                 }
                 console.log('Checking pending requests', pendingRequests);
@@ -345,10 +417,12 @@ class Profile extends HTMLElement {
                     `
                     modalContent.appendChild(pendingList);
                 }
+                await displayFriends(modalContent);
                 const acceptButtons = document.querySelectorAll('.accept_fr');
                 const rejectButtons = document.querySelectorAll('.reject_fr');
                 acceptButtons.forEach(button => {
                     button.addEventListener('click', async () => {
+                        console.log('Accept button clicked', button);
                         let pendingUser = button.parentElement.parentElement;
                         let pendingID = button.parentElement.parentElement.id;
                         makeAuthRequest('/api/friends/methods/', {
