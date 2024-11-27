@@ -240,7 +240,10 @@ class Profile extends HTMLElement {
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
-                        <span class="status">${gameStatus.status}</span>
+                        <span class="status">
+                            <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">Touranment</div>
+                            <div style="text-align: center;"> ${gameStatus.status}</div>
+                        </span>
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
