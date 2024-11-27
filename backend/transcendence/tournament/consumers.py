@@ -203,12 +203,14 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         # for player in players:
         try:
             for player in players:
-                await player.send(text_data=json.dumps({
+                tmp_dict: dict = {
                     'type': 'winners',
                     'winners': winners,
                     'players': usernames,
                     'round': "Round 1" if len(winners) == 1 else "Round 2" if len(winners) == 2 else "Round 3",
-                }))
+                }
+                print (f"tmp_dict : {tmp_dict}")
+                await player.send(text_data=json.dumps(tmp_dict))
         except Exception as e:
             print(f"Error sending message to player: {e}")
 
@@ -459,13 +461,16 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                 await self.disconnect(1000)
             elif message_type == 'enemy_disconnected':
                 try:
-                    await self.channel_layer.group_send(
-                        self.room_group_name,
-                        {
-                            'type': 'game_over',
-                            'winner': self.user_name
-                        }
-                    )
+                    await self.send(text_data=json.dumps({
+                        'type': 'game_over',
+                        'winner': self.user_name
+                    }))
+                    winners.append({
+                        'winner': self.user_name,
+                        'player1': self.room.players[0].user_name,
+                        'player2': self.room.players[1].user_name
+                    })
+                    winners_classes.append(self)
                 except Exception as e:
                     print (f"Error in enemy disconnected : {e}")
 

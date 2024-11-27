@@ -503,8 +503,8 @@ function game_over()
   if (racket1.score == MAX_SCORE || racket2.score == MAX_SCORE)
   {
     (async () => {
-    data_to_send.userScore = racket1.score
-    data_to_send.botScore = racket2.score
+    data_to_send.userScore = racket2.score
+    data_to_send.botScore = racket1.score
     makeAuthRequest('/api/auth/addGameBoot', {
       method: 'POST',
       headers: {
