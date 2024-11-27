@@ -204,6 +204,10 @@ gameSocket.onmessage = function (e) {
                     console.log('error closing socket: ', e);
                 }
             });
+            gameSocket.close();
+            setTimeout(() => {
+                Router.findRoute('/');
+            }, 1000);
             // new Promise((resolve) => {
             //     setTimeout(resolve, 3000);
             // }).then(() => {console.log ('closing ...');gameSocket.close()});
@@ -214,6 +218,14 @@ gameSocket.onmessage = function (e) {
             console.log ('data.winners: ', data.winners)
             console.log ('the fucking locker: ', locker)
         }
+    }
+    else if (data.type === 'bye')
+    {
+        console.log ('go to hell, bye');
+        gameSocket.close();
+        setTimeout(() => {
+            Router.findRoute('/');
+        }, 1000);
     }
     // else if (data.type === 'winner_winner_chicken_dinner')
     // {

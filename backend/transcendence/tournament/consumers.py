@@ -140,6 +140,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     async def start_championship(self):
         await asyncio.sleep(1)
+        if (len(players) != self.player_num):
+            print ('not enough players')
+            for player in players:
+                await player.send(text_data=json.dumps({
+                    'type': 'bye',
+                }))
+                player.disconnect(1000)
+                player.close()
+            return
         global started_championship
         if started_championship:
             return
@@ -202,6 +211,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         usernames = [p.user_name for p in players]
         # for player in players:
         try:
+            if (len(players) != self.player_num):
+                print ('not enough players')
+                for player in players:
+                    await player.send(text_data=json.dumps({
+                        'type': 'bye',
+                    }))
+                    player.disconnect(1000)
+                    player.close()
+                return
             for player in players:
                 tmp_dict: dict = {
                     'type': 'winners',
