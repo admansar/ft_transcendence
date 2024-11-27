@@ -12,3 +12,4 @@ __pycache__/
 .venv/
 resetdb.sh
 db
+migrations/

@@ -18,6 +18,9 @@ class Profile extends HTMLElement {
         const username = this.getAttribute('username');
         let me = await getMe();
         let userData = await getUserData(username);
+        if (!userData) {
+            return;
+        }
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
         await this.checkIfWaitingOrFriends(userData, me);
@@ -243,7 +246,7 @@ class Profile extends HTMLElement {
     async renderScore(data) {
         if (!data.games) {
             return `
-                <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
+                <span class="message" style="font-size: 20px;">No Online Games found, Go PLAY!</span><hr>
             `
         }
         function displayMatchHistory(username, currentGame) {
@@ -972,9 +975,11 @@ async function getUserData(username) {
 
     if (!response.ok) {
         const error = await response.text();
-        // alert(error)
+        if (error) {
+            app.router.findRoute('/404');
+            return null;
+        }
         console.log(error);
-        throw new Error(error);
     }
     const data = await response.json();
 

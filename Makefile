@@ -2,6 +2,11 @@ containers = $(shell docker ps -aq)
 images = $(shell docker images -q)
 volume = $(shell docker volume ls -q)
 network = $(shell docker network ls -q)
+GREEN = "\033[0;32m"
+NC = "\033[0m"
+BLUE = "\033[0;34m"
+BLACK = "\033[0;30m"
+RED = "\033[0;31m"
 
 all:
 	@docker compose -f ./docker-compose.yml up --build -d
@@ -20,6 +25,11 @@ fclean: clean
 	@if [ -n "$(volume)" ]; then docker volume rm -f $(volume); fi
 	@if [ -n "$(network)" ]; then docker network prune -f; fi
 	@docker system prune -af
+	@echo ${RED}"All containers, images, volumes and networks have been removed."${NC}
+	@find . -type d -name "__pycache__" -exec rm -r {} +
+	@echo ${RED}"All __pycache__ folders have been removed."${NC}
+	@find . -type d -name "migrations" -exec rm -r {} +
+	@echo ${RED}"All migrations folders have been removed."${NC}
 
 stop:
 	@docker compose -f ./docker-compose.yml stop
