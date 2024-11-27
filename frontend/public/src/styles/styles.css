@@ -1157,7 +1157,7 @@ input[type=text-chat] {
     width: 100%;
     height: 100%;
     background-image: url(../../src/img/back_profil.svg);
-    filter: blur(13px);
+    filter: blur(5px);
     border-radius: 20px;
     z-index: -1; 
 }
@@ -2839,6 +2839,13 @@ a {
     height: 30%;
     animation: fadeOut 5s forwards;
     /* Fades out over 3 seconds */
+}
+
+.status{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 @keyframes fadeOut {
