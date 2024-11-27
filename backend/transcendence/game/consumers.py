@@ -229,12 +229,14 @@ class GameConsumer(AsyncWebsocketConsumer):
                 if not self.room.players:
                     del game_rooms[self.room_id]
         except Exception as e:
-            print (f"Error in disconnect : {e}")
+            pass
+            #print (f"Error in disconnect : {e}")
             try:
                 await self.close()
             except Exception as e:
-                print (f"Error in closing websocket : {e}")
-                print ('maybe its already closed')
+                pass
+                #print (f"Error in closing websocket : {e}")
+                #print ('maybe its already closed')
             pass
 
     async def receive(self, text_data: Any) -> None:
@@ -433,7 +435,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             if self.room:
                 game_rooms.pop(self.room_id, None)
         except Exception as e:
-            print (f"Error in game_over : {e}")
+            pass
+            #print (f"Error in game_over : {e}")
         finally:
             await self.disconnect(1000)
 

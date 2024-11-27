@@ -38,7 +38,7 @@ def wait_for_postgres():
     while True:
         try:
             print("Waiting for postgres...")
-            s.connect(('postgres', 5432))
+            s.connect((os.getenv('POSTGRES_HOST'), int(os.getenv('POSTGRES_PORT'))))
             s.close()
             break
         except socket.error as ex:
