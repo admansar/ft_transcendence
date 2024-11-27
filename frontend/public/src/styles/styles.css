@@ -2841,6 +2841,13 @@ a {
     /* Fades out over 3 seconds */
 }
 
+.status{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
 @keyframes fadeOut {
     0% {
         opacity: 1;

@@ -55,20 +55,20 @@ class Profile extends HTMLElement {
         console.log('2d games :: ', data_2d)
         console.log('3d games :: ', data_3d)
         console.log('waiting for a front for it');
-
         for (let i = 0; i < data_3d.length; i++) {
             // getting avatar of the user
             let gameStatus = data_3d[i];
             let newdiv = document.createElement('div');
+            newdiv.className = "history-bar";
             newdiv.innerHTML = `
             <div class="history-bar">
             <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
                 <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
             </span>
-            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? 'green': 'red'};">
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
                 <span class="score_main">${gameStatus.userScore}</span>
                 <span class="status">
-                    <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">3D GAME</div>
+                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">3D GAME</div>
                     <div style="text-align: center;"> WIN</div>
                 </span>
                 <span class="score_guest">${gameStatus.botScore}</span>
@@ -84,15 +84,16 @@ class Profile extends HTMLElement {
             // getting avatar of the user
             let gameStatus = data_2d[i];
             let newdiv = document.createElement('div');
+            newdiv.className = "history-bar";
             newdiv.innerHTML = `
             <div class="history-bar">
             <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
                 <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
             </span>
-            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? 'green': 'red'};">
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
                 <span class="score_main">${gameStatus.userScore}</span>
                 <span class="status">
-                    <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">3D GAME</div>
+                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">2D GAME</div>
                     <div style="text-align: center;"> WIN</div>
                 </span>
                 <span class="score_guest">${gameStatus.botScore}</span>
@@ -289,7 +290,7 @@ class Profile extends HTMLElement {
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
                         <span class="status">
-                            <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">Touranment</div>
+                            <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">Online Game</div>
                             <div style="text-align: center;"> ${gameStatus.status}</div>
                         </span>
                         <span class="score_guest">${gameStatus.opponent_score}</span>
