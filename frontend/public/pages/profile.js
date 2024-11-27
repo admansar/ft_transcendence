@@ -5,6 +5,7 @@ import { getMe } from '../services/utils.js'
 import { getUserDataByID } from '../services/utils.js'
 import '../components/header.js';
 import "../components/chat.js";
+import { socket_impel } from '../components/chat.js';
 
 class Profile extends HTMLElement {
     constructor() {
@@ -19,18 +20,18 @@ class Profile extends HTMLElement {
         let userData = await getUserData(username);
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
-        this.appendChild(headerComponent);
-        this.appendChild(chatComponent);
         await this.checkIfWaitingOrFriends(userData, me);
         await this.checkIfAlreadyBlocked(userData, me);
         await this.getProfileHtml(userData, username);
+        this.appendChild(headerComponent);
+        this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank(me, userData);
+        await this.displayRank(me);
         await this.offline_games(me);
         document.title = `Profile - ${userData.username}`;
 
-        //socket_impel();
+        socket_impel();
     }
 
     async offline_games(me) {
@@ -41,12 +42,11 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log ('game :: ', response.games)
+        console.log('game :: ', response.games)
         const games = response.games;
         let data_2d = [];
         let data_3d = [];
-        for (let i = 0; i < games.length; i++)
-        {
+        for (let i = 0; i < games.length; i++) {
             if (games[i].type === '2')
                 data_2d.push(games[i])
             else if (games[i].type === '3')
@@ -55,58 +55,9 @@ class Profile extends HTMLElement {
         console.log('2d games :: ', data_2d)
         console.log('3d games :: ', data_3d)
         console.log('waiting for a front for it');
-        for (let i = 0; i < data_3d.length; i++) {
-            // getting avatar of the user
-            let gameStatus = data_3d[i];
-            let newdiv = document.createElement('div');
-            newdiv.className = "history-bar";
-            newdiv.innerHTML = `
-            <div class="history-bar">
-            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
-            </span>
-            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
-                <span class="score_main">${gameStatus.userScore}</span>
-                <span class="status">
-                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">3D GAME</div>
-                    <div style="text-align: center;"> WIN</div>
-                </span>
-                <span class="score_guest">${gameStatus.botScore}</span>
-            </span>
-            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
-            </span>
-        </div>    `
-            document.querySelector('.HISTORYdata').appendChild(newdiv);
-        }
-
-        for (let i = 0; i < data_2d.length; i++) {
-            // getting avatar of the user
-            let gameStatus = data_2d[i];
-            let newdiv = document.createElement('div');
-            newdiv.className = "history-bar";
-            newdiv.innerHTML = `
-            <div class="history-bar">
-            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
-            </span>
-            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? '#13bc204f': '#db0e0e63'};">
-                <span class="score_main">${gameStatus.userScore}</span>
-                <span class="status">
-                    <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">2D GAME</div>
-                    <div style="text-align: center;"> WIN</div>
-                </span>
-                <span class="score_guest">${gameStatus.botScore}</span>
-            </span>
-            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
-            </span>
-        </div>    `
-            document.querySelector('.HISTORYdata').appendChild(newdiv);
-        }
     }
 
-    async displayRank(me, userData) {
+    async displayRank(me) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
@@ -130,12 +81,8 @@ class Profile extends HTMLElement {
             </div>
         
         `;
-            if (response[i].username == userData.username) {
+            if (response[i].username == me.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
-                document.querySelector('.user_exp').style.width = `${response[i].exp}%`;
-                document.getElementById(`userLevel`).innerHTML = response[i].level;
-                document.getElementById(`experienceCount`).innerHTML = `${response[i].exp}%`;
-                console.log("HIHIHIHI", document.getElementById(`experienceCount`));
                 if (response[i].achivements >= 5) {
                     document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
                 }
@@ -147,6 +94,13 @@ class Profile extends HTMLElement {
                 }
             }
         }
+        let ranks = document.querySelectorAll('.RANKYdata');
+        ranks.forEach(rank => {
+            rank.addEventListener('click', e => {
+                let username = e.target.parentElement.querySelector('.rank_name').textContent;
+                app.router.findRoute(`/profile/${username}`);
+            })
+        })
     }
 
 
@@ -220,19 +174,17 @@ class Profile extends HTMLElement {
         });
 
         shareProfileButton.addEventListener('click', function () {
-            console.log('Share profile clicked');
             let profileUrl = `http://localhost/profile/${username}`;
             navigator.clipboard.writeText(profileUrl);
             let shareProfile = document.querySelector('.profile-status');
             notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
         });
 
-        //await getLevel();
+        await getLevel();
     }
 
     async renderScore(data) {
         if (!data.games) {
-            console.log('No games found');
             return `
                 <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
             `
@@ -241,7 +193,6 @@ class Profile extends HTMLElement {
             let matchResult;
             if (username === currentGame.player_a) {
                 matchResult = winOrLose(currentGame.score_a, currentGame.score_b);
-                // console.log(matchResult);
                 return {
                     'avatar': currentGame.avatar_a,
                     'score': currentGame.score_a,
@@ -267,7 +218,7 @@ class Profile extends HTMLElement {
             if (score_a > score_b) {
                 return {
                     status: 'WIN',
-                    color: '#13bc204f'
+                    color: 'green'
                 }
             } else if (score_a === score_b) {
                 return {
@@ -277,7 +228,7 @@ class Profile extends HTMLElement {
             }
             return {
                 status: 'LOSS',
-                color: '#db0e0e63'
+                color: 'brown'
             }
         }
         for (let i = 0; i < data.games.length; i++) {
@@ -285,18 +236,15 @@ class Profile extends HTMLElement {
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
-                        <span class="status">
-                            <div style="text-align: center; font-size: 18px; color: rgb(255, 170, 1);">Online Game</div>
-                            <div style="text-align: center;"> ${gameStatus.status}</div>
-                        </span>
+                        <span class="status">${gameStatus.status}</span>
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
                     </span>
                 </div>
             `
@@ -355,6 +303,22 @@ class Profile extends HTMLElement {
         }
     }
 
+    async getAllFriends(me, userData) {
+        try {
+            let response = await makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            let data = await response.json();
+            return data.Profile.friends
+        } catch (e) {
+            console.log(e);
+            throw e;
+        }
+    }
+
     async checkFriendsStatus(userData) {
         const addFriendButton = document.getElementById('add_friend');
         const pendingListButton = document.getElementById('pending_list');
@@ -366,26 +330,76 @@ class Profile extends HTMLElement {
 
         const blockModal2 = document.getElementById('blockModal');
 
+        async function displayFriends(modalContent) {
+            if (friends.length) {
+                modalContent.innerHTML += '<span class="message" style="width: 100%; font-size: 20px;">Friends</span>';
+            }
+            for (let i = 0; i < friends.length; i++) {
+                let friend = await getUserDataByID(friends[i]);
+                let friendEl = document.createElement('div');
+                friendEl.classList.add('fr_request_list');
+                friendEl.id = friends[i];
+                friendEl.style.maxWidth = '100%';
+                friendEl.innerHTML = `
+                    <span class="fr_id">
+                        <span class="fr_avatar" style="background-image: url(${friend.avatar})"></span>
+                        <span class="fr_name">${friend.username}</span>
+                    </span>
+                    <span class="requesting">
+                        <span class="remove_fr">Remove</span>
+                    </span>
+                `
+                modalContent.appendChild(friendEl);
+            }
+            const removeButtons = document.querySelectorAll('.remove_fr');
+            removeButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    let friend = button.parentElement.parentElement;
+                    let friendID = friend.id;
+                    makeAuthRequest('/api/friends/methods/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            "status": "UNFRIEND",
+                            "user_id": friendID
+                        })
+                    }).then(async res => {
+                        if (res.ok) {
+                            notifications.notify('Friend removed', 'success', 1500, modalContent);
+                            modalContent.removeChild(friend);
+                        }
+                    }).catch(err => {
+                        console.log(err);
+                        notifications.notify('Error removing friend', 'error', 1000, modalContent);
+                    })
+                })
+            })
+        }
+
         let pendings = [];
         let blocked = [];
+        let friends = [];
         try {
             pendingListButton.addEventListener('click', async () => {
                 let pendingRequests = await this.getPendingRequests(userData);
+                friends = await this.getAllFriends(userData);
                 if (!pendingRequests.length) {
                     pendingModal.style.display = 'flex';
                     modalContent.style.margin = 'auto';
                     modalContent.style.textAlign = 'center';
-                    modalContent.innerHTML = '<span class="message">No pending requests</span>';
+                    modalContent.innerHTML = '<span class="message">No pending requests</span><hr>';
                     modalContent.firstChild.style.width = '100%';
                     modalContent.firstChild.style.fontSize = '20px';
+
+                    await displayFriends(modalContent);
                     return;
                 }
-                console.log('Checking pending requests', pendingRequests);
                 modalContent.innerHTML = '';
                 pendingModal.style.display = 'flex';
                 for (let i = 0; i < pendingRequests.length; i++) {
                     pendings = await getUserDataByID(pendingRequests[i]);
-                    console.log('pendings', pendings);
                     let pendingList = document.createElement('div');
                     pendingList.classList.add('fr_request_list');
                     pendingList.id = pendings.id;
@@ -402,6 +416,7 @@ class Profile extends HTMLElement {
                     `
                     modalContent.appendChild(pendingList);
                 }
+                await displayFriends(modalContent);
                 const acceptButtons = document.querySelectorAll('.accept_fr');
                 const rejectButtons = document.querySelectorAll('.reject_fr');
                 acceptButtons.forEach(button => {
@@ -463,7 +478,6 @@ class Profile extends HTMLElement {
             blockListButton.addEventListener('click', async () => {
                 blocked = await this.getBlockedUsers(userData);
                 if (!blocked.length) {
-                    console.log('Blocked users', blocked);
                     blockModal.style.display = 'flex';
                     blockModal.style.textAlign = 'center';
                     blockModal.innerHTML = '<span class="message">No blocked users</span>';
@@ -478,7 +492,6 @@ class Profile extends HTMLElement {
                 }
                 // blockModal.style.display = 'flex';
                 blockModal.innerHTML = '';
-                console.log('Checking blocked users', blocked);
                 for (let i = 0; i < blocked.length; i++) {
                     let blockedUser = await getUserDataByID(blocked[i]);
                     let blockedUserEl = document.createElement('div');
@@ -533,7 +546,6 @@ class Profile extends HTMLElement {
         const addFriendButton = document.getElementById('add_friend');
         let notif = document.querySelector('.profile-status');
         addFriendButton.addEventListener('click', async () => {
-            console.log('Add friend clicked');
             const response = await makeAuthRequest('/api/friends/methods/', {
                 method: 'POST',
                 headers: {
@@ -549,6 +561,8 @@ class Profile extends HTMLElement {
                 notifications.notify(data.message, 'success', 1000, notif);
                 // addFriendButton.style.display = 'none';
                 addFriendButton.classList.add('active');
+                await sleep(1000);
+                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 console.log(data);
                 notifications.notify(data.error, 'error', 1000, notif);
@@ -634,12 +648,29 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.Profile.block.includes(userData.id)) {
-                console.log('User is blocked');
                 blockUserButton.style.display = 'none';
                 addFriendButton.style.display = 'none';
             }
         } catch (e) {
             console.log(e);
+        }
+    }
+
+    async checkIfAlreadyFriends(userData, me) {
+        const addFriendButton = document.getElementById('add_friend');
+        try {
+            let response = await makeAuthRequest('/api/friends/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            let data = await response.json();
+            if (data.Profile.friends.includes(userData.id)) {
+                addFriendButton.style.display = 'none';
+            }
+        } catch (e) {
+            throw new Error(e);
         }
     }
 
@@ -657,7 +688,8 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.status === 'Waiting' || data.status === 'Friend') {
-                addFriendButton.style.display = 'none';
+                // addFriendButton.style.display = 'none';
+                addFriendButton.classList.add('active');
             }
         } catch (e) {
             console.log(e);
@@ -666,7 +698,6 @@ class Profile extends HTMLElement {
     }
 
     async checkIfBlocked(userData, me) {
-        console.log('userData.id +++++++++++++++++++++++++++++ userData.username', userData.id, userData.username);
         let isBlockingMe = await makeAuthRequest('/api/friends/find/', {
             method: 'POST',
             headers: {
@@ -677,7 +708,6 @@ class Profile extends HTMLElement {
             })
         })
         isBlockingMe = await isBlockingMe.json();
-        console.log('isBlockingMe', isBlockingMe);
         if (isBlockingMe.status === 'Block') {
             Router.findRoute('/404');
             return;
@@ -701,6 +731,8 @@ class Profile extends HTMLElement {
             if (response.ok) {
                 notifications.notify('Friend request cancelled', 'success', 1000, addFriendButton);
                 addFriendButton.classList.remove('active');
+                await sleep(1000);
+                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 notifications.notify('Error cancelling friend request', 'error', 1000, addFriendButton);
             }
@@ -717,27 +749,22 @@ class Profile extends HTMLElement {
             addFriendButton.style.display = 'none';
             blockUserButton.style.display = 'none';
         } else { // If the user is not the owner of the profile
-            // let isBlockingMe = await this.checkIfBlocked(userData);
-            // console.log('isBlockingMe', isBlockingMe);
-            // if (isBlockingMe === 'Block') {
-            //     Router.findRoute('/404');
-            //     return;
-            // }
             blockListButton.style.display = 'none';
             pendingListButton.style.display = 'none';
             await this.checkFriendsStatus(userData);
             console.log(addFriendButton.classList);
 
             if (!addFriendButton.classList.contains('active')) {
-                console.log('??????????????????????????????????????');
+                console.log('Not active');
                 await this.addFriend(userData);
-                return;
             } else {
                 // await this.rejectFriendRequest(userData);
+                // console.log('Canceled!');
+                await this.checkIfAlreadyFriends(userData, me);
                 await this.cancelFriendRequest(userData);
                 // addFriendButton.classList.remove('active');
             }
-            this.blockUser(userData);
+            await this.blockUser(userData);
         }
     }
 
@@ -748,8 +775,7 @@ class Profile extends HTMLElement {
             let userStats = await this.getUserStats(userData);
             // let data = await this.displayRank();
             this.innerHTML = `
-            <div class="dashbord-main">
-                <div class="image"></div>
+                <div class="dashbord-main">
                     <div class="right-side-dashbord">
                         <div class="profile-avatar">
                             <div class="pingpong-avatar-bar">
@@ -783,11 +809,11 @@ class Profile extends HTMLElement {
                     </div>
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
-                            <div class="username-profile-dashbord">${userData.username}</div>
+                            <div class="username-profile-dashbord">${userData.username}</div><hr>
                             <div class="expbar-profile-dashbord" style="position:relative;">
-                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%); left: 3px; font-size : 80%">LEVEL <span id="userLevel">1</span> </span>
+                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">lvl <span id="userLevel">100</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
-                                    <span class="Experience" id="experienceCount">15%</span>
+                                    <span class="Experience" id="experienceCount">80%</span>
                                 </span>
                             </div>
                         </div>
@@ -841,7 +867,6 @@ class Profile extends HTMLElement {
 export function attachDOM({ username }) {
     app.root.innerHTML = '';
     document.body.style = '';
-    console.log('username from profile.js', username);
     const page = document.createElement('profile-page');
     page.setAttribute('username', username);
     app.root.appendChild(page);
