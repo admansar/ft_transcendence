@@ -1505,14 +1505,14 @@ input[type=text-chat] {
 
 .score_main {
     font-size: 58px;
-    color: #fff;
+    color: #000000;
     margin-left: 30px;
     font-family: Arial, Helvetica, sans-serif;
 }
 
 .score_guest {
     font-size: 58px;
-    color: #fff;
+    color: #000000;
     margin-right: 30px;
     font-family: Arial, Helvetica, sans-serif;
 }
