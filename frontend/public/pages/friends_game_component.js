@@ -70,14 +70,14 @@ export function attachDOM() {
     console.log ('cleanup')
     cleanup = null;
   }
-  document.body.innerHTML = '';
-  document.body.setAttribute('style', '');
-  document.head.innerHTML = ''
-  const page = document.createElement('friends-game-page');
-  document.body.appendChild(page);
+  document.body.style = '';
+  app.root.innerHTML = '';
   import(`../game/js/friends_game.js?t=${Date.now()}`).then(module => {
     cleanup = module.game_2d();
   })
+  const page = document.createElement('friends-game-page');
+  app.root.appendChild(page);
 }
+
 customElements.define('friends-game-page', Game_Friends);
 
