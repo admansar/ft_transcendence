@@ -1,3 +1,5 @@
+import { Router } from "../../services/Router.js"
+
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 
@@ -475,6 +477,10 @@ function game_draw()
 
 function game_over()
 {
+  if (racket1.score == MAX_SCORE || racket2.score == MAX_SCORE)
+    {
+      setTimeout(() => {Router.findRoute('/')}, 1000)
+    }
   if (racket1.score == MAX_SCORE)
   {
     ball.ray = 0
