@@ -222,7 +222,7 @@ class Profile extends HTMLElement {
             if (score_a > score_b) {
                 return {
                     status: 'WIN',
-                    color: 'green'
+                    color: '#13bc204f'
                 }
             } else if (score_a === score_b) {
                 return {
@@ -232,7 +232,7 @@ class Profile extends HTMLElement {
             }
             return {
                 status: 'LOSS',
-                color: 'brown'
+                color: '#db0e0e63'
             }
         }
         for (let i = 0; i < data.games.length; i++) {
@@ -245,7 +245,7 @@ class Profile extends HTMLElement {
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
                         <span class="status">
-                            <div style="text-align: center;font-size: 23px;color: rgb(236 188 93);">Touranment</div>
+                            <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">Touranment</div>
                             <div style="text-align: center;"> ${gameStatus.status}</div>
                         </span>
                         <span class="score_guest">${gameStatus.opponent_score}</span>
@@ -768,7 +768,8 @@ class Profile extends HTMLElement {
             let userStats = await this.getUserStats(userData);
             // let data = await this.displayRank();
             this.innerHTML = `
-                <div class="dashbord-main">
+            <div class="dashbord-main">
+                <div class="image"></div>
                     <div class="right-side-dashbord">
                         <div class="profile-avatar">
                             <div class="pingpong-avatar-bar">
@@ -802,7 +803,7 @@ class Profile extends HTMLElement {
                     </div>
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
-                            <div class="username-profile-dashbord">${userData.username} Profile</div><hr>
+                            <div class="username-profile-dashbord">${userData.username} Profile</div>
                             <div class="expbar-profile-dashbord" style="position:relative;">
                                 <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%); left: 3px; font-size : 80%">LEVEL <span id="userLevel">100</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
