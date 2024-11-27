@@ -236,7 +236,7 @@ function front_inject_friends(user, every_online_user)
         let avatar = res.avatar;
         console.log('avatar :', avatar);
         const chat = document.getElementById('chat');
-        const messengerList = document.querySelector('.messanger-list');
+        let messengerList = document.querySelector('.messanger-list');
         for (let i = 0; i < 5; i++) {
             console.log('waiting for the list to be ready');
             setTimeout(() => {

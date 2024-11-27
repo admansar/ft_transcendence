@@ -970,6 +970,7 @@ input[type=search] {
     border-top-left-radius: 20px;
     background-color: #FBCC0A;
     transition: all 0.2s ease-in-out;
+    z-index: 1;
 }
 
 .chat-border.active {

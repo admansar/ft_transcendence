@@ -184,7 +184,7 @@ class Profile extends HTMLElement {
             notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
         });
 
-        await getLevel();
+        //await getLevel();
     }
 
     async renderScore(data) {
@@ -803,11 +803,11 @@ class Profile extends HTMLElement {
                     </div>
                     <div class="left-side-dashbord">
                         <div class="profile-dashbord">
-                            <div class="username-profile-dashbord">${userData.username} Profile</div>
+                            <div class="username-profile-dashbord">${userData.username}</div>
                             <div class="expbar-profile-dashbord" style="position:relative;">
-                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%); left: 3px; font-size : 80%">LEVEL <span id="userLevel">100</span> </span>
+                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%); left: 3px; font-size : 80%">LEVEL <span id="userLevel">1</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
-                                    <span class="Experience" id="experienceCount">80%</span>
+                                    <span class="Experience" id="experienceCount">15%</span>
                                 </span>
                             </div>
                         </div>
