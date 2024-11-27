@@ -135,6 +135,7 @@ export async function tour_game(user_token) {
 
     gameSocket.onmessage = function (e) {
       const data = JSON.parse(e.data);
+      console.log('Received data: ', data);
       if (data.type === 'init_state') {
         playerId = data.game_state.player_id;
         roomId = data.game_state.room_id;

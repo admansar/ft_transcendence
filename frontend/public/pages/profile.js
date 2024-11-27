@@ -52,9 +52,57 @@ class Profile extends HTMLElement {
             else if (games[i].type === '3')
                 data_3d.push(games[i])
         }
-        console.log ('2d games :: ', data_2d)
-        console.log ('3d games :: ', data_3d)
-        console.log ('waiting for a front for it');
+        console.log('2d games :: ', data_2d)
+        console.log('3d games :: ', data_3d)
+        console.log('waiting for a front for it');
+
+        for (let i = 0; i < data_3d.length; i++) {
+            // getting avatar of the user
+            let gameStatus = data_3d[i];
+            let newdiv = document.createElement('div');
+            newdiv.innerHTML = `
+            <div class="history-bar">
+            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
+                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? 'green': 'red'};">
+                <span class="score_main">${gameStatus.userScore}</span>
+                <span class="status">
+                    <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">3D GAME</div>
+                    <div style="text-align: center;"> WIN</div>
+                </span>
+                <span class="score_guest">${gameStatus.botScore}</span>
+            </span>
+            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
+                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+        </div>    `
+            document.querySelector('.HISTORYdata').appendChild(newdiv);
+        }
+
+        for (let i = 0; i < data_2d.length; i++) {
+            // getting avatar of the user
+            let gameStatus = data_2d[i];
+            let newdiv = document.createElement('div');
+            newdiv.innerHTML = `
+            <div class="history-bar">
+            <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
+                <img src="${me.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+            <span class="score_bar" style="background-color: ${gameStatus.isWinner ? 'green': 'red'};">
+                <span class="score_main">${gameStatus.userScore}</span>
+                <span class="status">
+                    <div style="text-align: center; font-size: 30px; color: rgb(255, 170, 1);">3D GAME</div>
+                    <div style="text-align: center;"> WIN</div>
+                </span>
+                <span class="score_guest">${gameStatus.botScore}</span>
+            </span>
+            <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
+                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+            </span>
+        </div>    `
+            document.querySelector('.HISTORYdata').appendChild(newdiv);
+        }
     }
 
     async displayRank(me, userData) {
