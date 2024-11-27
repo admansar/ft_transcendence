@@ -230,7 +230,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 print (f"tmp_dict : {tmp_dict}")
                 await player.send(text_data=json.dumps(tmp_dict))
         except Exception as e:
-            print(f"Error sending message to player: {e}")
+            pass
+            #print(f"Error sending message to player: {e}")
 
 
     async def declare_winner(self, champion):
@@ -259,7 +260,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(2)
                 await players.remove(self)
         except Exception as e:
-            print (f"Error while disconnect : {e}")
+            pass
+            #print (f"Error while disconnect : {e}")
 
 
     async def broadcast_usernames(self):
@@ -441,7 +443,8 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                     }
                 )
         except Exception as e:
-            print (f"Error in notifying disconnect : {e}")
+            pass
+            #print (f"Error in notifying disconnect : {e}")
         
         try:
                 # cancel game loop
@@ -490,7 +493,8 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
                     })
                     winners_classes.append(self)
                 except Exception as e:
-                    print (f"Error in enemy disconnected : {e}")
+                    pass
+                    #print (f"Error in enemy disconnected : {e}")
 
 
 
@@ -708,8 +712,6 @@ class TournamentGameConsumer(AsyncWebsocketConsumer):
             if winner_data["winner"] == self.user_name and not champion:
                 winners_classes.append(self)
         except Exception as e:
-            print (f"Error in game_over : {e}")
-        finally:
             pass
             # await self.disconnect(1000)
 
