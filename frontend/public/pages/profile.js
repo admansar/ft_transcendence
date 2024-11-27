@@ -5,7 +5,6 @@ import { getMe } from '../services/utils.js'
 import { getUserDataByID } from '../services/utils.js'
 import '../components/header.js';
 import "../components/chat.js";
-import { socket_impel } from '../components/chat.js';
 
 class Profile extends HTMLElement {
     constructor() {
@@ -42,11 +41,12 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log('game :: ', response.games)
+        console.log ('game :: ', response.games)
         const games = response.games;
         let data_2d = [];
         let data_3d = [];
-        for (let i = 0; i < games.length; i++) {
+        for (let i = 0; i < games.length; i++)
+        {
             if (games[i].type === '2')
                 data_2d.push(games[i])
             else if (games[i].type === '3')
@@ -146,13 +146,6 @@ class Profile extends HTMLElement {
                 }
             }
         }
-        let ranks = document.querySelectorAll('.RANKYdata');
-        ranks.forEach(rank => {
-            rank.addEventListener('click', e => {
-                let username = e.target.parentElement.querySelector('.rank_name').textContent;
-                app.router.findRoute(`/profile/${username}`);
-            })
-        })
     }
 
 
@@ -226,6 +219,7 @@ class Profile extends HTMLElement {
         });
 
         shareProfileButton.addEventListener('click', function () {
+            console.log('Share profile clicked');
             let profileUrl = `http://localhost/profile/${username}`;
             navigator.clipboard.writeText(profileUrl);
             let shareProfile = document.querySelector('.profile-status');
@@ -237,6 +231,7 @@ class Profile extends HTMLElement {
 
     async renderScore(data) {
         if (!data.games) {
+            console.log('No games found');
             return `
                 <span class="message" style="font-size: 20px;">No Games found, Go PLAY!</span>
             `
@@ -245,6 +240,7 @@ class Profile extends HTMLElement {
             let matchResult;
             if (username === currentGame.player_a) {
                 matchResult = winOrLose(currentGame.score_a, currentGame.score_b);
+                // console.log(matchResult);
                 return {
                     'avatar': currentGame.avatar_a,
                     'score': currentGame.score_a,
@@ -358,22 +354,6 @@ class Profile extends HTMLElement {
         }
     }
 
-    async getAllFriends(me, userData) {
-        try {
-            let response = await makeAuthRequest('/api/friends/profile/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            let data = await response.json();
-            return data.Profile.friends
-        } catch (e) {
-            console.log(e);
-            throw e;
-        }
-    }
-
     async checkFriendsStatus(userData) {
         const addFriendButton = document.getElementById('add_friend');
         const pendingListButton = document.getElementById('pending_list');
@@ -385,76 +365,26 @@ class Profile extends HTMLElement {
 
         const blockModal2 = document.getElementById('blockModal');
 
-        async function displayFriends(modalContent) {
-            if (friends.length) {
-                modalContent.innerHTML += '<span class="message" style="width: 100%; font-size: 20px;">Friends</span>';
-            }
-            for (let i = 0; i < friends.length; i++) {
-                let friend = await getUserDataByID(friends[i]);
-                let friendEl = document.createElement('div');
-                friendEl.classList.add('fr_request_list');
-                friendEl.id = friends[i];
-                friendEl.style.maxWidth = '100%';
-                friendEl.innerHTML = `
-                    <span class="fr_id">
-                        <span class="fr_avatar" style="background-image: url(${friend.avatar})"></span>
-                        <span class="fr_name">${friend.username}</span>
-                    </span>
-                    <span class="requesting">
-                        <span class="remove_fr">Remove</span>
-                    </span>
-                `
-                modalContent.appendChild(friendEl);
-            }
-            const removeButtons = document.querySelectorAll('.remove_fr');
-            removeButtons.forEach(button => {
-                button.addEventListener('click', async () => {
-                    let friend = button.parentElement.parentElement;
-                    let friendID = friend.id;
-                    makeAuthRequest('/api/friends/methods/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            "status": "UNFRIEND",
-                            "user_id": friendID
-                        })
-                    }).then(async res => {
-                        if (res.ok) {
-                            notifications.notify('Friend removed', 'success', 1500, modalContent);
-                            modalContent.removeChild(friend);
-                        }
-                    }).catch(err => {
-                        console.log(err);
-                        notifications.notify('Error removing friend', 'error', 1000, modalContent);
-                    })
-                })
-            })
-        }
-
         let pendings = [];
         let blocked = [];
-        let friends = [];
         try {
             pendingListButton.addEventListener('click', async () => {
                 let pendingRequests = await this.getPendingRequests(userData);
-                friends = await this.getAllFriends(userData);
                 if (!pendingRequests.length) {
                     pendingModal.style.display = 'flex';
                     modalContent.style.margin = 'auto';
                     modalContent.style.textAlign = 'center';
-                    modalContent.innerHTML = '<span class="message">No pending requests</span><hr>';
+                    modalContent.innerHTML = '<span class="message">No pending requests</span>';
                     modalContent.firstChild.style.width = '100%';
                     modalContent.firstChild.style.fontSize = '20px';
-
-                    await displayFriends(modalContent);
                     return;
                 }
+                console.log('Checking pending requests', pendingRequests);
                 modalContent.innerHTML = '';
                 pendingModal.style.display = 'flex';
                 for (let i = 0; i < pendingRequests.length; i++) {
                     pendings = await getUserDataByID(pendingRequests[i]);
+                    console.log('pendings', pendings);
                     let pendingList = document.createElement('div');
                     pendingList.classList.add('fr_request_list');
                     pendingList.id = pendings.id;
@@ -471,7 +401,6 @@ class Profile extends HTMLElement {
                     `
                     modalContent.appendChild(pendingList);
                 }
-                await displayFriends(modalContent);
                 const acceptButtons = document.querySelectorAll('.accept_fr');
                 const rejectButtons = document.querySelectorAll('.reject_fr');
                 acceptButtons.forEach(button => {
@@ -533,6 +462,7 @@ class Profile extends HTMLElement {
             blockListButton.addEventListener('click', async () => {
                 blocked = await this.getBlockedUsers(userData);
                 if (!blocked.length) {
+                    console.log('Blocked users', blocked);
                     blockModal.style.display = 'flex';
                     blockModal.style.textAlign = 'center';
                     blockModal.innerHTML = '<span class="message">No blocked users</span>';
@@ -547,6 +477,7 @@ class Profile extends HTMLElement {
                 }
                 // blockModal.style.display = 'flex';
                 blockModal.innerHTML = '';
+                console.log('Checking blocked users', blocked);
                 for (let i = 0; i < blocked.length; i++) {
                     let blockedUser = await getUserDataByID(blocked[i]);
                     let blockedUserEl = document.createElement('div');
@@ -601,6 +532,7 @@ class Profile extends HTMLElement {
         const addFriendButton = document.getElementById('add_friend');
         let notif = document.querySelector('.profile-status');
         addFriendButton.addEventListener('click', async () => {
+            console.log('Add friend clicked');
             const response = await makeAuthRequest('/api/friends/methods/', {
                 method: 'POST',
                 headers: {
@@ -616,8 +548,6 @@ class Profile extends HTMLElement {
                 notifications.notify(data.message, 'success', 1000, notif);
                 // addFriendButton.style.display = 'none';
                 addFriendButton.classList.add('active');
-                await sleep(1000);
-                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 console.log(data);
                 notifications.notify(data.error, 'error', 1000, notif);
@@ -703,6 +633,7 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.Profile.block.includes(userData.id)) {
+                console.log('User is blocked');
                 blockUserButton.style.display = 'none';
                 addFriendButton.style.display = 'none';
             }
@@ -725,8 +656,7 @@ class Profile extends HTMLElement {
             })
             let data = await response.json();
             if (data.status === 'Waiting' || data.status === 'Friend') {
-                // addFriendButton.style.display = 'none';
-                addFriendButton.classList.add('active');
+                addFriendButton.style.display = 'none';
             }
         } catch (e) {
             console.log(e);
@@ -735,6 +665,7 @@ class Profile extends HTMLElement {
     }
 
     async checkIfBlocked(userData, me) {
+        console.log('userData.id +++++++++++++++++++++++++++++ userData.username', userData.id, userData.username);
         let isBlockingMe = await makeAuthRequest('/api/friends/find/', {
             method: 'POST',
             headers: {
@@ -745,6 +676,7 @@ class Profile extends HTMLElement {
             })
         })
         isBlockingMe = await isBlockingMe.json();
+        console.log('isBlockingMe', isBlockingMe);
         if (isBlockingMe.status === 'Block') {
             Router.findRoute('/404');
             return;
@@ -768,8 +700,6 @@ class Profile extends HTMLElement {
             if (response.ok) {
                 notifications.notify('Friend request cancelled', 'success', 1000, addFriendButton);
                 addFriendButton.classList.remove('active');
-                await sleep(1000);
-                app.router.findRoute(`/profile/${userData.username}`);
             } else {
                 notifications.notify('Error cancelling friend request', 'error', 1000, addFriendButton);
             }
@@ -800,12 +730,13 @@ class Profile extends HTMLElement {
             if (!addFriendButton.classList.contains('active')) {
                 console.log('??????????????????????????????????????');
                 await this.addFriend(userData);
+                return;
             } else {
                 // await this.rejectFriendRequest(userData);
                 await this.cancelFriendRequest(userData);
                 // addFriendButton.classList.remove('active');
             }
-            await this.blockUser(userData);
+            this.blockUser(userData);
         }
     }
 
@@ -909,6 +840,7 @@ class Profile extends HTMLElement {
 export function attachDOM({ username }) {
     app.root.innerHTML = '';
     document.body.style = '';
+    console.log('username from profile.js', username);
     const page = document.createElement('profile-page');
     page.setAttribute('username', username);
     app.root.appendChild(page);
