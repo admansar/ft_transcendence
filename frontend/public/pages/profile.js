@@ -27,13 +27,13 @@ class Profile extends HTMLElement {
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
         await this.displayRank(me, userData);
-        await this.offline_games(me);
+        await this.offline_games(me, userData);
         document.title = `Profile - ${userData.username}`;
 
         //socket_impel();
     }
 
-    async offline_games(me) {
+    async offline_games(me, other) {
         let response = await makeAuthRequest(`/api/auth/getGameBoot?username=${me.username}`, {
             method: 'GET',
             headers: {
@@ -41,7 +41,8 @@ class Profile extends HTMLElement {
             },
         })
         response = await response.json();
-        console.log ('game :: ', response.games)
+        if (response.games && me.username !== other.username)
+            return;
         const games = response.games;
         let data_2d = [];
         let data_3d = [];
@@ -74,7 +75,7 @@ class Profile extends HTMLElement {
                 <span class="score_guest">${gameStatus.botScore}</span>
             </span>
             <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                <img src="/public/game/images/bot3d.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
             </span>
         </div>    `
             document.querySelector('.HISTORYdata').appendChild(newdiv);
@@ -99,7 +100,7 @@ class Profile extends HTMLElement {
                 <span class="score_guest">${gameStatus.botScore}</span>
             </span>
             <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                <img src="https://static.vecteezy.com/system/resources/previews/035/676/071/large_2x/ai-generated-futuristic-robot-avatar-free-png.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
+                <img src="/public/game/images/bot2d.png" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
             </span>
         </div>    `
             document.querySelector('.HISTORYdata').appendChild(newdiv);
