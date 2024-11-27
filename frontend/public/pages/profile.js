@@ -19,16 +19,18 @@ class Profile extends HTMLElement {
         let userData = await getUserData(username);
         await this.checkIfBlocked(userData, me);
         await this.render(username, userData);
+        this.appendChild(headerComponent);
+        this.appendChild(chatComponent);
         await this.checkIfWaitingOrFriends(userData, me);
         await this.checkIfAlreadyBlocked(userData, me);
         await this.getProfileHtml(userData, username);
-        this.appendChild(headerComponent);
-        this.appendChild(chatComponent);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
-        await this.displayRank(me);
+        await this.displayRank(me, userData);
         await this.offline_games(me);
         document.title = `Profile - ${userData.username}`;
+
+        //socket_impel();
     }
 
     async offline_games(me) {
@@ -54,8 +56,8 @@ class Profile extends HTMLElement {
         console.log ('3d games :: ', data_3d)
         console.log ('waiting for a front for it');
     }
-    
-    async displayRank(me) {
+
+    async displayRank(me, userData) {
         let response = await makeAuthRequest('/api/game/rank/', {
             method: 'GET',
             headers: {
@@ -79,9 +81,12 @@ class Profile extends HTMLElement {
             </div>
         
         `;
-            // }
-            if (response[i].username == me.username) {
+            if (response[i].username == userData.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
+                document.querySelector('.user_exp').style.width = `${response[i].exp}%`;
+                document.getElementById(`userLevel`).innerHTML = response[i].level;
+                document.getElementById(`experienceCount`).innerHTML = `${response[i].exp}%`;
+                console.log("HIHIHIHI", document.getElementById(`experienceCount`));
                 if (response[i].achivements >= 5) {
                     document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
                 }
@@ -173,7 +178,7 @@ class Profile extends HTMLElement {
             notifications.notify('Profile URL copied to clipboard', 'success', 1000, shareProfile);
         });
 
-        await getLevel();
+        //await getLevel();
     }
 
     async renderScore(data) {
@@ -213,7 +218,7 @@ class Profile extends HTMLElement {
             if (score_a > score_b) {
                 return {
                     status: 'WIN',
-                    color: 'green'
+                    color: '#13bc204f'
                 }
             } else if (score_a === score_b) {
                 return {
@@ -223,7 +228,7 @@ class Profile extends HTMLElement {
             }
             return {
                 status: 'LOSS',
-                color: 'brown'
+                color: '#db0e0e63'
             }
         }
         for (let i = 0; i < data.games.length; i++) {
@@ -231,7 +236,7 @@ class Profile extends HTMLElement {
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
@@ -242,7 +247,7 @@ class Profile extends HTMLElement {
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                 </div>
             `
@@ -694,7 +699,8 @@ class Profile extends HTMLElement {
             let userStats = await this.getUserStats(userData);
             // let data = await this.displayRank();
             this.innerHTML = `
-                <div class="dashbord-main">
+            <div class="dashbord-main">
+                <div class="image"></div>
                     <div class="right-side-dashbord">
                         <div class="profile-avatar">
                             <div class="pingpong-avatar-bar">
@@ -730,9 +736,9 @@ class Profile extends HTMLElement {
                         <div class="profile-dashbord">
                             <div class="username-profile-dashbord">${userData.username}</div>
                             <div class="expbar-profile-dashbord" style="position:relative;">
-                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%);left: 10px">lvl <span id="userLevel">100</span> </span>
+                                <span class="level" style="position:absolute; top: 50%; transform: translateY(-50%); left: 3px; font-size : 80%">LEVEL <span id="userLevel">1</span> </span>
                                 <span class="user_exp" id="userExperienceBar" style="display:flex; justify-content: flex-end;">
-                                    <span class="Experience" id="experienceCount">80%</span>
+                                    <span class="Experience" id="experienceCount">15%</span>
                                 </span>
                             </div>
                         </div>

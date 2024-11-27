@@ -15,7 +15,7 @@ class User(AbstractUser):
 
     USERNAME_FIELD = 'email'  # Use email as the username
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']  # No additional fields required for createsuperuser
-    xp = models.IntegerField(default=30)
+    xp = models.IntegerField(default=15)
     level = models.IntegerField(default=1)
     is_2fa_enabled = models.BooleanField(default=False)
     
