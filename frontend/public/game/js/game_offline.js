@@ -301,8 +301,8 @@ let bot_mode = true;
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=true)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#fff", bot_mode=false)
+const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#fabc13", bot_mode=false)
 
 
 
@@ -517,20 +517,21 @@ function game_over()
   })()
   }
   if (racket1.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 2 win", canvas.width / 2, canvas.height / 2)
-    // hona
-    return (1)
-  }
-  if (racket2.score == MAX_SCORE)
-  {
-    ball.ray = 0
-    game_draw()
-    draw_string(100, "#ffffff", "player 1 win", canvas.width / 2, canvas.height / 2)
-    return (1)
-  }
+    {
+      ball.ray = 0
+      game_draw()
+      draw_string(100, "#ffffff", "player 2", canvas.width / 2, canvas.height / 2)
+      draw_string(120, "#fabc13", "WINNER", canvas.width / 2, canvas.height / 2.5)
+      return (1)
+    }
+    if (racket2.score == MAX_SCORE)
+    {
+      ball.ray = 0
+      game_draw()
+      draw_string(100, "#ffffff", "player 2", canvas.width / 2, canvas.height / 2)
+      draw_string(120, "#fabc13", "WINNER", canvas.width / 2, canvas.height / 2.5)
+      return (1)
+    }
   return (0)
 }
 

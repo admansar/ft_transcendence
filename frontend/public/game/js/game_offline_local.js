@@ -276,8 +276,8 @@ let bot_mode = true;
 const ball = new Ball(ball_pos, ratio, ball_ray, direction,  ball_speed, color="#ffffff")
 
 
-const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#33ff00", bot_mode=false)
-const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#FF3333", bot_mode=false)
+const racket1 = new Racket(racket1_pos, racket_speed, racket_width, racket_height, color="#fff", bot_mode=false)
+const racket2 = new Racket(racket2_pos, racket_speed, racket_width, racket_height, color="#fabc13", bot_mode=false)
 
 
 
@@ -333,7 +333,7 @@ function drawMenu()
 {
   ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  draw_string(50, "#ffffff", "Game Menu", canvas.width / 2, canvas.height / 2 - 100);
+  draw_string(50, "#fabc13", "Game Menu", canvas.width / 2, canvas.height / 2 - 100);
   draw_string(30, "#ffffff", "Press R to Restart", canvas.width / 2, canvas.height / 2);
   draw_string(30, "#ffffff", "Press ESC to Resume", canvas.width / 2, canvas.height / 2 + 50);
 }
@@ -479,14 +479,16 @@ function game_over()
   {
     ball.ray = 0
     game_draw()
-    draw_string(100, "#ffffff", "player 2 win", canvas.width / 2, canvas.height / 2)
+    draw_string(100, "#ffffff", "player 2", canvas.width / 2, canvas.height / 2)
+    draw_string(120, "#fabc13", "WINNER", canvas.width / 2, canvas.height / 2.5)
     return (1)
   }
   if (racket2.score == MAX_SCORE)
   {
     ball.ray = 0
     game_draw()
-    draw_string(100, "#ffffff", "player 1 win", canvas.width / 2, canvas.height / 2)
+    draw_string(100, "#ffffff", "player 2", canvas.width / 2, canvas.height / 2)
+    draw_string(120, "#fabc13", "WINNER", canvas.width / 2, canvas.height / 2.5)
     return (1)
   }
   return (0)
