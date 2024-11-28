@@ -189,8 +189,8 @@ class Oauth42(APIView):
         try:
             response_token = requests.post(api_url, data={
                 'code': code,
-                'client_id': 'u-s4t2ud-2a476d713b4fc0ea1dfd09f1c6a9204cd6a43dc0c9a6a976d2ed239addacd68b',
-                'client_secret': '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',
+                'client_id': os.getenv('CLIENT_ID'),
+                'client_secret': os.getenv('CLIENT_SECRET'),
                 'redirect_uri': redirect_uri,
                 'grant_type': 'authorization_code'
             })

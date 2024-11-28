@@ -10,6 +10,14 @@ RED = "\033[0;31m"
 
 all:
 	@docker compose -f ./docker-compose.yml up --build -d
+	@clear
+	@ ${welcome}
+	@sleep 1
+	@${to}
+	@sleep 1
+	@ ${transcendance}
+	@sleep 1
+	@clear
 
 build:
 	@docker compose -f ./docker-compose.yml build
@@ -45,3 +53,37 @@ re: clean all
 reshow: clean show
 
 sre: fclean all
+
+
+define welcome
+	@echo ${RED} "			██     ██ ███████ ██       ██████  ██████  ███    ███ ███████ " ${NC}
+	@echo ${RED} "			██     ██ ██      ██      ██      ██    ██ ████  ████ ██      " ${NC}
+	@echo ${RED} "			██  █  ██ █████   ██      ██      ██    ██ ██ ████ ██ █████   " ${NC}
+	@echo ${RED} "			██ ███ ██ ██      ██      ██      ██    ██ ██  ██  ██ ██      " ${NC}
+	@echo ${RED} "			 ███ ███  ███████ ███████  ██████  ██████  ██      ██ ███████ " ${NC}
+	@echo 
+    
+endef	
+                                                              
+
+define to
+	@ echo ${RED} "						████████  ██████ " ${NC}
+	@ echo ${RED} "						   ██    ██    ██" ${NC}
+	@ echo ${RED} "						   ██    ██    ██" ${NC}
+	@ echo ${RED} "						   ██    ██    ██" ${NC}
+	@ echo ${RED} "						   ██     ██████ " ${NC}
+	@echo
+endef
+
+
+define transcendance
+	
+	@echo ${RED} "████████ ██████   █████  ███    ██ ███████  ██████ ███████ ███    ██ ██████  ███████ ███    ██  ██████ ███████ " ${NC}
+	@echo ${RED} "   ██    ██   ██ ██   ██ ████   ██ ██      ██      ██      ████   ██ ██   ██ ██      ████   ██ ██      ██      " ${NC}
+	@echo ${RED} "   ██    ██████  ███████ ██ ██  ██ ███████ ██      █████   ██ ██  ██ ██   ██ █████   ██ ██  ██ ██      █████   " ${NC}
+	@echo ${RED} "   ██    ██   ██ ██   ██ ██  ██ ██      ██ ██      ██      ██  ██ ██ ██   ██ ██      ██  ██ ██ ██      ██      " ${NC}
+	@echo ${RED} "   ██    ██   ██ ██   ██ ██   ████ ███████  ██████ ███████ ██   ████ ██████  ███████ ██   ████  ██████ ███████ " ${NC}
+	@echo
+                                                                  
+
+endef

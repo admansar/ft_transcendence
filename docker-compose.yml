@@ -43,7 +43,6 @@ services:
       args:
         - PYTHONUNBUFFERED=1
         - SECRET_KEY=${SECRET_KEY}
-        - PRODUCTION=${PRODUCTION}
     container_name: backend
     ports:
       - "8000:8000"
