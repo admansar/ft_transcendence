@@ -242,7 +242,7 @@ class Oauth42(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         
-        response = HttpResponseRedirect("http://localhost/")
+        response = HttpResponseRedirect("http://" + os.getenv('URL'))
         response.data = {
             'access': str(access),
             'refresh': str(refresh)

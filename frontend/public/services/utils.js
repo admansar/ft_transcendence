@@ -30,7 +30,7 @@ export async function makeAuthRequest(url, options = {}) {
         if (refreshRes.ok) {
             response = await fetch(url, options)
         } else {
-            console.log('Session expired, please login again');
+            //console.log('Session expired, please login again');
             notifications.notify('Session expired, please login again', 'error', 1000);
             Router.findRoute('/login');
             return;

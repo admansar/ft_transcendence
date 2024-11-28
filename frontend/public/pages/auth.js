@@ -26,7 +26,7 @@ class Auth extends HTMLElement {
     render(page) {
         const registerPage = document.createElement('register-page');
         const loginPage = document.createElement('login-page');
-        console.log(page);
+        //console.log(page);
 
         if (page === 'register') {
             // this.cleanup();
@@ -66,7 +66,7 @@ class Auth extends HTMLElement {
         });
 
         let urlParams = new URLSearchParams(window.location.search);
-        console.log('urlParams', urlParams);
+        //console.log('urlParams', urlParams);
         if (urlParams.has('error')) {
             notifications.notify(urlParams.get('error'), 'danger');
             window.history.replaceState(null, null, window.location.pathname);
@@ -152,7 +152,7 @@ function register() {
                 });
             }
         } catch (e) {
-            console.log('Error during registration');
+            //console.log('Error during registration');
             notifications.notify('Error during registration', 'danger');
         }
     };
@@ -183,7 +183,7 @@ function login() {
                 })
             });
             const data = await response.json()
-            console.log('data', data);
+            //console.log('data', data);
             app.email = data.email;
             try {
                 if (response.status === 403) {
@@ -197,32 +197,32 @@ function login() {
                         })
                     }).then(res => {
                         res.json().then(res => {
-                            console.log(res)
+                            //console.log(res)
                             app.otp = res.otp_token;
-                            console.log('app.otp from auth.js', app.otp);
+                            //console.log('app.otp from auth.js', app.otp);
                         })
                     }).catch(e => {
-                        console.log('Error generating OTP', e);
+                        //console.log('Error generating OTP', e);
                     })
                     Router.findRoute('/verify-otp');
                     return;
                 }
                 if (response.ok) {
-                    console.log('access', data.access);
-                    console.log('refresh', data.refresh);
+                    //console.log('access', data.access);
+                    //console.log('refresh', data.refresh);
                     // localStorage.setItem('access', data.access);
                     // localStorage.setItem('refresh', data.refresh);
                     notifications.notify('Login successful!', 'success');
                     Router.findRoute(`/`);
                 } else {
-                    console.log(data.error);
+                    //console.log(data.error);
                     notifications.notify(data.error, 'danger');
                 }
             } catch (e) {
-                console.log('Error logging in', e);
+                //console.log('Error logging in', e);
             }
         } catch (e) {
-            console.log('Error logging in');
+            //console.log('Error logging in');
             // notifications.notify(data.error, 'danger');
         }
     };

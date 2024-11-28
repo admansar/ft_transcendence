@@ -16,8 +16,6 @@ all:
 	@${to}
 	@sleep 1
 	@ ${transcendance}
-	@sleep 1
-	@clear
 
 build:
 	@docker compose -f ./docker-compose.yml build

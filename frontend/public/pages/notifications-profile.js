@@ -36,10 +36,10 @@ class NotificationsProfile extends HTMLElement {
             })
         })
         if (response.ok) {
-            console.log('Friend request accepted');
+            //console.log('Friend request accepted');
             return response;
         } else {
-            console.log('Error accepting friend request');
+            //console.log('Error accepting friend request');
             throw new Error(response);
         }
     }
@@ -56,16 +56,16 @@ class NotificationsProfile extends HTMLElement {
             })
         })
         if (response.ok) {
-            console.log('Friend request rejected');
+            //console.log('Friend request rejected');
             return response;
         } else {
-            console.log('Error rejecting friend request');
+            //console.log('Error rejecting friend request');
             throw new Error(response);
         }
     }
 
     render() {
-        console.log('NotificationsProfile component is rendered');
+        //console.log('NotificationsProfile component is rendered');
         let notificationEl = document.querySelector('.notification-container');
         let notificationList = document.querySelector('.notifications-dashboard-container');
 
@@ -100,7 +100,7 @@ class NotificationsProfile extends HTMLElement {
                 
                 notifEl.querySelector('.accept').addEventListener('click', async (e) => {
                     e.stopPropagation();
-                    console.log(`Accepted request from ${user.username}`);
+                    //console.log(`Accepted request from ${user.username}`);
                     try {
                         await this.acceptFriendRequest(user.id);
                         notifications.notify('Friend request accepted', 'success', 1000, notificationEl);
@@ -115,7 +115,7 @@ class NotificationsProfile extends HTMLElement {
                     e.stopPropagation();
                     try {
                         await this.rejectFriendRequest(user.id);
-                        console.log(`Declined request from ${user.username}`);
+                        //console.log(`Declined request from ${user.username}`);
                         notifications.notify('Friend request declined', 'error', 1000, notificationEl);
                         notifEl.remove();
                     } catch (e) {
@@ -127,9 +127,9 @@ class NotificationsProfile extends HTMLElement {
             }
             document.querySelectorAll('li').forEach(li => {
                 li.addEventListener('click', async () => {
-                    console.log('User clicked:', li);
+                    //console.log('User clicked:', li);
                     let username = li.querySelector('span').textContent;
-                    console.log('Username:', username);
+                    //console.log('Username:', username);
                     app.router.findRoute(`/profile/${username}`);
                 })
             })

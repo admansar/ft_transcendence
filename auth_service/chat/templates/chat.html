@@ -25,14 +25,14 @@
         const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
         chatSocket.onopen = function(e) {
-            console.log('WebSocket connection established!');
+            //console.log('WebSocket connection established!');
         }
 
         chatSocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
             const message = data.message
             const user = data.user
-            console.log (data);
+            //console.log (data);
             // Display received message
             if (data.type === 'send_message') {
                 document.getElementById('messages').innerHTML += user + ' : ' + message + "<br>";
@@ -40,7 +40,7 @@
         };
 
         chatSocket.onclose = function(e){
-            console.log('WebSocket connection closed!');
+            //console.log('WebSocket connection closed!');
         }
 
         // Function to send the message
@@ -54,7 +54,7 @@
             }
 
             // Send message with user hashtag
-            //console.log(`${userHashtag.value} : ` + messageInput.value);
+            ////console.log(`${userHashtag.value} : ` + messageInput.value);
             chatSocket.send(JSON.stringify({
                 'type': 'send_message',
                 'message': messageInput.value,

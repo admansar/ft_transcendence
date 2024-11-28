@@ -33,11 +33,11 @@ let response = await makeAuthRequest('/api/auth/me', {
 
 if (response.ok) {
 	let data = await response.json();
-	console.log('full data: ', data)
+	//console.log('full data: ', data)
 	data_to_send.username = data.username
 }
 else {
-	console.log('Error fetching user data');
+	//console.log('Error fetching user data');
 	Router.findRoute('/');
 }
 
@@ -578,13 +578,13 @@ function game_score ()
 		{
 			ball_bonce1++
 			ball_bonce2 = 0
-			// console.log ("bounce lhih");
+			// //console.log ("bounce lhih");
 		}
 		else if (ballBody.position.z > 0)
 		{
 			ball_bonce2++
 			ball_bonce1 = 0
-			// console.log ("bounce hna");
+			// //console.log ("bounce hna");
 		}
 	}
 	if (ball_bonce1 >= 2 || ball_bonce2 >= 2)
@@ -850,7 +850,7 @@ function animate(time)
     if (paused)
 		return;
     requestAnimationFrame(animate);
-	// console.log ("camera postion : ", camera.position)
+	// //console.log ("camera postion : ", camera.position)
 
     // to seconds
     const currentTime = time * 0.001;
@@ -937,7 +937,7 @@ export function game_3d()
 	loadEnvironment()
 	animate()
 	return () => {
-		console.log('Game 3D destroyed')
+		//console.log('Game 3D destroyed')
 		document.removeEventListener('keydown', hooks)
 		document.removeEventListener('mousemove', function(event) {})
 		paused = true

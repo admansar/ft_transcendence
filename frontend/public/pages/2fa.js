@@ -79,7 +79,7 @@ class TwoFactorAuth extends HTMLElement {
 
         this.createOTPInputs();
         // otpServer = await otpServer.json();
-        // console.log('otpServer', otpServer);
+        // //console.log('otpServer', otpServer);
 
         this.addEventListeners();
     }
@@ -151,7 +151,7 @@ class TwoFactorAuth extends HTMLElement {
             .map(input => input.value)
             .join('');
 
-        console.log('userData', app.email, app.otp);
+        //console.log('userData', app.email, app.otp);
         this.generatedOTP = await fetch('/api/auth/verify-otp/', {
             method: 'POST',
             headers: {
@@ -165,7 +165,7 @@ class TwoFactorAuth extends HTMLElement {
         })
 
         this.generatedOTP = await this.generatedOTP.json();
-        console.log('this.generatedOTP===>', this.generatedOTP);
+        //console.log('this.generatedOTP===>', this.generatedOTP);
 
         if (this.generatedOTP.message === 'OTP verified successfully') {
             this.showMessage('OTP verified successfully', 'green');

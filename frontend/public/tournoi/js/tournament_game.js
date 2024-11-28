@@ -124,18 +124,18 @@ export async function tour_game(user_token) {
   return new Promise((resolve, reject) => {
 
 
-    console.log('the fucking token: ', user_token)
+    //console.log('the fucking token: ', user_token)
     let roomName = 'group_01'; // This should be dynamic based on matchmaking or user selection
     let gameSocket = new WebSocket(`wss://${window.location.host}/ws/tournament_game/${roomName}/?token=${user_token}`);
 
     // WebSocket event handlers
     gameSocket.onopen = function () {
-      console.log('Connected to the game server.');
+      //console.log('Connected to the game server.');
     };
 
     gameSocket.onmessage = function (e) {
       const data = JSON.parse(e.data);
-      console.log('Received data: ', data);
+      //console.log('Received data: ', data);
       if (data.type === 'init_state') {
         playerId = data.game_state.player_id;
         roomId = data.game_state.room_id;
@@ -148,7 +148,7 @@ export async function tour_game(user_token) {
         gameState.score2 = data.game_state.score2;
         playerName = data.game_state.player;
         gameState.ball_speed = data.game_state.ball_speed;
-        console.log('Ball speed: ', gameState.ball_speed);
+        //console.log('Ball speed: ', gameState.ball_speed);
         gameState.direction = data.game_state.direction;
         gameContainer.style.width = data.game_state.canvas_width + 'px';
         gameContainer.style.height = data.game_state.canvas_height + 'px';
@@ -170,7 +170,7 @@ export async function tour_game(user_token) {
         // renderGame();
       }
       else if (data.type === 'countdown') {
-        console.log('Countdown: ', data.countdown);
+        //console.log('Countdown: ', data.countdown);
         let dict = {
           '3': 'Ready',
           '2': 'Set',
@@ -203,12 +203,12 @@ export async function tour_game(user_token) {
           else
             user_data.score = current_state.score2
 
-          console.log('current state1: ', current_state)
-          console.log('user_data: ', user_data)
+          //console.log('current state1: ', current_state)
+          //console.log('user_data: ', user_data)
           /**
            * TOURNAMENT API CALL
            */
-          console.log('Tournament ID =========>', app.tournament_id);
+          //console.log('Tournament ID =========>', app.tournament_id);
           (async () => {
             user_data.tournament_id = app.tournament_id;
             await updateScore(user_data);
@@ -237,7 +237,7 @@ export async function tour_game(user_token) {
               // body: JSON.stringify(user_data)
             })
             game_id = await initGame.json();
-            console.log('game_id from front', game_id);
+            //console.log('game_id from front', game_id);
          }
         }) ()
 
@@ -247,13 +247,13 @@ export async function tour_game(user_token) {
       }
       else if (data.type === 'player_info') {
         opponentName = data.opponent;
-        console.log(`Opponent: ${opponentName}`);
+        //console.log(`Opponent: ${opponentName}`);
       }
       else if (data.type === 'notification') {
         show_notification(data.message);
         if (data.message.indexOf('has disconnected.') != -1 && !game_end_locker) {
           game_end_locker = true;
-          console.log('current state: ', current_state)
+          //console.log('current state: ', current_state)
           last_state = current_state;
           if (playerId === 1) {
             user_data.score = last_state.score1;
@@ -265,7 +265,7 @@ export async function tour_game(user_token) {
             last_state.self_name = opponentName;
             last_state.other_name = playerName
           }
-          console.log('last states: ', user_data);
+          //console.log('last states: ', user_data);
 
           (async () => {
             gameSocket.send(JSON.stringify({
@@ -292,11 +292,11 @@ export async function tour_game(user_token) {
         // navigate('/')
       }
       else if (data.type === 'game_over' && !game_end_locker) {
-        console.log ('game over data : ', data)
+        //console.log ('game over data : ', data)
         game_end_locker = true;
         show_notification(`${data.winner} wins the game!`);
         last_state = current_state;
-        console.log('winner: ', data.winner)
+        //console.log('winner: ', data.winner)
         if (playerId === 1) {
           last_state.self_name = playerName;
           last_state.other_name = opponentName;
@@ -307,8 +307,8 @@ export async function tour_game(user_token) {
           last_state.other_name = playerName
           user_data.score = last_state.score2
         }
-        console.log('last states: ', user_data);
-        console.log('full data: ', last_state)
+        //console.log('last states: ', user_data);
+        //console.log('full data: ', last_state)
         /**
        * 
        * 
@@ -335,7 +335,7 @@ export async function tour_game(user_token) {
       }
       else if (data.type === 'winner_winner_chicken_dinner') {
         // show_notification(`${data.winner} wins the game!`);
-        console.log('the champion chep is : ', data.champion)
+        //console.log('the champion chep is : ', data.champion)
         win = getElementById('champion');
         win.innerHTML = data.champion;
 
@@ -357,12 +357,12 @@ export async function tour_game(user_token) {
     };
 
     gameSocket.onclose = function () {
-      console.log('Disconnected from the tournamet game server.');
+      //console.log('Disconnected from the tournamet game server.');
     };
 
     // Sending player moves to the server
     function sendPlayerMove(direction) {
-      console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
+      //console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
       if (gameSocket.readyState === WebSocket.OPEN) {
         gameSocket.send(JSON.stringify({
           'type': 'player_move',
@@ -540,7 +540,7 @@ export async function tour_game(user_token) {
       if (isMovingDown || isMovingUp) {
         sendPlayerMove(isMovingDown ? 'down' : 'up');
 
-        console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
+        //console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
       }
     }
 
@@ -549,7 +549,7 @@ export async function tour_game(user_token) {
       fps_ratio = current_fps / server_fps;
       gameState.ball_pos.x += (gameState.ball_speed / fps_ratio) * gameState.direction.x;
       gameState.ball_pos.y += (gameState.ball_speed / fps_ratio) * gameState.direction.y;
-      // console.log('Ball speed ', gameState.ball_speed);
+      // //console.log('Ball speed ', gameState.ball_speed);
     }
 
 
@@ -559,7 +559,7 @@ export async function tour_game(user_token) {
     function game_loop() {
       if (breaker) {
         resolve(winner);
-        console.log('Winner ==========> ', user_data);
+        //console.log('Winner ==========> ', user_data);
         // updateScore(user_data);
         // finishGame(user_data);
         return;
