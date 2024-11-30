@@ -6,7 +6,7 @@ import { getMe } from '../services/utils.js';
 
 export function setupSetting() {
     const setModal = document.querySelector('.modal_settings');
-    console.log("im in settings");
+    //console.log("im in settings");
 
     document.querySelectorAll('.setting_bnt').forEach(button => {
         button.addEventListener('click', () => {
@@ -51,7 +51,7 @@ export class settings extends HTMLElement {
                 delete newUserData[key];
             }
         }
-        console.log(Object.values(newUserData), Object.values(newUserData).length, newUserData);
+        //console.log(Object.values(newUserData), Object.values(newUserData).length, newUserData);
         if (Object.values(newUserData).length === 0) {
             notifications.notify('No changes made', 'info', 3000, modal);
             return;
@@ -69,19 +69,19 @@ export class settings extends HTMLElement {
         })
         let data = await response.json();
         if (response.ok) {
-            console.log('User info updated successfully');
-            console.log(data);
+            //console.log('User info updated successfully');
+            //console.log(data);
             notifications.notify('User info updated successfully', 'success', 3000, modal);
             document.getElementById('new_first-name').value = '';
             document.getElementById('new_last-name').value = '';
             // closeModal();
             // await sleep(3000);
         } else {
-            console.log('Failed to update user info', data);
+            //console.log('Failed to update user info', data);
             for (let key in data) {
                 notifications.notify(`Error: ${data[key]}`, 'danger', 3000, modal);
             }
-            // console.log(data);
+            // //console.log(data);
             // notifications.notify('Failed to update user info', 'danger', 3000, modal);
         }
     }
@@ -115,13 +115,13 @@ export class settings extends HTMLElement {
     async update2FA() {
         let me = await getMe();
         document.getElementById('stay-sign').checked = me.is_2fa_enabled;
-        // console.log('me', staySign);
+        // //console.log('me', staySign);
 
         // document.getElementById('stay-sign').checked = me.is_2fa_enabled;
         let applyChange = document.querySelectorAll('.Confirmed_change')[1];
         applyChange.addEventListener('click', async () => {
             let staySign = document.getElementById('stay-sign').checked;
-            console.log('me before', me, staySign);
+            //console.log('me before', me, staySign);
             let updateOTP = await makeAuthRequest('/api/auth/update-otp/', {
                 'method': 'POST',
                 'headers': {
@@ -132,7 +132,7 @@ export class settings extends HTMLElement {
                 }),
             })
             let data = await updateOTP.json();
-            console.log('2FA updated successfully', data);
+            //console.log('2FA updated successfully', data);
             notifications.notify('2FA updated successfully', 'success', 1000);
             // document.getElementById('stay-sign').checked = staySign;
             document.getElementById('stay-sign').checked = data.is_2fa_enabled;
@@ -183,7 +183,7 @@ export class settings extends HTMLElement {
         document.querySelector('.modal_settings').addEventListener('click', async (event) => {
             if (event.target && event.target.classList.contains('Confirmed_change')) {
                 let newUserData = await this.getNewUserData();
-                console.log(Object.keys(newUserData), Object.keys(newUserData).length, newUserData);
+                //console.log(Object.keys(newUserData), Object.keys(newUserData).length, newUserData);
                 if (Object.keys(newUserData).length > 0) {
                     await this.updateUserInfo(newUserData);
                 }

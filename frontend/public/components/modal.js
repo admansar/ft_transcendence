@@ -1,7 +1,7 @@
 import { Router } from '../services/Router.js';
 
 export function setupModal() {
-    console.log('Setting up modal');
+    //console.log('Setting up modal');
     const playModal = document.getElementById('play-modal');
     const closeModalBtn = document.querySelector('.close-btn');
     

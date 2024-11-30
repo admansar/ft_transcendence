@@ -33,7 +33,7 @@ export class achievements extends HTMLElement {
         </div>
         `;
         const achiModal = document.querySelector('.modal-achivements');
-        console.log("im in achivments");
+        //console.log("im in achivments");
 
         window.addEventListener('click', (event) => {
             if (event.target === achiModal) {

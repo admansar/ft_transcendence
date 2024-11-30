@@ -24,7 +24,7 @@ export class HomePage extends HTMLElement {
         document.title = `Dashboard - ${userData.username}`;
         
         app.loggedUser = userData.username;
-        console.log('app.loggedUser', app.loggedUser);
+        //console.log('app.loggedUser', app.loggedUser);
 
         profile.style.backgroundImage = `url(${userData.avatar})`;
         document.querySelector('.message').innerHTML = `${userData.username}`;
@@ -52,7 +52,7 @@ export class HomePage extends HTMLElement {
     }
 
     disconnectedCallback() {
-        console.log('disconnected');
+        //console.log('disconnected');
         this.innerHTML = '';
     }
 }

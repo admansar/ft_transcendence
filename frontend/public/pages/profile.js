@@ -7,6 +7,10 @@ import '../components/header.js';
 import "../components/chat.js";
 import { socket_impel } from '../components/chat.js';
 
+let data_2d = [];
+let data_3d = [];
+let added_games = [];
+
 class Profile extends HTMLElement {
     constructor() {
         super();
@@ -28,13 +32,13 @@ class Profile extends HTMLElement {
         await this.getProfileHtml(userData, username);
         this.appendChild(headerComponent);
         this.appendChild(chatComponent);
+        await this.offline_games(me, userData);
         await this.checkFriendsStatus(userData);
         await this.renderProfile(userData, me);
         await this.displayRank(me, userData);
-        await this.offline_games(me, userData);
         document.title = `Profile - ${userData.username}`;
 
-        socket_impel();
+        //socket_impel();
     }
 
     async offline_games(me, other) {
@@ -48,18 +52,27 @@ class Profile extends HTMLElement {
         if (response.games && me.username !== other.username)
             return;
         const games = response.games;
-        let data_2d = [];
-        let data_3d = [];
         for (let i = 0; i < games.length; i++) {
             if (games[i].type === '2')
-                data_2d.push(games[i])
+            {
+                if (!data_2d.includes(games[i]))
+                    data_2d.push(games[i])
+
+            }
             else if (games[i].type === '3')
-                data_3d.push(games[i])
+            {
+                // check in games[i] is in data_3d
+                if (!data_3d.includes(games[i]))
+                    data_3d.push(games[i])
+            }
         }
-        console.log('2d games :: ', data_2d)
-        console.log('3d games :: ', data_3d)
-        console.log('waiting for a front for it');
+        //console.log('2d games :: ', data_2d)
+        //console.log('3d games :: ', data_3d)
+        //console.log('waiting for a front for it');
         for (let i = 0; i < data_3d.length; i++) {
+            if (added_games.includes(data_3d[i]))
+                continue;
+            added_games.push(data_3d[i]);
             // getting avatar of the user
             let gameStatus = data_3d[i];
             let newdiv = document.createElement('div');
@@ -85,6 +98,9 @@ class Profile extends HTMLElement {
         }
 
         for (let i = 0; i < data_2d.length; i++) {
+            if (added_games.includes(data_2d[i]))
+                continue;
+            added_games.push(data_2d[i]);
             // getting avatar of the user
             let gameStatus = data_2d[i];
             let newdiv = document.createElement('div');
@@ -137,12 +153,12 @@ class Profile extends HTMLElement {
             if (response[i].username == userData.username) {
                 document.getElementById(`index_${i + 1}`).style.backgroundColor = "#ffbb00a0";
                 document.querySelector('.user_exp').style.width = `${response[i].exp % 100}%`;
-                console.log ("current player xp : ", response[i].exp);
+                //console.log ("current player xp : ", response[i].exp);
                 if ((response[i].exp % 100) >= 5)
                     document.querySelector('.user_exp').style.opacity = 100;
                 document.getElementById(`userLevel`).innerHTML = "Level " + response[i].level;
                 document.getElementById(`experienceCount`).innerHTML = `${response[i].exp % 100}%`;
-                console.log("HIHIHIHI", document.getElementById(`experienceCount`));
+                //console.log("HIHIHIHI", document.getElementById(`experienceCount`));
                 if (response[i].achivements >= 5) {
                     document.querySelector('.medal.brounz').style.backgroundColor = "#ffbb00a0";
                 }
@@ -296,7 +312,7 @@ class Profile extends HTMLElement {
             this.innerHTML += `
                 <div class="history-bar">
                     <span class="my_profile_bar" style="border: 2px solid rgb(66, 193, 38);">
-                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                     <span class="score_bar" style="background-color: ${gameStatus.color};">
                         <span class="score_main">${gameStatus.score}</span>
@@ -304,7 +320,7 @@ class Profile extends HTMLElement {
                         <span class="score_guest">${gameStatus.opponent_score}</span>
                     </span>
                     <span class="challenger_bar" style="border: 2px solid rgb(193, 38, 38);">
-                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 100px; height: 100px;">
+                        <img src="${gameStatus.opponent_avatar}" style="object-fit: cover; width: 95px; height: 95px; border-radius: 50%;">
                     </span>
                 </div>
             `
@@ -313,7 +329,7 @@ class Profile extends HTMLElement {
     }
 
     async getUserStats(userData) {
-        console.log('************************************', userData);
+        //console.log('************************************', userData);
         if (userData.games && userData.username === userData.games[0].player_a) {
             return {
                 'wins': userData.games.filter(game => game.score_a > game.score_b).length,
@@ -329,7 +345,7 @@ class Profile extends HTMLElement {
                 'score': userData.games.reduce((acc, game) => acc + game.score_b, 0),
             }
         }
-        console.log('2************************************', userData);
+        //console.log('2************************************', userData);
         return {
             'wins': 0,
             'loses': 0,
@@ -360,7 +376,7 @@ class Profile extends HTMLElement {
             let data = await response.json();
             return data.Profile.block
         } catch (e) {
-            console.log(e);
+            //console.log(e);
             throw e;
         }
     }
@@ -376,7 +392,7 @@ class Profile extends HTMLElement {
             let data = await response.json();
             return data.Profile.friends
         } catch (e) {
-            console.log(e);
+            //console.log(e);
             throw e;
         }
     }
@@ -433,7 +449,7 @@ class Profile extends HTMLElement {
                             modalContent.removeChild(friend);
                         }
                     }).catch(err => {
-                        console.log(err);
+                        //console.log(err);
                         notifications.notify('Error removing friend', 'error', 1000, modalContent);
                     })
                 })
@@ -500,7 +516,7 @@ class Profile extends HTMLElement {
                                 pendingUser.style.display = 'none';
                             }
                         }).catch(err => {
-                            console.log(err);
+                            //console.log(err);
                             notifications.notify('Error accepting friend request', 'error', 1000, modalContent);
                         })
                     })
@@ -524,14 +540,14 @@ class Profile extends HTMLElement {
                                 pendingUser.style.display = 'none';
                             }
                         }).catch(err => {
-                            console.log(err);
+                            //console.log(err);
                             notifications.notify('Error rejecting friend request', 'error', 1000, modalContent);
                         })
                     })
                 })
             });
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             notifications.notify('Error checking friends status', 'error', 1000, addFriendButton);
             throw err;
         }
@@ -591,14 +607,14 @@ class Profile extends HTMLElement {
                                 blockedUser.style.display = 'none';
                             }
                         }).catch(err => {
-                            console.log(err);
+                            //console.log(err);
                             notifications.notify('Error unblocking user', 'error', 1000, blockModal);
                         })
                     })
                 })
             })
         } catch (err) {
-            console.log(err);
+            //console.log(err);
             notifications.notify('Error checking blocked users', 'error', 1000, addFriendButton);
             throw err;
         }
@@ -626,7 +642,7 @@ class Profile extends HTMLElement {
                 await sleep(1000);
                 app.router.findRoute(`/profile/${userData.username}`);
             } else {
-                console.log(data);
+                //console.log(data);
                 notifications.notify(data.error, 'error', 1000, notif);
             }
         });
@@ -714,7 +730,7 @@ class Profile extends HTMLElement {
                 addFriendButton.style.display = 'none';
             }
         } catch (e) {
-            console.log(e);
+            //console.log(e);
         }
     }
 
@@ -754,7 +770,7 @@ class Profile extends HTMLElement {
                 addFriendButton.classList.add('active');
             }
         } catch (e) {
-            console.log(e);
+            //console.log(e);
             notifications.notify('Error checking friend status', 'error', 1000, addFriendButton);
         }
     }
@@ -814,14 +830,14 @@ class Profile extends HTMLElement {
             blockListButton.style.display = 'none';
             pendingListButton.style.display = 'none';
             await this.checkFriendsStatus(userData);
-            console.log(addFriendButton.classList);
+            //console.log(addFriendButton.classList);
 
             if (!addFriendButton.classList.contains('active')) {
-                console.log('Not active');
+                //console.log('Not active');
                 await this.addFriend(userData);
             } else {
                 // await this.rejectFriendRequest(userData);
-                // console.log('Canceled!');
+                // //console.log('Canceled!');
                 await this.checkIfAlreadyFriends(userData, me);
                 await this.cancelFriendRequest(userData);
                 // addFriendButton.classList.remove('active');
@@ -833,7 +849,7 @@ class Profile extends HTMLElement {
 
     async render(username, userData) {
         try {
-            console.log(userData);
+            //console.log(userData);
             let userStats = await this.getUserStats(userData);
             // let data = await this.displayRank();
             this.innerHTML = `
@@ -921,7 +937,7 @@ class Profile extends HTMLElement {
                 </div>
             `
         } catch (e) {
-            console.log(e);
+            //console.log(e);
             app.router.findRoute('404');
         }
     }
@@ -949,13 +965,13 @@ async function getLevel() {
         return;
     }
     res = await res.json();
-    console.log(res);
+    //console.log(res);
     const userExperienceBar = document.getElementById("userExperienceBar");
     const experienceCount = document.getElementById("experienceCount");
     const userXp = res.userXp;
     const maxXp = 100;
     const userLevel = (userXp / maxXp) * 100;
-    console.log(userLevel + "%")
+    //console.log(userLevel + "%")
     userExperienceBar.style.width = `${userLevel}%`
     experienceCount.textContent = `${userLevel}%`
 
@@ -979,7 +995,7 @@ async function getUserData(username) {
             app.router.findRoute('/404');
             return null;
         }
-        console.log(error);
+        //console.log(error);
     }
     const data = await response.json();
 
@@ -987,9 +1003,9 @@ async function getUserData(username) {
     options.body = JSON.stringify({ username: data.username });
     response = await makeAuthRequest('/api/game/get-games', options)
     let games = await response.json();
-    // console.log(games);
+    // //console.log(games);
     data.games = games.games
-    console.log('data', data);
+    //console.log('data', data);
 
     return data;
 }

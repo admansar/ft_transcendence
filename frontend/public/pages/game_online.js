@@ -76,7 +76,7 @@ class Game_online extends HTMLElement {
   }
 
   disconnectedCallback() {
-    console.log('Game_online disconnected');
+    //console.log('Game_online disconnected');
     this.innerHTML = '';
   }
 }
@@ -85,7 +85,7 @@ let cleanup = null;
 export function attachDOM() {
   if (cleanup) {
     cleanup();
-    console.log('cleanup');
+    //console.log('cleanup');
     cleanup = null;
   }
   document.body.style = '';

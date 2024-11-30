@@ -13,7 +13,8 @@ from .views import (
     OtpUpdate,
     GetAllUsers,
     AddGameBootMatch,
-    GetGameBoot
+    GetGameBoot,
+    OauthRedirect,
 )
 
 from rest_framework_simplejwt.views import (
@@ -31,6 +32,7 @@ urlpatterns = [
     path('api/auth/logout/', Logout.as_view()),
     path('api/auth/update/', UpdateUser.as_view()),
     path('api/auth/oauth42/', Oauth42.as_view()),
+    path('api/auth/oauth42-redirect/', OauthRedirect.as_view()),
     path('api/auth/refresh/', RefreshTokenView.as_view(), name='refresh-expired'),
     path('api/auth/generate-otp/', GenerateOTPView.as_view(), name='generate-otp'),
     path('api/auth/verify-otp/', VerifyOTPView.as_view(), name='verify-otp'),

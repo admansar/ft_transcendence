@@ -16,7 +16,7 @@ makeAuthRequest('/api/auth/me', {
 	credentials: 'include',
 }).then(async res => {
     res = await res.json();
-    console.log("from me", res);
+    //console.log("from me", res);
     self_user = res.username;
 })
 
@@ -30,7 +30,7 @@ makeAuthRequest('/api/friends/ufriends/', {
     credentials: 'include',
 }).then(async res => {
     res = await res.json();
-    console.log(res['Friends']);
+    //console.log(res['Friends']);
     friend_list = res['Friends'];
 })
 
@@ -53,7 +53,7 @@ function front_remove_user(user)
     const messengerList = document.querySelector('.messanger-list');
     if (document.querySelector(`#${user}`))
     {
-        console.log('removing user :', user);
+        //console.log('removing user :', user);
         messengerList.removeChild(document.querySelector(`#${user}`));
     }
 }
@@ -74,14 +74,14 @@ export function front_inject_user(user)
         }
     }).then(async res => {
         res = await res.json();
-        console.log(res);
+        //console.log(res);
         let avatar = res.avatar;
-        console.log('avatar :', avatar);
+        //console.log('avatar :', avatar);
         const messengerList = document.querySelector('.messanger-list');
         const chat = document.getElementById('chat');
         if (!document.querySelector(`#${user}`))
         {
-            console.log('injecting user : ', user);
+            //console.log('injecting user : ', user);
             messengerList.insertAdjacentHTML('beforeend', `
                     <div class="friend-profile" id="${user}" style="background-image: url(${avatar}); background-size: cover; background-position: center center;" >
                         <div class="friend-profile-status" ></div>
@@ -175,7 +175,7 @@ export function front_inject_user(user)
                 });
                 const playWithWindow = document.getElementById(`play-with-${user}-window`);
                 document.getElementById(`play-with-${user}`).addEventListener('click', function () {
-                    console.log("Invite triggered");
+                    //console.log("Invite triggered");
                     let playwith = document.getElementById(`play-with-${user}`);
                     playwith.style.backgroundColor = '#dc3545';
                     chatSocket.send(JSON.stringify({
@@ -232,20 +232,20 @@ function front_inject_friends(user, every_online_user)
         }
     }).then(async res => {
         res = await res.json();
-        console.log(res);
+        //console.log(res);
         let avatar = res.avatar;
-        console.log('avatar :', avatar);
+        //console.log('avatar :', avatar);
         const chat = document.getElementById('chat');
         let messengerList = document.querySelector('.messanger-list');
         for (let i = 0; i < 5; i++) {
-            console.log('waiting for the list to be ready');
+            //console.log('waiting for the list to be ready');
             setTimeout(() => {
                 messengerList = document.querySelector('.messanger-list');
             }, 1000);
         }
         if (!document.querySelector(`#${user}`))
         {
-            console.log('injecting user : ', user);
+            //console.log('injecting user : ', user);
             messengerList.insertAdjacentHTML('beforeend', `
                     <div class="friend-profile" id="${user}" style="background-image: url(${avatar}); background-size: cover; background-position: center center;" >
                         <div class="friend-profile-status" ></div>
@@ -344,7 +344,7 @@ function front_inject_friends(user, every_online_user)
                 });
                 const playWithWindow = document.getElementById(`play-with-${user}-window`);
                 document.getElementById(`play-with-${user}`).addEventListener('click', function () {
-                    console.log("Invite triggered");
+                    //console.log("Invite triggered");
                     let playwith = document.getElementById(`play-with-${user}`);
                     playwith.style.backgroundColor = '#dc3545';
                     chatSocket.send(JSON.stringify({
@@ -406,7 +406,7 @@ export function setupChat() {
     friends.addEventListener('click', function (e) {
         const UserDATA = e.target.closest('.friend-profile')
         if (UserDATA) {
-            console.log("im here");
+            //console.log("im here");
     
         };
     });
@@ -442,35 +442,35 @@ export function socket_impel() {
     chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/');
 
     chatSocket.onopen = function(e) {
-        console.log('WebSocket connection established!');
+        //console.log('WebSocket connection established!');
     }
 
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        console.log(data);
+        //console.log(data);
 
         if (data.type === 'broadcast')
         {
             let users = data.users;
             setTimeout(() => {
-                console.log('broadcasting message');
-                console.log("online users: ", users);
-                console.log("friend list : ", friend_list);
-                console.log("me : ", self_user);
+                //console.log('broadcasting message');
+                //console.log("online users: ", users);
+                //console.log("friend list : ", friend_list);
+                //console.log("me : ", self_user);
                 for (let i = 0; i < friend_list.length; i++) {
                     front_inject_friends(friend_list[i], users);
                 }
             }, 200);
         }
         else if (data.type === 'remove_user') {
-            console.log('removing user :', data.user);
+            //console.log('removing user :', data.user);
             //front_remove_user(data.user);
             remove_online_dot(data.user);
         }
         else if (data.type === 'send_message') {
             let msn_lst = document.querySelector('.friend-profile');
             if (!msn_lst) {
-                console.log('ana hona');
+                //console.log('ana hona');
                 (async () => {
                     for (let i = 0; i < 5; i++) {
                         msn_lst = document.querySelector('.friend-profile');
@@ -478,8 +478,8 @@ export function socket_impel() {
                             break;
                         await new Promise(r => setTimeout(r, 1000));
                     }
-                    console.log('now the list is ready');
-                    console.log(data);
+                    //console.log('now the list is ready');
+                    //console.log(data);
                 })().then(() => {
                     front_inject_user(data.user);
                     front_receive_message(data.user, data.message);
@@ -489,11 +489,11 @@ export function socket_impel() {
                     chat_messanger_user.style.display = 'flex';
                 });
             } else {
-                console.log('receiving message');
+                //console.log('receiving message');
                 let user = data.user;
                 let message = data.message;
-                console.log(user);
-                console.log(message);
+                //console.log(user);
+                //console.log(message);
                 front_inject_user(user);
                 front_receive_message(user, message);
                 const chat_messanger_user = document.querySelector(`#${user}-chat`);
@@ -510,14 +510,14 @@ export function socket_impel() {
         else if (data.type === 'reject_game_invite') {
             let newDiv = null;
             setTimeout(() => {
-                console.log(`${data.from} rejected your invitation`);
+                //console.log(`${data.from} rejected your invitation`);
                 const chatMessage = document.getElementById(`chatMessages-${data.from}`);
                 const newDiv = document.createElement('div');
                 newDiv.className = 'alert-chat';
                 newDiv.textContent = `${data.from} rejected your invitation`;
                 chatMessage.appendChild(newDiv);
                 setTimeout(() => {
-                    console.log('removing alert');
+                    //console.log('removing alert');
                     newDiv.remove();
                 }, 3000); 
             }, 1000);
@@ -528,7 +528,7 @@ export function socket_impel() {
         }
         else if (data.type === 'accept_game_invite')
         {
-            console.log (`${data.from} accepted your invitation`);
+            //console.log (`${data.from} accepted your invitation`);
             chatSocket.close();
             Router.findRoute(`/game/friends`);
         }

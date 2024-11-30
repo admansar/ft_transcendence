@@ -63,12 +63,12 @@ let response = await makeAuthRequest('/api/auth/me', {
 
 if (response.ok) {
 	data = await response.json();
-	console.log ('full data: ', data)
+	//console.log ('full data: ', data)
 	token = data.access;
 }
 else
 {
-  console.log('Error fetching user data');
+  //console.log('Error fetching user data');
 }
 let breaker = false;
 
@@ -77,10 +77,10 @@ let roomName = 'room_01'; // This should be dynamic based on matchmaking or user
 // token should be changed to room_id
 let room_id = '12345'; // should be fetched from the server
 let gameSocket = new WebSocket(`wss://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
-console.log(`wss://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
+//console.log(`wss://${window.location.host}/ws/friends_game/${roomName}/?room_id=${room_id}`);
 // WebSocket event handlers
 gameSocket.onopen = function () {
-	console.log('Connected to the game server.');
+	//console.log('Connected to the game server.');
 };
 
 let test = 0;
@@ -90,7 +90,7 @@ let game_id = null;
 gameSocket.onmessage = async function (e) {
 	const data = JSON.parse(e.data);
 
-	// console.log ('data type : ', data.type)
+	// //console.log ('data type : ', data.type)
 	if (data.type === 'init_state') {
 		playerId = data.game_state.player_id;
 		roomId = data.game_state.room_id;
@@ -126,7 +126,7 @@ gameSocket.onmessage = async function (e) {
 	}
 	else if (data.type === 'countdown') {
 		disableWaitingOverlay();
-		console.log('Countdown: ', data.countdown);
+		//console.log('Countdown: ', data.countdown);
 		let dict = {
 			'3': 'Ready',
 			'2': 'Set',
@@ -135,7 +135,7 @@ gameSocket.onmessage = async function (e) {
 		updateCountdown(dict[data.countdown]);
 	}
 	else if (data.type === 'game_state') {
-		// console.log ('data received: ', data)
+		// //console.log ('data received: ', data)
 		gameState = data.state;
 		gameState.ball_speed = data.ball_speed;
 		gameState.direction = data.direction;
@@ -145,8 +145,8 @@ gameSocket.onmessage = async function (e) {
 		const seconds = elapsedTime % 60;
 		const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 		// current state update
-		//console.log ('player id : ', playerId)
-		// console.log ('current state: ', current_state.score1, gameState.score1)
+		////console.log ('player id : ', playerId)
+		// //console.log ('current state: ', current_state.score1, gameState.score1)
 
 		if ((current_state.score1 !== gameState.score1 ||
 			current_state.score2 !== gameState.score2
@@ -164,7 +164,7 @@ gameSocket.onmessage = async function (e) {
 			else
 				user_data.score = current_state.score2
 
-			console.log ('current state1: ', current_state)
+			//console.log ('current state1: ', current_state)
 
 			await updateScore(user_data);
 		}
@@ -197,7 +197,7 @@ gameSocket.onmessage = async function (e) {
 				body: JSON.stringify(current_state)
 			});
 			game_id = await initGame.json();
-			console.log('game_id from front', game_id);
+			//console.log('game_id from front', game_id);
 		}
 
 		// salim send current state here
@@ -209,14 +209,14 @@ gameSocket.onmessage = async function (e) {
 	}
 	else if (data.type === 'player_info') {
 		opponentName = data.opponent;
-		console.log(`Opponent: ${opponentName}`);
+		//console.log(`Opponent: ${opponentName}`);
 	}
 	else if (data.type === 'notification') {
 		show_notification(data.message);
 		if (data.message.indexOf('has disconnected.') != -1 && !game_end_locker) {
 			game_end_locker = true;
 			// last state update
-			console.log ('current state: ', current_state)
+			//console.log ('current state: ', current_state)
 			last_state = current_state;
 			if (playerId === 1) {
 				user_data.score = last_state.score1;
@@ -228,7 +228,7 @@ gameSocket.onmessage = async function (e) {
 				last_state.self_name = opponentName;
 				last_state.other_name = playerName
 			}
-			console.log('last states: ', user_data);
+			//console.log('last states: ', user_data);
 			
 			await updateScore(user_data);
 			await finishGame(user_data);
@@ -238,8 +238,8 @@ gameSocket.onmessage = async function (e) {
 			setTimeout(function () { }, 1000)
 			gameSocket.close()
 			// document.head.innerHTML = '';
-			console.log('router: ', Router)
-			console.log('router: ', Router)
+			//console.log('router: ', Router)
+			//console.log('router: ', Router)
 			Router.findRoute('/');
 			return;
 		}
@@ -249,7 +249,7 @@ gameSocket.onmessage = async function (e) {
 		show_notification(`${data.winner} wins the game!`);
 		// last state update
 		last_state = current_state;
-		console.log ('winner: ', data.winner)
+		//console.log ('winner: ', data.winner)
 		if (playerId === 1) {
 			last_state.self_name = playerName;
 			last_state.other_name = opponentName;
@@ -260,8 +260,8 @@ gameSocket.onmessage = async function (e) {
 			last_state.other_name = playerName
 			user_data.score = last_state.score2
 		}
-		console.log('last states: ', user_data);
-		console.log('full data: ', last_state)
+		//console.log('last states: ', user_data);
+		//console.log('full data: ', last_state)
 		// salim send last data here
 		await updateScore(user_data)
 		await finishGame(user_data);
@@ -308,12 +308,12 @@ async function finishGame(user_data) {
 }
 
 gameSocket.onclose = function () {
-	console.log('Disconnected from the game server.');
+	//console.log('Disconnected from the game server.');
 };
 
 // Sending player moves to the server
 function sendPlayerMove(direction) {
-	// console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
+	// //console.log('current positions: ', gameState.racket1_pos, gameState.racket2_pos)
 	if (gameSocket.readyState === WebSocket.OPEN) {
 		gameSocket.send(JSON.stringify({
 			'type': 'player_move',
@@ -492,7 +492,7 @@ function updatePaddlePosition() {
 
 		sendPlayerMove(isMovingDown ? 'down' : 'up');
 
-		// console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
+		// //console.log("r1: ", gameState.racket1_pos, ", r2: ", gameState.racket2_pos)
 	}
 }
 
@@ -501,7 +501,7 @@ function updateBallPosition() {
 	fps_ratio = current_fps / server_fps;
 	gameState.ball_pos.x += (gameState.ball_speed / fps_ratio) * gameState.direction.x;
 	gameState.ball_pos.y += (gameState.ball_speed / fps_ratio) * gameState.direction.y;
-	// console.log('Ball speed ', gameState.ball_speed);
+	// //console.log('Ball speed ', gameState.ball_speed);
 }
 
 
@@ -532,7 +532,7 @@ export function game_2d() {
 	game_loop();
 
     return () => {
-		console.log ('game online disconnected')
+		//console.log ('game online disconnected')
         //cancelAnimationFrame(animationFrame);
         canvas.remove();
 		gameSocket.close();

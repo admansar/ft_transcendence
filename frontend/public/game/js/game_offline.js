@@ -28,7 +28,7 @@ if (response.ok) {
   data_to_send.username = data.username
 }
 else {
-  console.log('Error fetching user data');
+  //console.log('Error fetching user data');
   Router.findRoute('/');
 }
 /* ball details */
@@ -413,7 +413,7 @@ function predict_ball_trajectory(ball, future_frames) //segment ball estimations
     if (future_ball.pos.y - future_ball.ray < 0 || future_ball.pos.y + future_ball.ray > canvas.height)
       future_ball.direction.y *= -1;
   
-    // console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
+    // //console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
     trajectory.push({ x: future_ball.pos.x, y: future_ball.pos.y});
   }
 
@@ -549,7 +549,7 @@ function fps_counter() {
     if (elapsed >= 1)
     {
         gameLoopSpeed = frameCount;
-        //console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
+        ////console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
         frameCount = 0;
         lastTime = currentTime;
     }

@@ -198,7 +198,7 @@ let cleanup = null;
 export function attachDOM() {
     if (cleanup) {
         cleanup();
-        console.log('cleanup');
+        //console.log('cleanup');
         cleanup = null;
     }
     document.body.style = '';

@@ -28,7 +28,7 @@ class Game_Offline extends HTMLElement {
     }
 
     disconnectedCallback() {
-        console.log('Game_Offline disconnected');
+        //console.log('Game_Offline disconnected');
         this.innerHTML = '';
     }
 }
@@ -38,7 +38,7 @@ let cleanup = null;
 export function attachDOM() {
     if (cleanup) {
         cleanup();
-        console.log('cleanup');
+        //console.log('cleanup');
         cleanup = null;
     }
     document.body.style = '';
@@ -48,7 +48,7 @@ export function attachDOM() {
     })
     const page = document.createElement('game-offline-page');
     app.root.appendChild(page);
-    console.log('Gamee');
+    //console.log('Gamee');
     
 }
 customElements.define('game-offline-page', Game_Offline);

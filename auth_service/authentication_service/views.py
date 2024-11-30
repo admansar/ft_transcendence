@@ -174,6 +174,12 @@ class OtpUpdate(APIView):
             user.is_2fa_enabled = False
         user.save()
         return Response({'message': '2FA status updated successfully', 'is_2fa_enabled': user.is_2fa_enabled})
+    
+class OauthRedirect(APIView):
+    def get(self, request):
+        URL = os.getenv('URL')
+        CLIENT_ID = os.getenv('CLIENT_ID')
+        return Response({'url': f'https://api.intra.42.fr/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={URL}/api/auth/oauth42/&response_type=code'})
 
 class Oauth42(APIView):
     def get(self, request):
@@ -182,9 +188,13 @@ class Oauth42(APIView):
         if not code:
             raise AuthenticationFailed('No code provided')
 
+        URL = os.getenv('URL')
         api_url = 'http://api.intra.42.fr/oauth/token'
-        redirect_uri = 'http://localhost/api/auth/oauth42/'
-
+        redirect_uri = f'{URL}/api/auth/oauth42/'
+        
+        print('redirect_uri', redirect_uri)
+        print('client_id', os.getenv('CLIENT_ID'))
+        print('client_secret', os.getenv('CLIENT_SECRET'))
         # Step 1: Get the access token
         try:
             response_token = requests.post(api_url, data={
@@ -242,7 +252,7 @@ class Oauth42(APIView):
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
         
-        response = HttpResponseRedirect("http://localhost/")
+        response = HttpResponseRedirect(os.getenv('URL'))
         response.data = {
             'access': str(access),
             'refresh': str(refresh)

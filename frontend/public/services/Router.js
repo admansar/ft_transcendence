@@ -25,7 +25,7 @@ export const Router = {
                 return null;
             }
         }
-        console.log('params', params);
+        //console.log('params', params);
         return params;
     },
     findRoute: (route) => {
@@ -54,7 +54,7 @@ export const Router = {
 
         if (route.isAuth !== undefined && route.isAuth === false) {
             let isUserAuth = await isAuth();
-            console.log('isUserAuth', isUserAuth);
+            //console.log('isUserAuth', isUserAuth);
             if (isUserAuth && (path === '/login' || path === '/register')) {
                 route = routes.find((el => el.path === '/'));
                 path = '/';
@@ -63,16 +63,16 @@ export const Router = {
                 path = '/login';
             } else if (!isUserAuth && path === '/verify-otp') {
                 isUserAuth = true;
-                console.log('isUserAuth from verify-otp', isUserAuth);
+                //console.log('isUserAuth from verify-otp', isUserAuth);
                 route = routes.find((el => el.path === '/verify-otp'));
                 path = '/verify-otp';
             }
         }
 
-        console.log(`Navigating to ${path}`, params);
+        //console.log(`Navigating to ${path}`, params);
         if (addHistory) {
-            console.log('window.location.pathname', window.location.pathname);
-            console.log('path', path);
+            //console.log('window.location.pathname', window.location.pathname);
+            //console.log('path', path);
             if (window.location.pathname !== path) {
                 history.pushState(null, null, path);
             }
@@ -176,7 +176,7 @@ export const routes = [
 
 function handleBackNavigation() {
     let path = window.location.pathname;
-    console.log('path', path);
+    //console.log('path', path);
     Router.findRoute(path);
 };
 

@@ -390,7 +390,7 @@ function predict_ball_trajectory(ball, future_frames) //segment ball estimations
     if (future_ball.pos.y - future_ball.ray < 0 || future_ball.pos.y + future_ball.ray > canvas.height)
       future_ball.direction.y *= -1;
   
-    // console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
+    // //console.log (`ball direction : ${ball.direction.y} ; future dire : ${future_ball.direction.y}`)
     trajectory.push({ x: future_ball.pos.x, y: future_ball.pos.y});
   }
 
@@ -514,7 +514,7 @@ function fps_counter() {
     if (elapsed >= 1)
     {
         gameLoopSpeed = frameCount;
-        //console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
+        ////console.log(`Game loop speed: ${gameLoopSpeed} FPS`);
         frameCount = 0;
         lastTime = currentTime;
     }
@@ -536,7 +536,7 @@ export function game_2d_offline()
   return () => {
     window.cancelAnimationFrame(game_loop)
     paused = true
-    console.log('game 2d offline cleaned')
+    //console.log('game 2d offline cleaned')
     window.removeEventListener('keydown', hooks)
     window.removeEventListener('keyup', function (e) {
       keyPressed[e.keyCode] = false

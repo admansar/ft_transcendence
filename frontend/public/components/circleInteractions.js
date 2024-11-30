@@ -96,7 +96,7 @@ export class Circles extends HTMLElement {
 
         if (circle.id === 'circle5') {
             const setText = circle.querySelector('.circle-text');
-            console.log("im here in setting");
+            //console.log("im here in setting");
 
             setText.addEventListener('click', () => {
                 setModal.style.display = 'flex'; // Show modal
@@ -104,7 +104,7 @@ export class Circles extends HTMLElement {
         }
         if (circle.id === 'circle4') {
             const setText = circle.querySelector('.circle-text');
-            console.log("im here in achivment");
+            //console.log("im here in achivment");
 
             setText.addEventListener('click', () => {
                 achiModal.style.display = 'flex'; // Show modal

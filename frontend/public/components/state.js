@@ -9,7 +9,7 @@ const app = {
     setUserData(userData) {
         this.state.userData = userData;
         document.dispatchEvent(new Event('userDataReady'));
-        console.log('userData fired!');
+        //console.log('userData fired!');
     },
     getUserData() {
         return this.state.userData;
